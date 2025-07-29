@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ttu-notes:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./saved_notes:/app/saved_notes
+      - ./devices.json:/app/devices.json
+      - ./logs_index.json:/app/logs_index.json
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    container_name: ttu-notes
