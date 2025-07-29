@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add New Device</h2>
+<p class="text-muted mb-4">Add a network device for SSH automation and command execution.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Device Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="device_name" class="form-label">Device Name</label>
+                        <input type="text" class="form-control" id="device_name" name="device_name" 
+                               placeholder="Enter device name" required>
+                        <div class="form-text">Device name or hostname</div>
+                        <div id="deviceSuggestions" class="mt-2" style="display: none;">
+                            <small class="text-muted">Suggestions from logs:</small>
+                            <div id="suggestionsList" class="mt-1"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ip_address" class="form-label">IP Address *</label>
+                        <input type="text" class="form-control" id="ip_address" name="ip_address" required placeholder="192.168.1.1">
+                        <div class="form-text">The IP address of the device</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="device_type" class="form-label">Device Type</label>
+                        <select class="form-select" id="device_type" name="device_type">
+                            <option value="">Auto-detect (recommended)</option>
+                            <option value="ciena_os">Ciena OS</option>
+                            <option value="cisco_xr">Cisco XR (ASR9k, NCS5500)</option>
+                            <option value="cisco_ios">Cisco IOS</option>
+                            <option value="nokia_sros">Nokia SR-OS (7250, 7750)</option>
+                            <option value="juniper">Juniper (MX, ACX)</option>
+                        </select>
+                        <div class="form-text">Leave as auto-detect for automatic device type detection</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Default Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Leave empty for RADIUS prompt">
+                        <div class="form-text">Optional default username (will still prompt for credentials)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Optional description of the device"></textarea>
+                        <div class="form-text">Optional description for the device</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Add Device
+                    </button>
+                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Device Type Detection</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Auto-detection works for:</strong>
+                    <ul class="list-unstyled small mt-2">
+                        <li><i class="fas fa-check text-success me-1"></i><strong>Ciena:</strong> CN-3903, CN-3916, CN-3930, CN-3924, 5160, 5170</li>
+                        <li><i class="fas fa-check text-success me-1"></i><strong>Cisco:</strong> ASR9k, NCS5500 series</li>
+                        <li><i class="fas fa-check text-success me-1"></i><strong>Nokia:</strong> 7250 IXR, 7750 series</li>
+                        <li><i class="fas fa-check text-success me-1"></i><strong>Juniper:</strong> MX and ACX series</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <strong>Connection Details:</strong>
+                    <ul class="list-unstyled small mt-2">
+                        <li><i class="fas fa-info text-info me-1"></i>SSH Port: 22 (default)</li>
+                        <li><i class="fas fa-info text-info me-1"></i>Timeout: 20 seconds</li>
+                        <li><i class="fas fa-info text-info me-1"></i>Password: Prompted securely</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <strong>Security Notes:</strong>
+                    <ul class="list-unstyled small mt-2">
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Uses RADIUS authentication</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Credentials prompted for each session</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>No passwords stored locally</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Only device info is stored</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Examples</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <strong>Ciena Device</strong>
+                        <div class="small text-muted">Name: Ciena-CN3903-01<br>IP: 10.1.1.100</div>
+                    </div>
+                    <div class="list-group-item">
+                        <strong>Cisco ASR9k</strong>
+                        <div class="small text-muted">Name: ASR9k-Core-01<br>IP: 10.1.1.101</div>
+                    </div>
+                    <div class="list-group-item">
+                        <strong>Nokia 7250</strong>
+                        <div class="small text-muted">Name: Nokia-7250-01<br>IP: 10.1.1.102</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-detect device type based on device name
+document.getElementById('device_name').addEventListener('input', function() {
+    const deviceName = this.value.toLowerCase();
+    const deviceTypeSelect = document.getElementById('device_type');
+    
+    if (deviceName.includes('ciena') || deviceName.includes('cn3903') || deviceName.includes('cn3916') || 
+        deviceName.includes('cn3930') || deviceName.includes('cn3924') || deviceName.includes('5160') || 
+        deviceName.includes('5170')) {
+        deviceTypeSelect.value = 'ciena_os';
+    } else if (deviceName.includes('asr9k') || deviceName.includes('ncs5500')) {
+        deviceTypeSelect.value = 'cisco_xr';
+    } else if (deviceName.includes('7250') || deviceName.includes('7750')) {
+        deviceTypeSelect.value = 'nokia_sros';
+    } else if (deviceName.includes('mx') || deviceName.includes('acx')) {
+        deviceTypeSelect.value = 'juniper';
+    } else {
+        deviceTypeSelect.value = '';
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        document.querySelector('form').submit();
+    }
+});
+
+// Check if device data was passed from logs viewer
+document.addEventListener('DOMContentLoaded', function() {
+    const deviceFromLog = localStorage.getItem('deviceFromLog');
+    if (deviceFromLog) {
+        try {
+            const deviceData = JSON.parse(deviceFromLog);
+            
+            // Pre-fill the form
+            document.getElementById('device_name').value = deviceData.name || '';
+            document.getElementById('ip_address').value = deviceData.ip_address || '';
+            document.getElementById('device_type').value = deviceData.device_type || '';
+            document.getElementById('username').value = deviceData.username || '';
+            
+            // Clear the stored data
+            localStorage.removeItem('deviceFromLog');
+            
+            // Show a notification
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle me-1"></i>
+                Device information pre-filled from log file: <strong>${deviceData.name}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            
+        } catch (e) {
+            console.error('Error parsing device data:', e);
+        }
+    }
+    
+    // Check for device data from discovery
+    const deviceFromDiscovery = localStorage.getItem('deviceFromDiscovery');
+    if (deviceFromDiscovery) {
+        try {
+            const deviceData = JSON.parse(deviceFromDiscovery);
+            
+            // Pre-fill the form
+            document.getElementById('device_name').value = deviceData.name || '';
+            document.getElementById('ip_address').value = deviceData.ip_address || '';
+            document.getElementById('device_type').value = deviceData.device_type || '';
+            document.getElementById('username').value = deviceData.username || '';
+            document.getElementById('description').value = deviceData.description || '';
+            
+            // Clear the stored data
+            localStorage.removeItem('deviceFromDiscovery');
+            
+            // Show a notification
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-1"></i>
+                Device information pre-filled from discovery: <strong>${deviceData.name}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            
+        } catch (e) {
+            console.error('Error parsing device data:', e);
+        }
+    }
+});
+
+// Auto-suggestions functionality
+let suggestionTimeout;
+document.getElementById('device_name').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const suggestionsDiv = document.getElementById('deviceSuggestions');
+    const suggestionsList = document.getElementById('suggestionsList');
+    
+    // Clear previous timeout
+    clearTimeout(suggestionTimeout);
+    
+    if (query.length < 2) {
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Debounce the search
+    suggestionTimeout = setTimeout(() => {
+        fetch(`{{ url_for('auto_suggest_devices') }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(suggestions => {
+                if (suggestions.length > 0) {
+                    let html = '';
+                    suggestions.forEach(suggestion => {
+                        html += `
+                            <div class="suggestion-item p-2 border-bottom" 
+                                 onclick="selectSuggestion('${suggestion.name}', '${suggestion.device_type}')"
+                                 style="cursor: pointer; background: var(--bg-secondary);">
+                                <strong>${suggestion.name}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    ${suggestion.device_type} • ${suggestion.file_count} logs • Last seen: ${suggestion.last_seen[:10]}
+                                </small>
+                            </div>
+                        `;
+                    });
+                    suggestionsList.innerHTML = html;
+                    suggestionsDiv.style.display = 'block';
+                } else {
+                    suggestionsDiv.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching suggestions:', error);
+                suggestionsDiv.style.display = 'none';
+            });
+    }, 300);
+});
+
+function selectSuggestion(deviceName, deviceType) {
+    document.getElementById('device_name').value = deviceName;
+    document.getElementById('device_type').value = deviceType;
+    document.getElementById('deviceSuggestions').style.display = 'none';
+}
+</script>
+{% endblock %} 

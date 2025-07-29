@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Quick Notes</h2>
+<p class="text-muted mb-4">Create and save command templates for Cisco, Ciena, Nokia, Juniper devices. Perfect for frequently used commands that need quick modifications.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Create New Quick Note</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g. cisco, vlan, troubleshooting, ciena">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Command Template</label>
+                        <textarea class="form-control" id="content" name="content" rows="15" placeholder="Paste your command template here...
+
+Example:
+show interface gi1/0/{port}
+show vlan brief
+configure terminal
+interface gi1/0/{port}
+switchport mode access
+switchport access vlan {vlan}
+end
+
+You can use placeholders like {vlan}, {port}, {device} that you can quickly find and replace."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Quick Note
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Search and Filter -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Search Quick Notes</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by content or tags...">
+                </div>
+                <div class="mb-3">
+                    <select class="form-select" id="tagFilter">
+                        <option value="">All Tags</option>
+                        {% set all_tags = [] %}
+                        {% for filename, meta in notes_metadata.items() %}
+                            {% if meta.get('type') == 'quick_note' and meta.tags %}
+                                {% for tag in meta.tags %}
+                                    {% if tag not in all_tags %}
+                                        {% set _ = all_tags.append(tag) %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for tag in all_tags|sort %}
+                            <option value="{{ tag }}">{{ tag }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-outline-primary btn-sm" onclick="clearFilters()">
+                    <i class="fas fa-times me-1"></i>Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Quick Notes -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Quick Notes</h5>
+                <span class="badge bg-primary" id="noteCount">0</span>
+            </div>
+            <div class="card-body">
+                {% set quick_notes = [] %}
+                {% for filename in notes_metadata.keys() %}
+                    {% if notes_metadata[filename].get('type') == 'quick_note' %}
+                        {% set _ = quick_notes.append({'filename': filename, 'metadata': notes_metadata[filename]}) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <div id="quickNotesList">
+                    {% if quick_notes %}
+                        <div class="list-group list-group-flush">
+                            {% for note in quick_notes %}
+                                <a href="{{ url_for('view_quick_note', filename=note.filename) }}" class="list-group-item list-group-item-action quick-note-item" 
+                                   data-tags="{{ note.metadata.tags | join(' ') }}" data-content="{{ note.filename.replace('.txt', '') }}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ note.filename.replace('.txt', '') }}</h6>
+                                        <small class="text-muted">{{ note.metadata.created.split(' ')[0] if note.metadata.created else 'N/A' }}</small>
+                                    </div>
+                                    {% if note.metadata.tags %}
+                                        <div class="mt-1">
+                                            {% for tag in note.metadata.tags[:3] %}
+                                                <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+                                            {% endfor %}
+                                            {% if note.metadata.tags|length > 3 %}
+                                                <span class="badge bg-secondary">+{{ note.metadata.tags|length - 3 }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No quick notes yet. Create your first one!</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('view_notes') }}?type=quick_note" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>View All Notes
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Use tags to organize by device type</li>
+                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Include placeholders like {vlan} for easy find/replace</li>
+                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Add comments with # for better organization</li>
+                    <li><i class="fas fa-lightbulb text-warning me-2"></i>Use descriptive first lines for better filenames</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tagFilter = document.getElementById('tagFilter');
+    const noteItems = document.querySelectorAll('.quick-note-item');
+    const noteCount = document.getElementById('noteCount');
+    
+    function filterNotes() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedTag = tagFilter.value.toLowerCase();
+        let visibleCount = 0;
+        
+        noteItems.forEach(item => {
+            const content = item.getAttribute('data-content').toLowerCase();
+            const tags = item.getAttribute('data-tags').toLowerCase();
+            const matchesSearch = content.includes(searchTerm) || tags.includes(searchTerm);
+            const matchesTag = !selectedTag || tags.includes(selectedTag);
+            
+            if (matchesSearch && matchesTag) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        noteCount.textContent = visibleCount;
+    }
+    
+    searchInput.addEventListener('input', filterNotes);
+    tagFilter.addEventListener('change', filterNotes);
+    
+    // Initial count
+    filterNotes();
+});
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('tagFilter').value = '';
+    document.querySelectorAll('.quick-note-item').forEach(item => {
+        item.style.display = 'block';
+    });
+    document.getElementById('noteCount').textContent = document.querySelectorAll('.quick-note-item').length;
+}
+
+// Auto-save functionality
+let autoSaveTimer;
+const contentTextarea = document.getElementById('content');
+const tagsInput = document.getElementById('tags');
+
+function setupAutoSave() {
+    [contentTextarea, tagsInput].forEach(element => {
+        if (element) {
+            element.addEventListener('input', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    // Save to localStorage for recovery
+                    localStorage.setItem('quickNoteDraft', JSON.stringify({
+                        content: contentTextarea.value,
+                        tags: tagsInput.value,
+                        timestamp: Date.now()
+                    }));
+                }, 2000);
+            });
+        }
+    });
+}
+
+// Restore draft on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const draft = localStorage.getItem('quickNoteDraft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        
+        if (now - data.timestamp < oneHour) {
+            if (confirm('Found a draft from your last session. Would you like to restore it?')) {
+                contentTextarea.value = data.content || '';
+                tagsInput.value = data.tags || '';
+            } else {
+                localStorage.removeItem('quickNoteDraft');
+            }
+        } else {
+            localStorage.removeItem('quickNoteDraft');
+        }
+    }
+    
+    setupAutoSave();
+});
+</script>
+{% endblock %} 

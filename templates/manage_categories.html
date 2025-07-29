@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-tags me-2"></i>Manage Template Categories</h2>
+                    <p class="text-muted mb-0">Organize your templates into categories for better organization</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('manage_templates') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Templates
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Category -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add New Category</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="category_name" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="category_name" name="category_name" 
+                                   placeholder="Enter category name" required>
+                        </div>
+                        <input type="hidden" name="action" value="add">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Category
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Category Management</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">
+                        Categories help organize your templates by type, vendor, or purpose. 
+                        You can assign categories when creating or editing templates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Categories -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Existing Categories</h5>
+                </div>
+                <div class="card-body">
+                    {% if categories %}
+                        <div class="row">
+                            {% for category in categories %}
+                            <div class="col-md-4 col-lg-3 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-tag fa-2x text-primary mb-2"></i>
+                                        <h6 class="card-title">{{ category }}</h6>
+                                        <form method="post" style="display: inline;" 
+                                              onsubmit="return confirm('Delete category \"{{ category }}\"? This will not delete templates, only remove the category assignment.')">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="category_name" value="{{ category }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Categories Found</h5>
+                            <p class="text-muted">Create your first category to start organizing templates.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        document.getElementById('category_name').focus();
+    }
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('manage_templates') }}";
+    }
+});
+</script>
+
+{% endblock %}

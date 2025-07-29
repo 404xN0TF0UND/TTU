@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>View Note: {{ filename }}</h2>
+<div class="mb-2 small text-muted">
+    Created: {{ metadata.created or 'N/A' }} | Modified: {{ metadata.modified or 'N/A' }}
+</div>
+{% if metadata.tags %}
+    <div class="mb-2">
+        {% for tag in metadata.tags %}
+            <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="mb-3">
+    <textarea class="form-control" rows="12" readonly>{{ content }}</textarea>
+</div>
+<a href="{{ url_for('download_note', filename=filename) }}" class="btn btn-primary">Download</a>
+<a href="{{ url_for('email_note', filename=filename) }}" class="btn btn-info ms-2">Email Note</a>
+<a href="{{ url_for('view_notes') }}" class="btn btn-secondary">Back to Notes</a>
+{% endblock %} 

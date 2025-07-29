@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-search me-2"></i>Search Logs</h2>
+                    <p class="text-muted mb-0">Search through {{ index.total_files if index else 0 }} historical log files</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('logs_dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Search Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('logs_search') }}">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="q" class="form-label">Search Query</label>
+                                <input type="text" class="form-control" id="q" name="q" 
+                                       value="{{ query }}" placeholder="Search in content, device names...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="device_type" class="form-label">Device Type</label>
+                                <select class="form-select" id="device_type" name="device_type">
+                                    <option value="">All Types</option>
+                                    {% if index and index.device_types %}
+                                        {% for device_type, count in index.device_types.items() %}
+                                            <option value="{{ device_type }}" 
+                                                    {% if device_type == device_type %}selected{% endif %}>
+                                                {% if device_type == 'ciena_cpe' %}Ciena CPE
+                                                {% elif device_type == 'ciena_metro' %}Ciena Metro
+                                                {% elif device_type == 'ciena_nid' %}Ciena NID
+                                                {% elif device_type == 'nokia_soag' %}Nokia SOAG
+                                                {% elif device_type == 'nokia_ceg' %}Nokia CEG
+                                                {% else %}{{ device_type|title }}{% endif %}
+                                                ({{ count }})
+                                            </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="device_name" class="form-label">Device Name</label>
+                                <input type="text" class="form-control" id="device_name" name="device_name" 
+                                       value="{{ device_name }}" placeholder="Partial device name...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="date_from" class="form-label">From Date</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from" 
+                                       value="{{ date_from }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="date_to" class="form-label">To Date</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to" 
+                                       value="{{ date_to }}">
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if results is defined %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Search Results
+                        {% if results %}
+                            <span class="badge bg-primary ms-2">{{ results|length }} files</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Device</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Size</th>
+                                        <th>Commands</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in results %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ file.device_name }}</strong>
+                                            {% if query and query.lower() in file.device_name.lower() %}
+                                                <span class="badge bg-warning ms-1">Match</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if file.device_type == 'ciena_cpe' %}
+                                                <span class="badge bg-primary">Ciena CPE</span>
+                                            {% elif file.device_type == 'ciena_metro' %}
+                                                <span class="badge bg-success">Ciena Metro</span>
+                                            {% elif file.device_type == 'ciena_nid' %}
+                                                <span class="badge bg-info">Ciena NID</span>
+                                            {% elif file.device_type == 'nokia_soag' %}
+                                                <span class="badge bg-warning">Nokia SOAG</span>
+                                            {% elif file.device_type == 'nokia_ceg' %}
+                                                <span class="badge bg-danger">Nokia CEG</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ file.device_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ file.timestamp[:10] }}</td>
+                                        <td>{{ (file.size / 1024)|round(1) }} KB</td>
+                                        <td>{{ file.command_count }}</td>
+                                        <td>
+                                            <a href="{{ url_for('view_log', file_path=file.path) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="copyToClipboard('{{ file.device_name }}')">
+                                                <i class="fas fa-copy"></i> Copy Name
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% elif query or device_type or date_from or date_to or device_name %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results found</h5>
+                            <p class="text-muted">Try adjusting your search criteria</p>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Enter search criteria</h5>
+                            <p class="text-muted">Use the filters above to search through your logs</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Search Suggestions -->
+    {% if index and index.common_commands %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Quick Search Suggestions</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Click on any command to search for it:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for command, count in list(index.common_commands.items())[:15] %}
+                        <a href="{{ url_for('logs_search', q=command) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <code>{{ command }}</code>
+                            <span class="badge bg-primary ms-1">{{ count }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show a temporary success message
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(function() {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+</script>
+
+{% endblock %}

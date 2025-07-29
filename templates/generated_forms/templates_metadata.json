@@ -1,0 +1,35 @@
+{
+  "Disco-Issue_Soft_Disco.html": {
+    "category": "Disconnect"
+  },
+  "Disco-Remove_Cpe_EoHFC.html": {
+    "category": "Disconnect"
+  },
+  "Disco-Remove_Cpe_Fiber.html": {
+    "category": "Disconnect"
+  },
+  "New_ME_EoHFC.html": {
+    "category": "Installation"
+  },
+  "New_ME_Fiber.html": {
+    "category": "Installation"
+  },
+  "General_FE.html": {
+    "category": "Installation"
+  },
+  "BW_Upgrade.html": {
+    "category": "Network"
+  },
+  "Customer_Acceptance.html": {
+    "category": "Customer"
+  },
+  "ENNI.html": {
+    "category": "Other"
+  },
+  "Offnet.html": {
+    "category": "Network"
+  },
+  "Disco-Load_CPE_Configs.html": {
+    "category": "Disconnect"
+  }
+}

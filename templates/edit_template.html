@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Template: {{ template_name }}</h2>
+<form method="post">
+    <div class="mb-3">
+        <textarea name="template_content" class="form-control" rows="20">{{ content }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{{ url_for('manage_templates') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %} 

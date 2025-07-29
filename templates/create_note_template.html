@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create New Template</h2>
+<p class="text-muted mb-4">Create your own command templates for your specific environment and workflows.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Template Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="template_name" class="form-label">Template Name *</label>
+                        <input type="text" class="form-control" id="template_name" name="template_name" required placeholder="e.g. My Custom Ciena Template">
+                    </div>
+                    <div class="mb-3">
+                        <label for="template_tags" class="form-label">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="template_tags" name="template_tags" placeholder="e.g. ciena, custom, troubleshooting, fiber">
+                        <div class="form-text">Tags help organize and find your templates later.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="template_content" class="form-label">Command Template *</label>
+                        <textarea class="form-control" id="template_content" name="template_content" rows="15" required placeholder="Paste your command template here... Use {variable} for dynamic values."></textarea>
+                        <div class="form-text">Use {variable_name} for dynamic values that can be replaced later.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Create Template
+                    </button>
+                    <a href="{{ url_for('note_templates') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Template Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Variables:</strong>
+                    <div id="variablesList">
+                        <span class="text-muted">Variables will appear here as you type</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Common Variables:</strong>
+                    <ul class="list-unstyled small">
+                        <li><code>{port}</code> - Interface port</li>
+                        <li><code>{vlan}</code> - VLAN number</li>
+                        <li><code>{device}</code> - Device name</li>
+                        <li><code>{ip}</code> - IP address</li>
+                        <li><code>{date}</code> - Current date</li>
+                        <li><code>{engineer}</code> - Engineer name</li>
+                    </ul>
+                </div>
+                <div class="mb-3">
+                    <strong>Best Practices:</strong>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Use descriptive variable names</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Include comments with #</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Group related commands together</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Add expected outputs or ranges</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickTemplate('cisco_basic')">
+                        <strong>Cisco Basic Commands</strong>
+                        <div class="small text-muted">show version, show interfaces, show ip route</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickTemplate('ciena_basic')">
+                        <strong>Ciena Basic Commands</strong>
+                        <div class="small text-muted">show equipment, show interface, show alarms</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickTemplate('juniper_basic')">
+                        <strong>Juniper Basic Commands</strong>
+                        <div class="small text-muted">show interfaces, show route, show version</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickTemplate('troubleshooting')">
+                        <strong>Troubleshooting Template</strong>
+                        <div class="small text-muted">Basic troubleshooting workflow</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Extract and display variables from the template
+document.addEventListener('DOMContentLoaded', function() {
+    const contentTextarea = document.getElementById('template_content');
+    const variablesList = document.getElementById('variablesList');
+    
+    function updateVariables() {
+        const content = contentTextarea.value;
+        const variables = extractVariables(content);
+        
+        if (variables.length > 0) {
+            variablesList.innerHTML = '';
+            variables.forEach(variable => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-warning text-dark me-1 mb-1';
+                badge.textContent = `{${variable}}`;
+                variablesList.appendChild(badge);
+            });
+        } else {
+            variablesList.innerHTML = '<span class="text-muted">No variables found</span>';
+        }
+    }
+    
+    contentTextarea.addEventListener('input', updateVariables);
+    
+    // Check for duplicate template data
+    const duplicateData = localStorage.getItem('duplicateTemplate');
+    if (duplicateData) {
+        const data = JSON.parse(duplicateData);
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        
+        if (now - data.timestamp < oneHour) {
+            if (confirm('Found a template to duplicate. Would you like to load it?')) {
+                document.getElementById('template_name').value = data.name;
+                // You could load the source template content here
+                localStorage.removeItem('duplicateTemplate');
+            } else {
+                localStorage.removeItem('duplicateTemplate');
+            }
+        } else {
+            localStorage.removeItem('duplicateTemplate');
+        }
+    }
+});
+
+function extractVariables(text) {
+    const regex = /\{([^}]+)\}/g;
+    const variables = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        if (!variables.includes(match[1])) {
+            variables.push(match[1]);
+        }
+    }
+    return variables;
+}
+
+// Quick template loading
+function loadQuickTemplate(type) {
+    const templates = {
+        'cisco_basic': {
+            name: 'Cisco Basic Commands',
+            tags: 'cisco, basic, commands',
+            content: `# Cisco Basic Commands - {device_name}
+# Date: {date}
+# Engineer: {engineer}
+
+show version
+show interfaces
+show ip interface brief
+show ip route
+show running-config | include {search_term}`
+        },
+        'ciena_basic': {
+            name: 'Ciena Basic Commands',
+            tags: 'ciena, basic, commands',
+            content: `# Ciena Basic Commands - {device_name}
+# Date: {date}
+# Engineer: {engineer}
+
+show equipment
+show interface {port}
+show alarms
+show performance {port}`
+        },
+        'juniper_basic': {
+            name: 'Juniper Basic Commands',
+            tags: 'juniper, basic, commands',
+            content: `# Juniper Basic Commands - {device_name}
+# Date: {date}
+# Engineer: {engineer}
+
+show version
+show interfaces
+show route
+show configuration interfaces {interface}`
+        },
+        'troubleshooting': {
+            name: 'Troubleshooting Template',
+            tags: 'troubleshooting, general',
+            content: `# Troubleshooting Template - {issue_type}
+# Date: {date}
+# Engineer: {engineer}
+# Issue: {issue_description}
+
+# 1. Check current status
+show {status_command}
+
+# 2. Check configuration
+show {config_command}
+
+# 3. Check logs
+show {log_command}
+
+# 4. Test connectivity
+{test_command}
+
+# 5. Next steps
+# {next_steps}`
+        }
+    };
+    
+    const template = templates[type];
+    if (template) {
+        document.getElementById('template_name').value = template.name;
+        document.getElementById('template_tags').value = template.tags;
+        document.getElementById('template_content').value = template.content;
+        
+        // Trigger variable update
+        document.getElementById('template_content').dispatchEvent(new Event('input'));
+    }
+}
+
+// Auto-save functionality
+let autoSaveTimer;
+const templateNameInput = document.getElementById('template_name');
+const templateTagsInput = document.getElementById('template_tags');
+const templateContentInput = document.getElementById('template_content');
+
+function setupAutoSave() {
+    [templateNameInput, templateTagsInput, templateContentInput].forEach(element => {
+        if (element) {
+            element.addEventListener('input', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    localStorage.setItem('templateDraft', JSON.stringify({
+                        name: templateNameInput.value,
+                        tags: templateTagsInput.value,
+                        content: templateContentInput.value,
+                        timestamp: Date.now()
+                    }));
+                }, 2000);
+            });
+        }
+    });
+}
+
+// Restore draft on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const draft = localStorage.getItem('templateDraft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        
+        if (now - data.timestamp < oneHour) {
+            if (confirm('Found a draft template. Would you like to restore it?')) {
+                templateNameInput.value = data.name || '';
+                templateTagsInput.value = data.tags || '';
+                templateContentInput.value = data.content || '';
+            } else {
+                localStorage.removeItem('templateDraft');
+            }
+        } else {
+            localStorage.removeItem('templateDraft');
+        }
+    }
+    
+    setupAutoSave();
+});
+</script>
+{% endblock %} 

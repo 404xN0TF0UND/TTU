@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Templates</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+<ul class="list-group mb-4">
+    {% for template in templates %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <span>{{ template }}</span>
+                <div class="small text-muted">Category: {{ template_metadata.get(template, {}).get('category', 'Other') }}</div>
+            </div>
+            <span>
+                <a href="{{ url_for('edit_template', template_name=template) }}" class="btn btn-sm btn-primary">Edit</a>
+                <form method="post" action="{{ url_for('delete_template', template_name=template) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this template?');">Delete</button>
+                </form>
+                <button class="btn btn-sm btn-warning ms-2" onclick="showDuplicatePrompt('{{ template }}')">Duplicate</button>
+                <button class="btn btn-sm btn-info ms-2" onclick="showCategoryPrompt('{{ template }}', '{{ template_metadata.get(template, {}).get('category', 'Other') }}')">Category</button>
+            </span>
+        </li>
+    {% else %}
+        <li class="list-group-item">No templates found.</li>
+    {% endfor %}
+</ul>
+
+<!-- Duplicate Template Form -->
+<form id="duplicateForm" method="post" style="display:none;">
+    <input type="hidden" name="duplicate_template" id="duplicateTemplateName">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" name="new_template_name" placeholder="New template name (e.g. My New Template)">
+        <button type="submit" class="btn btn-warning">Duplicate</button>
+        <button type="button" class="btn btn-secondary" onclick="hideDuplicatePrompt()">Cancel</button>
+    </div>
+</form>
+
+<!-- Category Management Form -->
+<form id="categoryForm" method="post" style="display:none;">
+    <input type="hidden" name="update_category_template" id="categoryTemplateName">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">Update Template Category</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="categorySelect" class="form-label">Select Category:</label>
+                <select class="form-select" id="categorySelect" name="category">
+                    <option value="Installation">Installation</option>
+                    <option value="Troubleshooting">Troubleshooting</option>
+                    <option value="Disconnect">Disconnect</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Network">Network</option>
+                    <option value="Other">Other</option>
+                    <option value="custom">Custom...</option>
+                </select>
+            </div>
+            <div class="mb-3" id="customCategoryDiv" style="display:none;">
+                <label for="customCategory" class="form-label">Custom Category:</label>
+                <input type="text" class="form-control" id="customCategory" name="custom_category" placeholder="Enter custom category name">
+            </div>
+            <button type="submit" class="btn btn-info">Update Category</button>
+            <button type="button" class="btn btn-secondary" onclick="hideCategoryPrompt()">Cancel</button>
+        </div>
+    </div>
+</form>
+
+<a href="/" class="btn btn-secondary">Back to Home</a>
+
+<script>
+function showDuplicatePrompt(templateName) {
+    document.getElementById('duplicateForm').style.display = 'block';
+    document.getElementById('duplicateTemplateName').value = templateName;
+    document.getElementById('categoryForm').style.display = 'none';
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function hideDuplicatePrompt() {
+    document.getElementById('duplicateForm').style.display = 'none';
+    document.getElementById('duplicateTemplateName').value = '';
+}
+
+function showCategoryPrompt(templateName, currentCategory) {
+    document.getElementById('categoryForm').style.display = 'block';
+    document.getElementById('categoryTemplateName').value = templateName;
+    document.getElementById('duplicateForm').style.display = 'none';
+    
+    // Set current category in dropdown
+    const select = document.getElementById('categorySelect');
+    const customInput = document.getElementById('customCategory');
+    
+    // Check if current category is in predefined options
+    let found = false;
+    for (let option of select.options) {
+        if (option.value === currentCategory) {
+            option.selected = true;
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found) {
+        // Set to custom and populate custom field
+        select.value = 'custom';
+        customInput.value = currentCategory;
+        document.getElementById('customCategoryDiv').style.display = 'block';
+    } else {
+        customInput.value = '';
+        document.getElementById('customCategoryDiv').style.display = 'none';
+    }
+    
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function hideCategoryPrompt() {
+    document.getElementById('categoryForm').style.display = 'none';
+    document.getElementById('categoryTemplateName').value = '';
+}
+
+// Handle category select change
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('categorySelect');
+    const customDiv = document.getElementById('customCategoryDiv');
+    
+    categorySelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customDiv.style.display = 'block';
+        } else {
+            customDiv.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %} 

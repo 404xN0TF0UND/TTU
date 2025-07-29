@@ -1,0 +1,110 @@
+{
+  "ciena": {
+    "Basic": [
+      "po sh",
+      "po sh po {port}",
+      "show equipment",
+      "show interface {port}",
+      "show alarms",
+      "show performance {port}",
+      "show version",
+      "show system"
+    ],
+    "Troubleshooting": [
+      "cfm remote-mep show",
+      "cfm local-mep show",
+      "show equipment ont interface {port} detail",
+      "show equipment ont interface {port} statistics",
+      "show equipment ont interface {port} optical-info",
+      "show equipment ont interface {port} alarms",
+      "show interface {port} statistics",
+      "show interface {port} detail",
+      "show interface {port} status"
+    ],
+    "Configuration": [
+      "show running-config",
+      "show configuration interface {port}",
+      "show equipment ont interface {port} configuration",
+      "show configuration",
+      "show configuration port {port}",
+      "show configuration cfm"
+    ],
+    "CFM Monitoring": [
+      "cfm remote-mep show",
+      "cfm local-mep show",
+      "cfm mep show",
+      "cfm domain show",
+      "cfm association show",
+      "cfm statistics show"
+    ]
+  },
+  "nokia": {
+    "Basic": [
+      "show version",
+      "show port {port}",
+      "show interface {interface}",
+      "show router interface",
+      "admin show version",
+      "admin show system"
+    ],
+    "Troubleshooting": [
+      "show port {port} statistics",
+      "show port {port} detail",
+      "show router status",
+      "show router bgp summary",
+      "admin show port {port}",
+      "admin show interface {interface}"
+    ],
+    "Configuration": [
+      "show configuration",
+      "show configuration port {port}",
+      "show configuration router interface {interface}",
+      "admin show configuration full-context",
+      "admin show configuration full-context | match {pattern}"
+    ]
+  },
+  "cisco": {
+    "Basic": [
+      "show version",
+      "show interfaces {interface}",
+      "show ip interface brief",
+      "show ip route",
+      "show interface status"
+    ],
+    "Troubleshooting": [
+      "show interface {interface} counters",
+      "show interface {interface} status",
+      "show logging",
+      "show ip bgp summary",
+      "show interface {interface} detail"
+    ],
+    "Configuration": [
+      "show running-config interface {interface}",
+      "show startup-config",
+      "show ip route {prefix}",
+      "show configuration"
+    ]
+  },
+  "juniper": {
+    "Basic": [
+      "show version",
+      "show interfaces {interface}",
+      "show route",
+      "show system storage",
+      "show interface status"
+    ],
+    "Troubleshooting": [
+      "show interface {interface} detail",
+      "show route {prefix}",
+      "show bgp summary",
+      "show system alarms",
+      "show interface {interface} statistics"
+    ],
+    "Configuration": [
+      "show configuration interfaces {interface}",
+      "show configuration routing-options",
+      "show configuration protocols bgp",
+      "show configuration"
+    ]
+  }
+} 

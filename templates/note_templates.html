@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Note Templates</h2>
+<p class="text-muted mb-4">Predefined templates for common network scenarios. Click any template to use it as a starting point for your Quick Notes.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<!-- Template Categories -->
+<div class="mb-4">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-outline-primary active" onclick="filterTemplates('all')">All Templates</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('ciena')">Ciena</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('cisco')">Cisco</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('nokia')">Nokia</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('juniper')">Juniper</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('bgp')">BGP</button>
+        <button type="button" class="btn btn-outline-primary" onclick="filterTemplates('troubleshooting')">Troubleshooting</button>
+    </div>
+    <a href="{{ url_for('create_note_template') }}" class="btn btn-success ms-3">
+        <i class="fas fa-plus me-1"></i>Create New Template
+    </a>
+</div>
+
+<div class="row" id="templatesContainer">
+    {% for template_id, template in templates.items() %}
+        <div class="col-md-6 col-lg-4 mb-4 template-card" data-category="{{ template.tags.lower() }}">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ template.name }}</h6>
+                    <span class="badge bg-secondary">{{ template.tags.split(', ')[0] }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Tags:</strong>
+                        {% for tag in template.tags.split(', ') %}
+                            <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Preview:</strong>
+                        <pre class="bg-dark text-light p-2 rounded" style="font-size: 0.8rem; max-height: 100px; overflow-y: auto;">{{ template.content[:200] }}{% if template.content|length > 200 %}...{% endif %}</pre>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('use_note_template', template_id=template_id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Use Template
+                        </a>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="duplicateTemplate('{{ template_id }}', '{{ template.name }}')">
+                            <i class="fas fa-copy me-1"></i>Duplicate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('quick_notes') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Quick Notes
+    </a>
+    <a href="{{ url_for('view_notes') }}" class="btn btn-outline-primary ms-2">
+        <i class="fas fa-list me-1"></i>View All Notes
+    </a>
+</div>
+
+<script>
+// Filter templates by category
+function filterTemplates(category) {
+    const cards = document.querySelectorAll('.template-card');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    
+    // Update active button
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    cards.forEach(card => {
+        const templateTags = card.getAttribute('data-category');
+        if (category === 'all' || templateTags.includes(category)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Duplicate template functionality
+function duplicateTemplate(templateId, templateName) {
+    // Redirect to create template page with pre-filled data
+    const newName = prompt(`Enter a name for your duplicated template (copying from: ${templateName}):`);
+    if (newName) {
+        // Store the template data in localStorage for the create page to use
+        const templateData = {
+            name: newName,
+            source: templateId,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('duplicateTemplate', JSON.stringify(templateData));
+        window.location.href = "{{ url_for('create_note_template') }}";
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'q') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('quick_notes') }}";
+    }
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('create_note_template') }}";
+    }
+});
+</script>
+{% endblock %} 

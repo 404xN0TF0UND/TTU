@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Execute Commands</h2>
+<p class="text-muted mb-4">Execute SSH commands on your network devices and save the results as notes.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Command Execution</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="device_name" class="form-label">Device *</label>
+                        <select class="form-select" id="device_name" name="device_name" required>
+                            <option value="">Select a device...</option>
+                            {% for device_name, device_info in devices.items() %}
+                                <option value="{{ device_name }}" {% if request.args.get('device') == device_name %}selected{% endif %}>
+                                    {{ device_name }} ({{ device_info.ip_address }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Select the device to execute commands on</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Leave empty for RADIUS prompt">
+                        <div class="form-text">Username for SSH connection (will prompt for password)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Leave empty for secure prompt">
+                        <div class="form-text">Password for SSH connection (recommended to leave empty for secure prompt)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="commands" class="form-label">Commands *</label>
+                        <textarea class="form-control" id="commands" name="commands" rows="10" required placeholder="Enter commands to execute (one per line)&#10;&#10;Example:&#10;show version&#10;show interfaces&#10;show ip route"></textarea>
+                        <div class="form-text">Enter commands to execute, one per line</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play me-1"></i>Execute Commands
+                    </button>
+                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('ciena_basic')">
+                        <strong>Ciena Basic Commands</strong>
+                        <div class="small text-muted">show equipment, show interface, show alarms</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('cisco_basic')">
+                        <strong>Cisco Basic Commands</strong>
+                        <div class="small text-muted">show version, show interfaces, show ip route</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('nokia_basic')">
+                        <strong>Nokia Basic Commands</strong>
+                        <div class="small text-muted">show version, show port, show interface</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('juniper_basic')">
+                        <strong>Juniper Basic Commands</strong>
+                        <div class="small text-muted">show version, show interfaces, show route</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadTemplate('troubleshooting')">
+                        <strong>Troubleshooting</strong>
+                        <div class="small text-muted">Basic troubleshooting commands</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Template Execution</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">Execute predefined templates with variable replacement:</p>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('execute_template', template_id='ciena_cn3903_basic') }}" class="list-group-item list-group-item-action">
+                        <strong>Ciena CN-3903 Template</strong>
+                        <div class="small text-muted">Basic Ciena commands with variables</div>
+                    </a>
+                    <a href="{{ url_for('execute_template', template_id='cisco_asr9k_basic') }}" class="list-group-item list-group-item-action">
+                        <strong>Cisco ASR9k Template</strong>
+                        <div class="small text-muted">Basic Cisco commands with variables</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Security Notes</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-shield-alt text-warning me-1"></i>Uses RADIUS authentication</li>
+                    <li><i class="fas fa-shield-alt text-warning me-1"></i>Credentials prompted securely</li>
+                    <li><i class="fas fa-shield-alt text-warning me-1"></i>Results are saved as notes</li>
+                    <li><i class="fas fa-shield-alt text-warning me-1"></i>Check device connectivity first</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load quick templates
+function loadTemplate(type) {
+    const templates = {
+        'ciena_basic': `show equipment
+show interface {port}
+show alarms
+show performance {port}
+show equipment ont interface {port} detail
+show equipment ont interface {port} statistics
+show equipment ont interface {port} optical-info`,
+        'cisco_basic': `show version
+show interfaces {interface}
+show ip interface brief
+show ip route
+show running-config interface {interface}`,
+        'nokia_basic': `show version
+show port {port}
+show port {port} statistics
+show port {port} detail
+show interface {interface}`,
+        'juniper_basic': `show version
+show interfaces {interface}
+show route
+show configuration interfaces {interface}`,
+        'troubleshooting': `# Basic troubleshooting commands
+show version
+show interfaces
+show alarms
+show errors
+show logging`
+    };
+    
+    const template = templates[type];
+    if (template) {
+        document.getElementById('commands').value = template;
+    }
+}
+
+// Auto-select device if specified in URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const device = urlParams.get('device');
+    if (device) {
+        document.getElementById('device_name').value = device;
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('form').submit();
+    }
+});
+</script>
+{% endblock %} 

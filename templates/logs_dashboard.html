@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-history me-2"></i>Logs Dashboard</h2>
+                    <p class="text-muted mb-0">Historical device logs analysis and search</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('logs_search') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Search Logs
+                    </a>
+                    <a href="{{ url_for('logs_analytics') }}" class="btn btn-info ms-2">
+                        <i class="fas fa-chart-bar me-1"></i>Analytics
+                    </a>
+                    <a href="{{ url_for('rebuild_logs_index') }}" class="btn btn-warning ms-2">
+                        <i class="fas fa-sync me-1"></i>Rebuild Index
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ index.total_files }}</h4>
+                            <p class="mb-0">Total Log Files</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ index.devices|length }}</h4>
+                            <p class="mb-0">Unique Devices</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-server fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ index.device_types|length }}</h4>
+                            <p class="mb-0">Device Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-network-wired fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ index.common_commands|length }}</h4>
+                            <p class="mb-0">Commands Found</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-terminal fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range -->
+    {% if index.date_range.earliest and index.date_range.latest %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Log Date Range</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Earliest:</strong> {{ index.date_range.earliest[:10] }} | 
+                        <strong>Latest:</strong> {{ index.date_range.latest[:10] }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Device Types Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Device Types</h5>
+                </div>
+                <div class="card-body">
+                    {% if index.device_types %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Device Type</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device_type, count in index.device_types.items() %}
+                                    <tr>
+                                        <td>
+                                            {% if device_type == 'ciena_cpe' %}
+                                                <i class="fas fa-network-wired text-primary me-1"></i>Ciena CPE
+                                            {% elif device_type == 'ciena_metro' %}
+                                                <i class="fas fa-exchange-alt text-success me-1"></i>Ciena Metro
+                                            {% elif device_type == 'ciena_nid' %}
+                                                <i class="fas fa-hdd text-info me-1"></i>Ciena NID
+                                            {% elif device_type == 'nokia_soag' %}
+                                                <i class="fas fa-server text-warning me-1"></i>Nokia SOAG
+                                            {% elif device_type == 'nokia_ceg' %}
+                                                <i class="fas fa-server text-danger me-1"></i>Nokia CEG
+                                            {% else %}
+                                                <i class="fas fa-question text-muted me-1"></i>{{ device_type|title }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ count }}</td>
+                                        <td>{{ "%.1f"|format(count / index.total_files * 100) }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No device types found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Most Common Commands</h5>
+                </div>
+                <div class="card-body">
+                    {% if index.common_commands %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Command</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for command, count in index.common_commands.items() %}
+                                    {% if loop.index <= 10 %}
+                                    <tr>
+                                        <td><code>{{ command }}</code></td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No commands found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if index.files %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Device</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Size</th>
+                                        <th>Commands</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in index.files[:20] %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ file.device_name }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if file.device_type == 'ciena_cpe' %}
+                                                <span class="badge bg-primary">Ciena CPE</span>
+                                            {% elif file.device_type == 'ciena_metro' %}
+                                                <span class="badge bg-success">Ciena Metro</span>
+                                            {% elif file.device_type == 'ciena_nid' %}
+                                                <span class="badge bg-info">Ciena NID</span>
+                                            {% elif file.device_type == 'nokia_soag' %}
+                                                <span class="badge bg-warning">Nokia SOAG</span>
+                                            {% elif file.device_type == 'nokia_ceg' %}
+                                                <span class="badge bg-danger">Nokia CEG</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ file.device_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ file.timestamp[:10] }}</td>
+                                        <td>{{ (file.size / 1024)|round(1) }} KB</td>
+                                        <td>{{ file.command_count }}</td>
+                                        <td>
+                                            <a href="{{ url_for('view_log', file_path=file.path) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No recent activity found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
