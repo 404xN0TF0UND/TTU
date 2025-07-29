@@ -3,39 +3,134 @@
     "Basic": [
       "po sh",
       "po sh po {port}",
-      "show equipment",
       "show interface {port}",
       "show alarms",
-      "show performance {port}",
-      "show version",
-      "show system"
+      "show version"
     ],
-    "Troubleshooting": [
+    "CFM Monitoring": [
       "cfm remote-mep show",
-      "cfm local-mep show",
-      "show equipment ont interface {port} detail",
-      "show equipment ont interface {port} statistics",
-      "show equipment ont interface {port} optical-info",
-      "show equipment ont interface {port} alarms",
-      "show interface {port} statistics",
-      "show interface {port} detail",
-      "show interface {port} status"
+      "cfm mep show"
     ],
     "Configuration": [
       "show running-config",
       "show configuration interface {port}",
-      "show equipment ont interface {port} configuration",
       "show configuration",
       "show configuration port {port}",
       "show configuration cfm"
     ],
-    "CFM Monitoring": [
+    "Troubleshooting": [
       "cfm remote-mep show",
       "cfm local-mep show",
-      "cfm mep show",
-      "cfm domain show",
-      "cfm association show",
-      "cfm statistics show"
+      "show interface {port} status"
+    ]
+  },
+  "cisco": {
+    "ASR9k Specific": [
+      "show platform hardware qfp active statistics drop",
+      "show platform hardware qfp active statistics interface {interface}",
+      "show platform hardware qfp active statistics ipv4",
+      "show platform hardware qfp active statistics ipv6",
+      "show platform hardware qfp active statistics mpls",
+      "show platform hardware qfp active statistics bgp",
+      "show platform hardware qfp active statistics ospf",
+      "show platform hardware qfp active statistics ldp",
+      "show platform hardware qfp active statistics traffic-eng",
+      "show platform hardware qfp active statistics acl",
+      "show platform hardware qfp active statistics qos",
+      "show platform hardware qfp active statistics policer",
+      "show platform hardware qfp active statistics shaper",
+      "show platform hardware qfp active statistics queue",
+      "show platform hardware qfp active statistics buffer"
+    ],
+    "Basic": [
+      "show version",
+      "show interfaces {interface}",
+      "show ip interface brief",
+      "show ip route",
+      "show interface status",
+      "show platform",
+      "show inventory",
+      "show processes cpu",
+      "show memory statistics"
+    ],
+    "Configuration": [
+      "show running-config interface {interface}",
+      "show startup-config",
+      "show ip route {prefix}",
+      "show configuration",
+      "show running-config | section {section}",
+      "show running-config | include {pattern}",
+      "show ip access-list",
+      "show ip prefix-list",
+      "show route-map",
+      "show policy-map",
+      "show class-map",
+      "show mpls ldp configuration",
+      "show mpls traffic-eng configuration",
+      "show ip bgp configuration",
+      "show ip ospf configuration",
+      "show interface {interface} description"
+    ],
+    "NCS5500 Specific": [
+      "show platform hardware qfp active statistics drop",
+      "show platform hardware qfp active statistics interface {interface}",
+      "show platform hardware qfp active statistics ipv4",
+      "show platform hardware qfp active statistics ipv6",
+      "show platform hardware qfp active statistics mpls",
+      "show platform hardware qfp active statistics bgp",
+      "show platform hardware qfp active statistics ospf",
+      "show platform hardware qfp active statistics ldp",
+      "show platform hardware qfp active statistics traffic-eng",
+      "show platform hardware qfp active statistics acl",
+      "show platform hardware qfp active statistics qos",
+      "show platform hardware qfp active statistics policer",
+      "show platform hardware qfp active statistics shaper",
+      "show platform hardware qfp active statistics queue",
+      "show platform hardware qfp active statistics buffer"
+    ],
+    "Troubleshooting": [
+      "show interface {interface} counters",
+      "show interface {interface} status",
+      "show logging",
+      "show ip bgp summary",
+      "show interface {interface} detail",
+      "show interface {interface} statistics",
+      "show ip route {prefix}",
+      "show ip bgp neighbors",
+      "show ip bgp {prefix}",
+      "show ip ospf neighbor",
+      "show ip ospf database",
+      "show mpls ldp neighbor",
+      "show mpls ldp discovery",
+      "show mpls forwarding-table",
+      "show mpls traffic-eng tunnels",
+      "show controllers {interface}",
+      "show tech-support {interface}",
+      "show diagnostic result module {slot}",
+      "show platform hardware qfp active statistics drop",
+      "show platform hardware qfp active statistics interface {interface}"
+    ]
+  },
+  "juniper": {
+    "Basic": [
+      "show version",
+      "show interfaces {interface}",
+      "show route",
+      "show system storage",
+      "show interface status"
+    ],
+    "Configuration": [
+      "show configuration interfaces {interface}",
+      "show configuration routing-options",
+      "show configuration protocols bgp",
+      "show configuration"
+    ],
+    "Troubleshooting": [
+      "show interface {interface} detail",
+      "show route {prefix}",
+      "show bgp summary",
+      "show system alarms",
+      "show interface {interface} statistics"
     ]
   },
   "nokia": {
@@ -47,6 +142,13 @@
       "admin show version",
       "admin show system"
     ],
+    "Configuration": [
+      "show configuration",
+      "show configuration port {port}",
+      "show configuration router interface {interface}",
+      "admin show configuration full-context",
+      "admin show configuration full-context | match {pattern}"
+    ],
     "Troubleshooting": [
       "show port {port} statistics",
       "show port {port} detail",
@@ -54,57 +156,6 @@
       "show router bgp summary",
       "admin show port {port}",
       "admin show interface {interface}"
-    ],
-    "Configuration": [
-      "show configuration",
-      "show configuration port {port}",
-      "show configuration router interface {interface}",
-      "admin show configuration full-context",
-      "admin show configuration full-context | match {pattern}"
-    ]
-  },
-  "cisco": {
-    "Basic": [
-      "show version",
-      "show interfaces {interface}",
-      "show ip interface brief",
-      "show ip route",
-      "show interface status"
-    ],
-    "Troubleshooting": [
-      "show interface {interface} counters",
-      "show interface {interface} status",
-      "show logging",
-      "show ip bgp summary",
-      "show interface {interface} detail"
-    ],
-    "Configuration": [
-      "show running-config interface {interface}",
-      "show startup-config",
-      "show ip route {prefix}",
-      "show configuration"
-    ]
-  },
-  "juniper": {
-    "Basic": [
-      "show version",
-      "show interfaces {interface}",
-      "show route",
-      "show system storage",
-      "show interface status"
-    ],
-    "Troubleshooting": [
-      "show interface {interface} detail",
-      "show route {prefix}",
-      "show bgp summary",
-      "show system alarms",
-      "show interface {interface} statistics"
-    ],
-    "Configuration": [
-      "show configuration interfaces {interface}",
-      "show configuration routing-options",
-      "show configuration protocols bgp",
-      "show configuration"
     ]
   }
-} 
+}

@@ -1980,6 +1980,35 @@ def delete_vendor(vendor_name):
         flash(f'Error deleting vendor: {str(e)}', 'error')
         return redirect(url_for('manage_command_library'))
 
+@app.route('/commands/library/delete-command', methods=['POST'])
+def delete_command():
+    """Delete a specific command from the command library"""
+    try:
+        vendor = request.form.get('vendor', '').strip()
+        category = request.form.get('category', '').strip()
+        command = request.form.get('command', '').strip()
+        
+        if not all([vendor, category, command]):
+            flash('Missing required parameters', 'error')
+            return redirect(url_for('manage_command_library'))
+        
+        command_library = load_command_library()
+        
+        if vendor in command_library and category in command_library[vendor]:
+            if command in command_library[vendor][category]:
+                command_library[vendor][category].remove(command)
+                save_command_library(command_library)
+                flash(f'Command "{command}" deleted successfully!', 'success')
+            else:
+                flash(f'Command "{command}" not found in {category}', 'error')
+        else:
+            flash(f'Vendor "{vendor}" or category "{category}" not found', 'error')
+        
+        return redirect(url_for('manage_command_library'))
+    except Exception as e:
+        flash(f'Error deleting command: {str(e)}', 'error')
+        return redirect(url_for('manage_command_library'))
+
 def scan_and_index_logs():
     """Scan and index all log files for search functionality"""
     logs_index = {
