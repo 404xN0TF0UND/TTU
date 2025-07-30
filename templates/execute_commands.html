@@ -1,5 +1,82 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for better readability */
+.form-control, .form-select {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+textarea.form-control {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border: 1px solid #2f3136;
+}
+
+textarea.form-control:focus {
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 0.2rem rgba(88, 101, 242, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #e6e9ea;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    font-size: 12px;
+    color: #72767d;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #e6e9ea;
+}
+
+.list-group-item {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item:hover {
+    background-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item strong {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.list-group-item .small {
+    color: #72767d;
+}
+
+/* Improve button styling */
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Improve overall readability */
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+</style>
+
 <h2>Execute Commands</h2>
 <p class="text-muted mb-4">Execute SSH commands on your network devices and save the results as notes.</p>
 

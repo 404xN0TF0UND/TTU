@@ -1,5 +1,89 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for better readability */
+pre {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #e6e9ea;
+    background-color: #1e2124;
+    border: 1px solid #2f3136;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    background-color: #2f3136;
+    color: #e6e9ea;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+}
+
+.bg-dark {
+    background-color: #1e2124 !important;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #e6e9ea;
+}
+
+.list-group-item {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item:hover {
+    background-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item strong {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.list-group-item .small {
+    color: #72767d;
+}
+
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Improve scrollbar styling */
+.bg-dark::-webkit-scrollbar {
+    width: 8px;
+}
+
+.bg-dark::-webkit-scrollbar-track {
+    background: #2f3136;
+}
+
+.bg-dark::-webkit-scrollbar-thumb {
+    background: #5865f2;
+    border-radius: 4px;
+}
+
+.bg-dark::-webkit-scrollbar-thumb:hover {
+    background: #4752c4;
+}
+</style>
+
 <h2>Command Execution Results</h2>
 <p class="text-muted mb-4">Results from executing commands on {{ device_name }}</p>
 

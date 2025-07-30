@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+y#!/usr/bin/env python3
 """
 Create a portable package for TTU Notes
 This includes Python runtime and all dependencies in a single folder
@@ -49,7 +49,7 @@ def create_portable_package():
         "--add-data=templates;templates",  # Include templates
         "--add-data=saved_notes;saved_notes",  # Include saved notes
         "--add-data=command_library.json;.",  # Include command library
-        "--add-data=logs_index.json;.",  # Include logs index
+        # Note: logs_index.json is NOT included - each user gets a clean slate
         "--hidden-import=netmiko",
         "--hidden-import=jinja2",
         "--hidden-import=flask",
@@ -76,32 +76,32 @@ TTU_Notes_Portable.exe
         # Create README for portable package
         readme_content = """# TTU Notes - Portable Version
 
-## 🚀 Quick Start
+## Quick Start
 1. Double-click "Start_TTU_Notes.bat" to launch the application
 2. The application will open in your default web browser
 3. No installation required - this is a portable package
 
-## 📁 What's Included
+## What's Included
 - TTU_Notes_Portable.exe - Main application
 - Start_TTU_Notes.bat - Easy launcher script
 - All required dependencies and templates
 
-## 🔧 System Requirements
+## System Requirements
 - Windows 10 or later
 - Web browser (Chrome, Firefox, Edge, Safari)
 - Network access to your devices
 
-## 📝 Usage
+## Usage
 1. Run Start_TTU_Notes.bat
 2. Open your web browser to http://127.0.0.1:5000
 3. Start managing your network devices!
 
-## 🗂️ Data Storage
+## Data Storage
 Your notes and device configurations are stored locally in the same folder.
 You can copy this entire folder to another computer to transfer your data.
 
 ---
-Built for Network Engineers, by Network Engineers 🛠️
+Built for Network Engineers, by Network Engineers
 """
         
         readme_path = Path("dist/TTU_Notes_Portable/README.txt")

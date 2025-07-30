@@ -1447,6 +1447,18 @@ def delete_device(device_name):
         flash(f'Device {device_name} deleted successfully.')
     return redirect(url_for('manage_devices'))
 
+@app.route('/devices/clear-all', methods=['POST'])
+def clear_all_devices():
+    """Clear all devices from the device list"""
+    try:
+        # Delete the devices.json file to clear all devices
+        if os.path.exists(DEVICES_FILE):
+            os.remove(DEVICES_FILE)
+        flash('All devices have been cleared successfully.')
+    except Exception as e:
+        flash(f'Error clearing devices: {str(e)}')
+    return redirect(url_for('manage_devices'))
+
 # Command execution routes
 @app.route('/execute', methods=['GET', 'POST'])
 def execute_commands():
@@ -2698,6 +2710,20 @@ def bulk_add_discovered_devices():
         
     except Exception as e:
         flash(f'Error adding devices: {str(e)}', 'error')
+        return redirect(url_for('device_discovery'))
+
+@app.route('/devices/discover/clear', methods=['POST'])
+def clear_discovery_data():
+    """Clear all discovered device data by rebuilding the logs index"""
+    try:
+        # Delete the logs index file to clear all discovery data
+        if os.path.exists(LOGS_INDEX_FILE):
+            os.remove(LOGS_INDEX_FILE)
+        
+        flash('All discovered device data has been cleared successfully.')
+        return redirect(url_for('device_discovery'))
+    except Exception as e:
+        flash(f'Error clearing discovery data: {str(e)}')
         return redirect(url_for('device_discovery'))
 
 @app.route('/devices/discover/auto-suggest')

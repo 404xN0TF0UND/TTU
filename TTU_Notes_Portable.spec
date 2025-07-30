@@ -5,7 +5,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('templates', 'templates'), ('saved_notes', 'saved_notes'), ('command_library.json', '.'), ('logs_index.json', '.')],
+    datas=[('templates', 'templates'), ('saved_notes', 'saved_notes'), ('command_library.json', '.')],
     hiddenimports=['netmiko', 'jinja2', 'flask', 'paramiko', 'cryptography'],
     hookspath=[],
     hooksconfig={},

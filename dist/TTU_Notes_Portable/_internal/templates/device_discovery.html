@@ -1,5 +1,93 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for better readability */
+.table {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+}
+
+.table th {
+    font-weight: 600;
+    color: #e6e9ea;
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.table td {
+    color: #e6e9ea;
+    border-color: #2f3136;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.badge {
+    font-weight: 500;
+    font-size: 12px;
+    padding: 0.4rem 0.6rem;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #e6e9ea;
+    font-size: 16px;
+}
+
+.list-group-item {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item:hover {
+    background-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item strong {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.list-group-item .small {
+    color: #72767d;
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+
+/* Improve table responsiveness */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Better form controls */
+.form-check-input {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.form-check-input:checked {
+    background-color: #5865f2;
+    border-color: #5865f2;
+}
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -10,6 +98,11 @@
                     <p class="text-muted mb-0">Discover devices from your log analysis and add them to your device list</p>
                 </div>
                 <div>
+                    <form method="post" action="{{ url_for('clear_discovery_data') }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to clear ALL discovered device data? This will remove all 2,327 discovered devices and cannot be undone.');">
+                        <button type="submit" class="btn btn-danger me-2">
+                            <i class="fas fa-trash-alt me-1"></i>Clear All Discovery Data
+                        </button>
+                    </form>
                     <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i>Back to Devices
                     </a>
