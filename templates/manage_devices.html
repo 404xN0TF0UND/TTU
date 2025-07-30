@@ -1,5 +1,113 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for better readability */
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-header {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-header h6 {
+    color: #e6e9ea;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+
+.card-body strong {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.card-body .mb-3 {
+    color: #e6e9ea;
+}
+
+.badge {
+    font-weight: 500;
+    font-size: 12px;
+    padding: 0.4rem 0.6rem;
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.btn-sm {
+    font-size: 12px;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Improve overall readability */
+h2 {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #72767d !important;
+}
+
+/* Better form controls */
+.form-check-input {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.form-check-input:checked {
+    background-color: #5865f2;
+    border-color: #5865f2;
+}
+
+/* Improve card hover effects */
+.card:hover {
+    border-color: #5865f2;
+    box-shadow: 0 0 0 1px rgba(88, 101, 242, 0.25);
+}
+
+/* Better button styling */
+.btn-primary {
+    background-color: #5865f2;
+    border-color: #5865f2;
+}
+
+.btn-primary:hover {
+    background-color: #4752c4;
+    border-color: #4752c4;
+}
+
+.btn-danger {
+    background-color: #ed4245;
+    border-color: #ed4245;
+}
+
+.btn-danger:hover {
+    background-color: #c03537;
+    border-color: #c03537;
+}
+
+.btn-success {
+    background-color: #57f287;
+    border-color: #57f287;
+    color: #000;
+}
+
+.btn-success:hover {
+    background-color: #3ba55c;
+    border-color: #3ba55c;
+    color: #000;
+}
+</style>
+
 <h2>Device Management</h2>
 <p class="text-muted mb-4">Manage your network devices for SSH automation and command execution.</p>
 

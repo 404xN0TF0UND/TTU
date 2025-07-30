@@ -1,5 +1,145 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for better readability */
+.form-control, .form-select {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border: 1px solid #2f3136;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 0.2rem rgba(88, 101, 242, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #e6e9ea;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    font-size: 12px;
+    color: #72767d;
+}
+
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-header {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #e6e9ea;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+
+.list-group-item {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.list-group-item strong {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.list-group-item .small {
+    color: #72767d;
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Improve overall readability */
+h2 {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #72767d !important;
+}
+
+.text-light {
+    color: #e6e9ea !important;
+}
+
+/* Better button styling */
+.btn-primary {
+    background-color: #5865f2;
+    border-color: #5865f2;
+}
+
+.btn-primary:hover {
+    background-color: #4752c4;
+    border-color: #4752c4;
+}
+
+.btn-secondary {
+    background-color: #72767d;
+    border-color: #72767d;
+}
+
+.btn-secondary:hover {
+    background-color: #5f6368;
+    border-color: #5f6368;
+}
+
+/* Suggestion styling */
+.suggestion-item {
+    background-color: #1e2124 !important;
+    border-color: #2f3136 !important;
+    color: #e6e9ea !important;
+}
+
+.suggestion-item:hover {
+    background-color: #2f3136 !important;
+}
+
+.suggestion-item strong {
+    color: #e6e9ea !important;
+}
+
+.suggestion-item .text-muted {
+    color: #72767d !important;
+}
+
+/* Alert styling */
+.alert {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.alert-info {
+    background-color: rgba(88, 101, 242, 0.1);
+    border-color: #5865f2;
+}
+
+.alert-success {
+    background-color: rgba(87, 242, 135, 0.1);
+    border-color: #57f287;
+}
+</style>
+
 <h2>Add New Device</h2>
 <p class="text-muted mb-4">Add a network device for SSH automation and command execution.</p>
 
