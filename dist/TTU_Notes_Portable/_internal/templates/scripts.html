@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Python Scripts</h2>
+{% if scripts %}
+    <form method="post">
+        <div class="mb-3">
+            <label for="script" class="form-label">Select a script to run:</label>
+            <select name="script" id="script" class="form-select mb-2">
+                {% for script in scripts %}
+                    <option value="{{ script }}" {% if script == selected_script %}selected{% endif %}>{{ script }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Run Script</button>
+    </form>
+    {% if output is not none %}
+        <h4 class="mt-4">Output:</h4>
+        <pre class="bg-light p-3 border rounded">{{ output }}</pre>
+    {% endif %}
+{% else %}
+    <div class="alert alert-secondary">No Python scripts found in the scripts/ directory. Add scripts to enable this feature.</div>
+{% endif %}
+<a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+{% endblock %} 

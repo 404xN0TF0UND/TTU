@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Note Templates{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Modern Clean Dark Theme */
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a1d21;
+            --bg-card: #1e2124;
+            --text-primary: #e6e9ea;
+            --text-secondary: #b9bbbe;
+            --text-muted: #72767d;
+            --border-color: #2f3136;
+            --accent-color: #5865f2;
+            --accent-hover: #4752c4;
+            --success-color: #57f287;
+            --warning-color: #fee75c;
+            --danger-color: #ed4245;
+            --info-color: #5865f2;
+        }
+
+        body { 
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1d21 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+        
+        /* Modern Navbar */
+        .navbar {
+            background: rgba(30, 33, 36, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary) !important;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(88, 101, 242, 0.1);
+        }
+        
+        /* Modern Cards */
+        .card {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Modern Buttons */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%) !important;
+            color: white !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        .btn-success {
+            background: var(--success-color) !important;
+            color: #000 !important;
+        }
+        
+        .btn-warning {
+            background: var(--warning-color) !important;
+            color: #000 !important;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color) !important;
+            color: white !important;
+        }
+        
+        .btn-info {
+            background: var(--info-color) !important;
+            color: white !important;
+        }
+        
+        /* Form Elements */
+        .form-control, .form-select {
+            background: var(--bg-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1) !important;
+        }
+        
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* List Groups */
+        .list-group-item {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px !important;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Alerts */
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .alert-info {
+            background: rgba(88, 101, 242, 0.1) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .alert-secondary {
+            background: var(--bg-secondary) !important;
+            color: var(--text-muted) !important;
+        }
+        
+        /* Badges */
+        .badge {
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .badge.bg-info {
+            background: var(--info-color) !important;
+            color: white !important;
+        }
+        
+        /* Links */
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            color: var(--accent-hover);
+        }
+        
+        /* Text Colors */
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        .text-primary {
+            color: var(--accent-color) !important;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+        
+        /* Container spacing */
+        .container {
+            max-width: 1200px;
+        }
+        
+        /* Section headers */
+        h1, h2, h3 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Icon spacing */
+        .btn i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Keyboard shortcut hints */
+        .shortcut-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 0.5rem;
+        }
+        
+        /* Help modal styling */
+        .shortcut-table {
+            font-size: 0.9rem;
+        }
+        
+        .shortcut-key {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+        
+        /* Fix dropdown menu z-index */
+        .dropdown-menu {
+            z-index: 99999 !important;
+            position: absolute !important;
+        }
+        
+        .navbar-nav .dropdown {
+            position: relative;
+        }
+        
+        /* Ensure dropdown appears above all content */
+        .navbar .dropdown-menu {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Ensure navbar has proper z-index */
+        .navbar {
+            z-index: 1000 !important;
+            position: relative !important;
+        }
+        
+        /* Lower z-index for content elements */
+        .card {
+            z-index: 1 !important;
+            position: relative !important;
+        }
+        
+        .btn {
+            z-index: 1 !important;
+            position: relative !important;
+        }
+        
+        /* Ensure dropdown items are above everything */
+        .dropdown-item {
+            color: var(--text-secondary) !important;
+            transition: all 0.2s ease;
+            position: relative !important;
+            z-index: 99999 !important;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(88, 101, 242, 0.1) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .dropdown-divider {
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Override any Bootstrap z-index issues */
+        .dropdown.show .dropdown-menu {
+            z-index: 99999 !important;
+        }
+        
+        /* Ensure container doesn't interfere */
+        .container, .container-fluid {
+            z-index: 1 !important;
+            position: relative !important;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+        <i class="fas fa-sticky-note me-2"></i>TTU Notes
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('home') }}">
+                <i class="fas fa-home me-1"></i>Home
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('view_notes') }}">
+                <i class="fas fa-list me-1"></i>Notes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('quick_notes') }}">
+                <i class="fas fa-sticky-note me-1"></i>Quick Notes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('manage_templates') }}">
+                <i class="fas fa-edit me-1"></i>Templates
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('scripts') }}">
+                <i class="fas fa-code me-1"></i>Scripts
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('manage_devices') }}">
+                <i class="fas fa-server me-1"></i>Devices
+            </a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-cog me-1"></i>Advanced
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('template_suggestions') }}">
+                    <i class="fas fa-lightbulb me-1"></i>Smart Template Suggestions
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('batch_operations') }}">
+                    <i class="fas fa-layer-group me-1"></i>Batch Operations
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('logs_dashboard') }}">
+                    <i class="fas fa-history me-1"></i>Logs Dashboard
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('command_library') }}">
+                    <i class="fas fa-book me-1"></i>Command Library
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('manage_devices') }}">
+                    <i class="fas fa-server me-1"></i>Manage Devices
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="showKeyboardShortcuts()">
+                    <i class="fas fa-keyboard me-1"></i>Keyboard Shortcuts
+                </a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link btn btn-link" onclick="showKeyboardShortcuts()" style="border: none; background: none;">
+                <i class="fas fa-question-circle me-1"></i>Help
+            </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Keyboard Shortcuts Help Modal -->
+<div class="modal fade" id="keyboardShortcutsModal" tabindex="-1" aria-labelledby="keyboardShortcutsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="keyboardShortcutsModalLabel">
+                    <i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts & Help
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Global Shortcuts -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-light">
+                        <i class="fas fa-globe me-2"></i>Global Shortcuts
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+H</kbd> <span class="text-light">Go to Home</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+N</kbd> <span class="text-light">Go to Notes</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+Q</kbd> <span class="text-light">Go to Quick Notes</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+T</kbd> <span class="text-light">Go to Templates</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+S</kbd> <span class="text-light">Go to Scripts</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-primary btn-sm">Ctrl+/</kbd> <span class="text-light">Show this help</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="border-secondary">
+                
+                <!-- Note Shortcuts -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-light">
+                        <i class="fas fa-sticky-note me-2"></i>Note Shortcuts
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-success btn-sm">Ctrl+C</kbd> <span class="text-light">Copy note content</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-success btn-sm">Ctrl+E</kbd> <span class="text-light">Edit note</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-success btn-sm">Ctrl+F</kbd> <span class="text-light">Toggle favorites</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-success btn-sm">Ctrl+D</kbd> <span class="text-light">Delete note</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <kbd class="btn btn-success btn-sm">Ctrl+V</kbd> <span class="text-light">Replace variables (Quick Notes)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="border-secondary">
+                
+                <!-- Tips -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3 text-light">
+                        <i class="fas fa-lightbulb me-2"></i>Tips
+                    </h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <span class="text-light">Use tags to organize your notes</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <span class="text-light">Quick Notes support variables like {vlan}, {port}</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <span class="text-light">Star important notes for quick access</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <span class="text-light">Use Ctrl+C to quickly copy command templates</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Global keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Don't trigger shortcuts when typing in form fields
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return;
+    }
+    
+    // Global navigation shortcuts
+    if (e.ctrlKey) {
+        switch(e.key) {
+            case 'h':
+                e.preventDefault();
+                window.location.href = "{{ url_for('home') }}";
+                break;
+            case 'n':
+                e.preventDefault();
+                window.location.href = "{{ url_for('view_notes') }}";
+                break;
+            case 'q':
+                e.preventDefault();
+                window.location.href = "{{ url_for('quick_notes') }}";
+                break;
+            case 't':
+                e.preventDefault();
+                window.location.href = "{{ url_for('manage_templates') }}";
+                break;
+            case 's':
+                e.preventDefault();
+                window.location.href = "{{ url_for('scripts') }}";
+                break;
+        }
+    }
+    
+    // Help shortcut
+    if (e.key === '?') {
+        e.preventDefault();
+        showKeyboardShortcutsModal();
+    }
+});
+
+function showKeyboardShortcutsModal() {
+    new bootstrap.Modal(document.getElementById('keyboardShortcutsModal')).show();
+}
+
+// Add keyboard shortcut hints to buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Add shortcut hints to common buttons
+    const shortcuts = {
+        'Copy Commands': 'Ctrl+C',
+        'Edit': 'Ctrl+E',
+        'Delete': 'Ctrl+D',
+        'Replace Variables': 'Ctrl+V'
+    };
+    
+    document.querySelectorAll('.btn').forEach(btn => {
+        const text = btn.textContent.trim();
+        if (shortcuts[text]) {
+            btn.innerHTML += `<span class="shortcut-hint">${shortcuts[text]}</span>`;
+        }
+    });
+    
+    // Ensure dropdown menus have highest z-index
+    document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const dropdownMenu = this.nextElementSibling;
+            if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                dropdownMenu.style.zIndex = '99999';
+                dropdownMenu.style.position = 'absolute';
+            }
+        });
+    });
+    
+    // Fix dropdown positioning on window resize
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            menu.style.zIndex = '99999';
+        });
+    });
+    
+    // Keyboard shortcuts help modal
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('keyboardShortcutsModal'));
+            modal.show();
+        }
+    });
+    
+    // Function to show keyboard shortcuts modal
+    window.showKeyboardShortcuts = function() {
+        const modal = new bootstrap.Modal(document.getElementById('keyboardShortcutsModal'));
+        modal.show();
+    };
+});
+</script>
+</body>
+</html> 

@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-bolt me-2"></i>Quick Batch Operations</h2>
+                    <p class="text-muted mb-0">Fast batch operations for common tasks</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('batch_operations') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Batch Operations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-heartbeat fa-2x mb-2"></i>
+                    <h5>Health Check</h5>
+                    <p class="mb-2">Basic system status</p>
+                    <button class="btn btn-light btn-sm" onclick="quickHealthCheck()">
+                        <i class="fas fa-play me-1"></i>Run
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-save fa-2x mb-2"></i>
+                    <h5>Backup Config</h5>
+                    <p class="mb-2">Save configurations</p>
+                    <button class="btn btn-light btn-sm" onclick="quickBackup()">
+                        <i class="fas fa-play me-1"></i>Run
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-network-wired fa-2x mb-2"></i>
+                    <h5>Interface Status</h5>
+                    <p class="mb-2">Check interfaces</p>
+                    <button class="btn btn-light btn-sm" onclick="quickInterfaceCheck()">
+                        <i class="fas fa-play me-1"></i>Run
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-eye fa-2x mb-2"></i>
+                    <h5>CFM Check</h5>
+                    <p class="mb-2">Ciena CFM status</p>
+                    <button class="btn btn-light btn-sm" onclick="quickCfmCheck()">
+                        <i class="fas fa-play me-1"></i>Run
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Type Groups -->
+    <div class="row">
+        {% for device_type, device_list in device_groups.items() %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            {% if device_type == 'ciena_os' %}
+                                <i class="fas fa-server text-primary me-1"></i>
+                            {% elif device_type == 'nokia_sros' %}
+                                <i class="fas fa-server text-warning me-1"></i>
+                            {% elif device_type == 'cisco_xr' %}
+                                <i class="fas fa-server text-success me-1"></i>
+                            {% elif device_type == 'juniper' %}
+                                <i class="fas fa-server text-info me-1"></i>
+                            {% else %}
+                                <i class="fas fa-server text-secondary me-1"></i>
+                            {% endif %}
+                            {{ device_type|title }} Devices
+                        </h6>
+                        <span class="badge bg-primary">{{ device_list|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   id="select_all_{{ device_type }}" 
+                                   onchange="toggleDeviceType('{{ device_type }}', this.checked)">
+                            <label class="form-check-label" for="select_all_{{ device_type }}">
+                                <strong>Select All {{ device_type|title }}</strong>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="device-list" style="max-height: 200px; overflow-y: auto;">
+                        {% for device_name in device_list %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input device-checkbox" type="checkbox" 
+                                   name="selected_devices" value="{{ device_name }}" 
+                                   id="quick_{{ device_type }}_{{ loop.index }}"
+                                   data-device-type="{{ device_type }}">
+                            <label class="form-check-label" for="quick_{{ device_type }}_{{ loop.index }}">
+                                <small>{{ device_name }}</small>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary btn-sm" 
+                                onclick="runQuickCommand('{{ device_type }}', 'show version')">
+                            <i class="fas fa-terminal me-1"></i>Show Version
+                        </button>
+                        <button class="btn btn-outline-success btn-sm ms-1" 
+                                onclick="runQuickCommand('{{ device_type }}', 'show interface status')">
+                            <i class="fas fa-network-wired me-1"></i>Interface Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Custom Quick Command -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Custom Quick Command</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="quickCommand" class="form-label">Command</label>
+                            <input type="text" class="form-control" id="quickCommand" 
+                                   placeholder="Enter command (e.g., show version)">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="quickDeviceType" class="form-label">Device Type</label>
+                            <select class="form-select" id="quickDeviceType">
+                                <option value="all">All Devices</option>
+                                {% for device_type in device_groups.keys() %}
+                                <option value="{{ device_type }}">{{ device_type|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" onclick="runCustomQuickCommand()">
+                                <i class="fas fa-play me-1"></i>Execute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+</style>
+
+<script>
+// Quick action functions
+function quickHealthCheck() {
+    const selectedDevices = getSelectedDevices();
+    if (selectedDevices.length === 0) {
+        alert('Please select at least one device');
+        return;
+    }
+    
+    const commands = [
+        'show version',
+        'show system',
+        'show interface status',
+        'show alarms'
+    ];
+    
+    executeQuickBatch(selectedDevices, commands, 'Health Check');
+}
+
+function quickBackup() {
+    const selectedDevices = getSelectedDevices();
+    if (selectedDevices.length === 0) {
+        alert('Please select at least one device');
+        return;
+    }
+    
+    const commands = [
+        'show running-config',
+        'show configuration'
+    ];
+    
+    executeQuickBatch(selectedDevices, commands, 'Configuration Backup');
+}
+
+function quickInterfaceCheck() {
+    const selectedDevices = getSelectedDevices();
+    if (selectedDevices.length === 0) {
+        alert('Please select at least one device');
+        return;
+    }
+    
+    const commands = [
+        'show interface status',
+        'show interface brief',
+        'show port status'
+    ];
+    
+    executeQuickBatch(selectedDevices, commands, 'Interface Status Check');
+}
+
+function quickCfmCheck() {
+    const selectedDevices = getSelectedDevices();
+    if (selectedDevices.length === 0) {
+        alert('Please select at least one device');
+        return;
+    }
+    
+    const commands = [
+        'cfm remote-mep show',
+        'cfm local-mep show',
+        'cfm mep show'
+    ];
+    
+    executeQuickBatch(selectedDevices, commands, 'CFM Check');
+}
+
+function runQuickCommand(deviceType, command) {
+    const devices = getDevicesByType(deviceType);
+    if (devices.length === 0) {
+        alert(`No ${deviceType} devices selected`);
+        return;
+    }
+    
+    executeQuickBatch(devices, [command], `Quick ${command}`);
+}
+
+function runCustomQuickCommand() {
+    const command = document.getElementById('quickCommand').value.trim();
+    const deviceType = document.getElementById('quickDeviceType').value;
+    
+    if (!command) {
+        alert('Please enter a command');
+        return;
+    }
+    
+    const devices = deviceType === 'all' ? getSelectedDevices() : getDevicesByType(deviceType);
+    if (devices.length === 0) {
+        alert('No devices selected');
+        return;
+    }
+    
+    executeQuickBatch(devices, [command], `Custom: ${command}`);
+}
+
+// Helper functions
+function getSelectedDevices() {
+    const selected = [];
+    document.querySelectorAll('.device-checkbox:checked').forEach(checkbox => {
+        selected.push(checkbox.value);
+    });
+    return selected;
+}
+
+function getDevicesByType(deviceType) {
+    const selected = [];
+    document.querySelectorAll(`.device-checkbox[data-device-type="${deviceType}"]:checked`).forEach(checkbox => {
+        selected.push(checkbox.value);
+    });
+    return selected;
+}
+
+function toggleDeviceType(deviceType, checked) {
+    document.querySelectorAll(`.device-checkbox[data-device-type="${deviceType}"]`).forEach(checkbox => {
+        checkbox.checked = checked;
+    });
+}
+
+function executeQuickBatch(devices, commands, description) {
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{{ url_for('execute_batch_operations') }}";
+    
+    // Add devices
+    devices.forEach(device => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_devices';
+        input.value = device;
+        form.appendChild(input);
+    });
+    
+    // Add commands
+    const commandsInput = document.createElement('input');
+    commandsInput.type = 'hidden';
+    commandsInput.name = 'commands';
+    commandsInput.value = commands.join('\n');
+    form.appendChild(commandsInput);
+    
+    // Add description
+    const descInput = document.createElement('input');
+    descInput.type = 'hidden';
+    descInput.name = 'description';
+    descInput.value = description;
+    form.appendChild(descInput);
+    
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey) {
+        switch(e.key) {
+            case 'h':
+                e.preventDefault();
+                quickHealthCheck();
+                break;
+            case 'b':
+                e.preventDefault();
+                quickBackup();
+                break;
+            case 'i':
+                e.preventDefault();
+                quickInterfaceCheck();
+                break;
+            case 'c':
+                e.preventDefault();
+                quickCfmCheck();
+                break;
+        }
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Use Template: {{ template.name }}</h2>
+<p class="text-muted mb-4">Customize this template and save it as a new Quick Note.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Create Quick Note from Template</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('quick_notes') }}">
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="tags" name="tags" value="{{ template.tags }}" placeholder="e.g. cisco, vlan, troubleshooting, ciena">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Command Template</label>
+                        <textarea class="form-control" id="content" name="content" rows="15" placeholder="Paste your command template here...">{{ template.content }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save as Quick Note
+                    </button>
+                    <a href="{{ url_for('note_templates') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Template Preview</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Template:</strong> {{ template.name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Tags:</strong>
+                    {% for tag in template.tags.split(', ') %}
+                        <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    <strong>Variables:</strong>
+                    <div id="variablesList">
+                        <!-- Variables will be populated here -->
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong class="text-light">Usage Tips:</strong>
+                    <ul class="list-unstyled small text-light">
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Edit the template to fit your specific needs</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Add or modify variables like {vlan}, {port}</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Update tags for better organization</li>
+                        <li><i class="fas fa-lightbulb text-warning me-1"></i>Save as a Quick Note for easy access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Available Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('use_note_template', template_id='cisco_vlan_config') }}" class="list-group-item list-group-item-action">
+                        <strong>Cisco VLAN Configuration</strong>
+                        <div class="small text-muted">VLAN setup and port configuration</div>
+                    </a>
+                    <a href="{{ url_for('use_note_template', template_id='cisco_interface_troubleshooting') }}" class="list-group-item list-group-item-action">
+                        <strong>Cisco Interface Troubleshooting</strong>
+                        <div class="small text-muted">Interface status and diagnostics</div>
+                    </a>
+                    <a href="{{ url_for('use_note_template', template_id='ciena_light_levels') }}" class="list-group-item list-group-item-action">
+                        <strong>Ciena Light Level Check</strong>
+                        <div class="small text-muted">Optical interface monitoring</div>
+                    </a>
+                    <a href="{{ url_for('use_note_template', template_id='juniper_interface_config') }}" class="list-group-item list-group-item-action">
+                        <strong>Juniper Interface Configuration</strong>
+                        <div class="small text-muted">Juniper switch configuration</div>
+                    </a>
+                    <a href="{{ url_for('use_note_template', template_id='nokia_interface_status') }}" class="list-group-item list-group-item-action">
+                        <strong>Nokia Interface Status</strong>
+                        <div class="small text-muted">Nokia port monitoring</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Extract and display variables from the template
+document.addEventListener('DOMContentLoaded', function() {
+    const content = `{{ template.content }}`;
+    const variables = extractVariables(content);
+    const variablesList = document.getElementById('variablesList');
+    
+    if (variables.length > 0) {
+        variables.forEach(variable => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-warning text-dark me-1 mb-1';
+            badge.textContent = `{${variable}}`;
+            variablesList.appendChild(badge);
+        });
+    } else {
+        variablesList.innerHTML = '<span class="text-muted">No variables found</span>';
+    }
+});
+
+function extractVariables(text) {
+    const regex = /\{([^}]+)\}/g;
+    const variables = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        if (!variables.includes(match[1])) {
+            variables.push(match[1]);
+        }
+    }
+    return variables;
+}
+
+// Auto-save functionality
+let autoSaveTimer;
+const contentTextarea = document.getElementById('content');
+const tagsInput = document.getElementById('tags');
+
+function setupAutoSave() {
+    [contentTextarea, tagsInput].forEach(element => {
+        if (element) {
+            element.addEventListener('input', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    localStorage.setItem('templateDraft', JSON.stringify({
+                        content: contentTextarea.value,
+                        tags: tagsInput.value,
+                        template_id: '{{ template_id }}',
+                        timestamp: Date.now()
+                    }));
+                }, 2000);
+            });
+        }
+    });
+}
+
+// Restore draft on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const draft = localStorage.getItem('templateDraft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        
+        if (data.template_id === '{{ template_id }}' && now - data.timestamp < oneHour) {
+            if (confirm('Found a draft for this template. Would you like to restore it?')) {
+                contentTextarea.value = data.content || contentTextarea.value;
+                tagsInput.value = data.tags || tagsInput.value;
+            } else {
+                localStorage.removeItem('templateDraft');
+            }
+        } else {
+            localStorage.removeItem('templateDraft');
+        }
+    }
+    
+    setupAutoSave();
+});
+</script>
+{% endblock %} 

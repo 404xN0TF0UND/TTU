@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-layer-group me-2"></i>Batch Operations</h2>
+                    <p class="text-muted mb-0">Execute commands across multiple devices simultaneously</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('batch_templates') }}" class="btn btn-info">
+                        <i class="fas fa-file-code me-1"></i>Use Templates
+                    </a>
+                    <a href="{{ url_for('quick_batch') }}" class="btn btn-warning ms-2">
+                        <i class="fas fa-bolt me-1"></i>Quick Batch
+                    </a>
+                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Devices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-server fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ devices|length }}</h4>
+                    <small>Available Devices</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-terminal fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ command_library|length }}</h4>
+                    <small>Command Categories</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h4 class="mb-0">Real-time</h4>
+                    <small>Progress Tracking</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-2x mb-2"></i>
+                    <h4 class="mb-0">Auto-save</h4>
+                    <small>Results as Notes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" action="{{ url_for('execute_batch_operations') }}">
+        <div class="row">
+            <!-- Device Selection -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-server me-2"></i>Select Devices</h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllDevices()">
+                                    <i class="fas fa-check-square me-1"></i>All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+                                    <i class="fas fa-square me-1"></i>None
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if devices %}
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="deviceSearch" 
+                                       placeholder="Search devices..." onkeyup="filterDevices()">
+                            </div>
+                            <div class="device-list" style="max-height: 400px; overflow-y: auto;">
+                                {% for device_name, device_info in devices.items() %}
+                                <div class="device-item mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input device-checkbox" type="checkbox" 
+                                               name="selected_devices" value="{{ device_name }}" 
+                                               id="device_{{ loop.index }}">
+                                        <label class="form-check-label" for="device_{{ loop.index }}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ device_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        {% if device_info.device_type == 'ciena_os' %}
+                                                            <span class="badge bg-primary">Ciena OS</span>
+                                                        {% elif device_info.device_type == 'nokia_sros' %}
+                                                            <span class="badge bg-warning">Nokia SROS</span>
+                                                        {% elif device_info.device_type == 'cisco_xr' %}
+                                                            <span class="badge bg-success">Cisco XR</span>
+                                                        {% elif device_info.device_type == 'juniper' %}
+                                                            <span class="badge bg-info">Juniper</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary">{{ device_info.device_type|title }}</span>
+                                                        {% endif %}
+                                                        {{ device_info.ip_address }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <span id="selectedCount">0</span> of {{ devices|length }} devices selected
+                                </small>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-server fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Devices Available</h5>
+                                <p class="text-muted">Add devices to your device list first.</p>
+                                <a href="{{ url_for('add_device') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Add Device
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Input -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Commands</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="description" name="description" 
+                                   placeholder="Brief description of this batch operation">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="commands" class="form-label">Commands (one per line)</label>
+                            <textarea class="form-control" id="commands" name="commands" rows="8" 
+                                      placeholder="Enter commands here, one per line...&#10;&#10;Example:&#10;show version&#10;show interface status&#10;show alarms" required></textarea>
+                        </div>
+                        
+                        <!-- Command Library Quick Insert -->
+                        <div class="mb-3">
+                            <label class="form-label">Quick Insert from Command Library</label>
+                            <div class="row">
+                                {% for vendor, categories in command_library.items() %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown">
+                                            {{ vendor|title }}
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            {% for category, commands in categories.items() %}
+                                            <li><h6 class="dropdown-header">{{ category }}</h6></li>
+                                            {% for command in commands[:5] %}
+                                            <li><a class="dropdown-item" href="#" onclick="insertCommand('{{ command }}')">{{ command }}</a></li>
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Credentials -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           placeholder="Leave empty for RADIUS prompt">
+                                    <div class="form-text">Username for SSH connection (will prompt for password)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="Leave empty for secure prompt">
+                                    <div class="form-text">Password for SSH connection (recommended to leave empty)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Execute Button -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary" id="executeBtn" disabled>
+                                    <i class="fas fa-play me-1"></i>Execute Batch Operation
+                                </button>
+                                <small class="text-muted ms-2">Select devices and enter commands to enable</small>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearCommands()">
+                                    <i class="fas fa-eraser me-1"></i>Clear Commands
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Usage Tips -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Usage Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-light">Best Practices:</h6>
+                            <ul class="list-unstyled text-light">
+                                <li><i class="fas fa-check text-success me-2"></i>Start with simple commands like 'show version'</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Use device-specific commands for better results</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Test on a few devices first before large batches</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Results are automatically saved as notes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-light">Keyboard Shortcuts:</h6>
+                            <ul class="list-unstyled text-light">
+                                <li><i class="fas fa-keyboard text-info me-2"></i><kbd>Ctrl+A</kbd> Select all devices</li>
+                                <li><i class="fas fa-keyboard text-info me-2"></i><kbd>Ctrl+Enter</kbd> Execute batch operation</li>
+                                <li><i class="fas fa-keyboard text-info me-2"></i><kbd>Ctrl+E</kbd> Clear commands</li>
+                                <li><i class="fas fa-keyboard text-info me-2"></i><kbd>Ctrl+F</kbd> Search devices</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Device selection functionality
+function selectAllDevices() {
+    document.querySelectorAll('.device-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    updateSelectedCount();
+    updateExecuteButton();
+}
+
+function clearSelection() {
+    document.querySelectorAll('.device-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateSelectedCount();
+    updateExecuteButton();
+}
+
+function updateSelectedCount() {
+    const checkedBoxes = document.querySelectorAll('.device-checkbox:checked');
+    document.getElementById('selectedCount').textContent = checkedBoxes.length;
+}
+
+function updateExecuteButton() {
+    const checkedBoxes = document.querySelectorAll('.device-checkbox:checked');
+    const commands = document.getElementById('commands').value.trim();
+    const executeBtn = document.getElementById('executeBtn');
+    
+    executeBtn.disabled = checkedBoxes.length === 0 || commands.length === 0;
+}
+
+// Device search functionality
+function filterDevices() {
+    const searchTerm = document.getElementById('deviceSearch').value.toLowerCase();
+    const deviceItems = document.querySelectorAll('.device-item');
+    
+    deviceItems.forEach(item => {
+        const deviceName = item.querySelector('strong').textContent.toLowerCase();
+        if (deviceName.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Command insertion
+function insertCommand(command) {
+    const textarea = document.getElementById('commands');
+    const currentValue = textarea.value;
+    const newValue = currentValue + (currentValue ? '\n' : '') + command;
+    textarea.value = newValue;
+    updateExecuteButton();
+}
+
+function clearCommands() {
+    document.getElementById('commands').value = '';
+    updateExecuteButton();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Device checkbox listeners
+    document.querySelectorAll('.device-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectedCount();
+            updateExecuteButton();
+        });
+    });
+    
+    // Commands textarea listener
+    document.getElementById('commands').addEventListener('input', updateExecuteButton);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey) {
+            switch(e.key) {
+                case 'a':
+                    e.preventDefault();
+                    selectAllDevices();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (!document.getElementById('executeBtn').disabled) {
+                        document.querySelector('form').submit();
+                    }
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    clearCommands();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    document.getElementById('deviceSearch').focus();
+                    break;
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

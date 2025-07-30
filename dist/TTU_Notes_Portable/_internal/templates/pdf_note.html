@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Note PDF - {{ filename }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        h2 { border-bottom: 1px solid #ccc; padding-bottom: 0.5em; }
+        .note-field { margin-bottom: 1em; }
+        .label { font-weight: bold; }
+        pre { background: #f8f8f8; padding: 1em; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2>Note: {{ filename }}</h2>
+    <pre>{{ content }}</pre>
+</body>
+</html> 

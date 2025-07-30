@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-file-code me-2"></i>Batch Operation Templates</h2>
+                    <p class="text-muted mb-0">Predefined command sets for common batch operations</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('batch_operations') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Batch Operations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Grid -->
+    <div class="row">
+        {% for template_id, template in templates.items() %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 template-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            {% if template_id == 'health_check' %}
+                                <i class="fas fa-heartbeat text-success me-1"></i>
+                            {% elif template_id == 'backup_config' %}
+                                <i class="fas fa-save text-primary me-1"></i>
+                            {% elif template_id == 'interface_status' %}
+                                <i class="fas fa-network-wired text-info me-1"></i>
+                            {% elif template_id == 'ciena_cfm' %}
+                                <i class="fas fa-eye text-warning me-1"></i>
+                            {% elif template_id == 'nokia_admin' %}
+                                <i class="fas fa-user-shield text-danger me-1"></i>
+                            {% else %}
+                                <i class="fas fa-cog text-secondary me-1"></i>
+                            {% endif %}
+                            {{ template.name }}
+                        </h6>
+                        <span class="badge bg-{{ 'success' if template.devices == 'all' else 'warning' }}">
+                            {{ template.devices|title }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted mb-3">{{ template.description }}</p>
+                    
+                    <div class="mb-3">
+                        <strong>Commands:</strong>
+                        <div class="mt-2">
+                            {% for command in template.commands %}
+                            <code class="d-block bg-light p-2 mb-1 rounded">{{ command }}</code>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-terminal me-1"></i>
+                            {{ template.commands|length }} commands
+                        </small>
+                        <a href="{{ url_for('use_batch_template', template_id=template_id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-play me-1"></i>Use Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Custom Template Creation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Create Custom Template</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Don't see a template that fits your needs? Create a custom batch operation template.
+                    </p>
+                    <a href="{{ url_for('batch_operations') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>Create Custom Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Tips -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Template Usage Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-light">Template Types:</h6>
+                            <ul class="list-unstyled text-light">
+                                <li><i class="fas fa-heartbeat text-success me-2"></i><strong>Health Check:</strong> Basic system status and health</li>
+                                <li><i class="fas fa-save text-primary me-2"></i><strong>Backup Config:</strong> Configuration backup commands</li>
+                                <li><i class="fas fa-network-wired text-info me-2"></i><strong>Interface Status:</strong> Network interface monitoring</li>
+                                <li><i class="fas fa-eye text-warning me-2"></i><strong>Ciena CFM:</strong> CFM monitoring for Ciena devices</li>
+                                <li><i class="fas fa-user-shield text-danger me-2"></i><strong>Nokia Admin:</strong> Admin-level Nokia commands</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-light">Best Practices:</h6>
+                            <ul class="list-unstyled text-light">
+                                <li><i class="fas fa-check text-success me-2"></i>Test templates on a few devices first</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Modify commands as needed for your environment</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Use device-specific templates for better results</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Results are automatically saved as notes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.template-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.template-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.template-card .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+</style>
+
+<script>
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('batch_operations') }}";
+    }
+});
+</script>
+
+{% endblock %}

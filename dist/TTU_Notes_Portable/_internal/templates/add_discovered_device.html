@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-plus me-2"></i>Add Discovered Device</h2>
+                    <p class="text-muted mb-0">Add {{ device.name }} to your device list</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('device_discovery') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Discovery
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Information Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>Device Information from Logs
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Device Name:</strong> {{ device.name }}</p>
+                            <p><strong>Device Type:</strong> 
+                                {% if device.device_type == 'ciena_os' %}
+                                    <span class="badge bg-primary">Ciena OS</span>
+                                {% elif device.device_type == 'nokia_sros' %}
+                                    <span class="badge bg-warning">Nokia SROS</span>
+                                {% elif device.device_type == 'cisco_xr' %}
+                                    <span class="badge bg-success">Cisco XR</span>
+                                {% elif device.device_type == 'juniper' %}
+                                    <span class="badge bg-info">Juniper</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ device.device_type|title }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Log Files:</strong> {{ device.file_count }}</p>
+                            <p><strong>Last Seen:</strong> {{ device.last_seen[:10] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Device Form -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Device Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('add_device') }}">
+                        <div class="mb-3">
+                            <label for="device_name" class="form-label">Device Name</label>
+                            <input type="text" class="form-control" id="device_name" name="device_name" 
+                                   value="{{ device.name }}" required>
+                            <div class="form-text">Device name from logs</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ip_address" class="form-label">IP Address</label>
+                            <input type="text" class="form-control" id="ip_address" name="ip_address" 
+                                   value="{{ device.ip_address }}" required>
+                            <div class="form-text">IP address or hostname for SSH connection</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="device_type" class="form-label">Device Type</label>
+                            <select class="form-select" id="device_type" name="device_type" required>
+                                <option value="ciena_os" {% if device.device_type == 'ciena_os' %}selected{% endif %}>Ciena OS</option>
+                                <option value="nokia_sros" {% if device.device_type == 'nokia_sros' %}selected{% endif %}>Nokia SROS</option>
+                                <option value="cisco_xr" {% if device.device_type == 'cisco_xr' %}selected{% endif %}>Cisco XR</option>
+                                <option value="juniper" {% if device.device_type == 'juniper' %}selected{% endif %}>Juniper</option>
+                                <option value="cisco_ios" {% if device.device_type == 'cisco_ios' %}selected{% endif %}>Cisco IOS</option>
+                                <option value="cisco_nxos" {% if device.device_type == 'cisco_nxos' %}selected{% endif %}>Cisco NX-OS</option>
+                                <option value="arista_eos" {% if device.device_type == 'arista_eos' %}selected{% endif %}>Arista EOS</option>
+                                <option value="unknown" {% if device.device_type == 'unknown' %}selected{% endif %}>Unknown</option>
+                            </select>
+                            <div class="form-text">Auto-detected from device name</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Default Username</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   value="{{ device.username }}" placeholder="Leave empty for RADIUS prompt">
+                            <div class="form-text">Optional default username (will still prompt for credentials)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ device.description }}</textarea>
+                            <div class="form-text">Optional description for this device</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add Device
+                            </button>
+                            <a href="{{ url_for('device_discovery') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Notes</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Uses RADIUS authentication</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Credentials prompted for each session</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>No passwords stored locally</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>Only device info is stored</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('execute_commands') }}?device={{ device.name }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-terminal me-1"></i>Execute Commands
+                        </a>
+                        <a href="{{ url_for('template_suggestions') }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-lightbulb me-1"></i>Get Template Suggestions
+                        </a>
+                        <a href="{{ url_for('logs_search') }}?device_name={{ device.name }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-search me-1"></i>View Device Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Store device data for potential use
+const deviceData = {{ device_data_json|tojson }};
+localStorage.setItem('deviceFromDiscovery', JSON.stringify(deviceData));
+
+// Auto-focus on IP address field for easy editing
+document.getElementById('ip_address').focus();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('form').submit();
+    }
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('device_discovery') }}";
+    }
+});
+</script>
+
+{% endblock %}

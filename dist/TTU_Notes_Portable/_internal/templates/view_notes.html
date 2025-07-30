@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Saved Notes</h2>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <input type="text" name="search" class="form-control" placeholder="Search by filename..." value="{{ search }}">
+    </div>
+    <div class="col-md-2">
+        <input type="text" name="content_search" class="form-control" placeholder="Search in note content..." value="{{ content_search }}">
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+    </div>
+    <div class="col-md-2">
+        <select name="tag" class="form-select">
+            <option value="">All Tags</option>
+            {% for tag in all_tags %}
+                <option value="{{ tag }}" {% if tag_filter == tag.lower() %}selected{% endif %}>{{ tag }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="type" class="form-select">
+            <option value="">All Types</option>
+            <option value="template_note" {% if note_type_filter == 'template_note' %}selected{% endif %}>Template Notes</option>
+            <option value="quick_note" {% if note_type_filter == 'quick_note' %}selected{% endif %}>Quick Notes</option>
+        </select>
+    </div>
+    <div class="col-md-12">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('view_notes') }}" class="btn btn-secondary ms-2">Clear</a>
+        <a href="{{ url_for('view_notes') }}?favorites=true" class="btn btn-warning ms-2">
+            <i class="fas fa-star me-1"></i>Favorites
+        </a>
+        <a href="{{ url_for('note_templates') }}" class="btn btn-info ms-2">
+            <i class="fas fa-file-alt me-1"></i>Templates
+        </a>
+    </div>
+</form>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-light">{{ notes|length }}</h5>
+                <p class="card-text text-light">Total Notes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-light">{{ notes|selectattr('favorite', 'equalto', true)|list|length }}</h5>
+                <p class="card-text text-light">Favorites</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-light">{{ notes|selectattr('type', 'equalto', 'quick_note')|list|length }}</h5>
+                <p class="card-text text-light">Quick Notes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-light">{{ notes|selectattr('type', 'equalto', 'template_note')|list|length }}</h5>
+                <p class="card-text text-light">Template Notes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Operations -->
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 text-light">Bulk Operations</h6>
+        <div>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">Select All</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">Deselect All</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <form method="post" action="{{ url_for('bulk_delete_notes') }}" id="bulkDeleteForm">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirmBulkDelete()">
+                        <i class="fas fa-trash me-1"></i>Delete Selected
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{{ url_for('export_all_notes') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-download me-1"></i>Export All Notes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="notesForm">
+    <ul class="list-group mb-4">
+        {% for note in notes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center">
+                        <input type="checkbox" class="form-check-input me-3" name="selected_notes" value="{{ note.filename }}">
+                        {% if note.favorite %}
+                            <i class="fas fa-star text-warning me-2" title="Favorite"></i>
+                        {% endif %}
+                        <a href="{{ url_for('view_note', filename=note.filename) if note.type == 'template_note' else url_for('view_quick_note', filename=note.filename) }}" class="text-decoration-none">
+                            {{ note.filename }}
+                        </a>
+                        <span class="badge bg-secondary ms-2">{{ note.type.replace('_', ' ').title() }}</span>
+                    </div>
+                                            <div class="small text-light">Created: {{ note.created or 'N/A' }} | Modified: {{ note.modified or 'N/A' }}</div>
+                    {% if note.tags %}
+                        <div class="mt-1">
+                            {% for tag in note.tags %}
+                                <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center">
+                    <form method="post" action="{{ url_for('toggle_favorite', filename=note.filename) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-warning me-2" title="{{ 'Remove from favorites' if note.favorite else 'Add to favorites' }}">
+                            <i class="fas fa-star{{ '-fill' if note.favorite else '' }}"></i>
+                        </button>
+                    </form>
+                    <form method="post" action="{{ url_for('delete_note', filename=note.filename) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this note?');">Delete</button>
+                    </form>
+                </div>
+            </li>
+        {% else %}
+            <li class="list-group-item">No notes found.</li>
+        {% endfor %}
+    </ul>
+</form>
+<a href="/" class="btn btn-secondary">Back to Home</a>
+
+<script>
+function selectAll() {
+    document.querySelectorAll('input[name="selected_notes"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function deselectAll() {
+    document.querySelectorAll('input[name="selected_notes"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+function confirmBulkDelete() {
+    const selectedNotes = document.querySelectorAll('input[name="selected_notes"]:checked');
+    if (selectedNotes.length === 0) {
+        alert('Please select at least one note to delete.');
+        return false;
+    }
+    return confirm(`Are you sure you want to delete ${selectedNotes.length} note(s)?`);
+}
+
+// Keyboard shortcuts for bulk operations
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'a') {
+        e.preventDefault();
+        selectAll();
+    }
+    if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        deselectAll();
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Command Execution Results</h2>
+<p class="text-muted mb-4">Results from executing commands on {{ device_name }}</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endfor %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Execution Results</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="copyAllResults()">
+                    <i class="fas fa-copy me-1"></i>Copy All
+                </button>
+            </div>
+            <div class="card-body">
+                {% for result in results %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">
+                                <span class="badge {% if result.success %}bg-success{% else %}bg-danger{% endif %} me-2">
+                                    {% if result.success %}✓{% else %}✗{% endif %}
+                                </span>
+                                Command: <code>{{ result.command }}</code>
+                            </h6>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyResult('{{ loop.index }}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="bg-dark text-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                            <pre id="result-{{ loop.index }}" style="margin: 0; white-space: pre-wrap;">{{ result.output }}</pre>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Device:</strong> {{ device_name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Commands Executed:</strong> {{ results|length }}
+                </div>
+                <div class="mb-3">
+                    <strong>Successful:</strong> 
+                    <span class="badge bg-success">{{ results|selectattr('success', 'equalto', true)|list|length }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Failed:</strong> 
+                    <span class="badge bg-danger">{{ results|selectattr('success', 'equalto', false)|list|length }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Timestamp:</strong> {{ timestamp }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('execute_commands') }}?device={{ device_name }}" class="btn btn-primary">
+                        <i class="fas fa-redo me-1"></i>Execute More Commands
+                    </a>
+                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary">
+                        <i class="fas fa-server me-1"></i>Manage Devices
+                    </a>
+                    <a href="{{ url_for('view_notes') }}" class="btn btn-info">
+                        <i class="fas fa-list me-1"></i>View All Notes
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Commands</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickCommand('show version')">
+                        <strong>Show Version</strong>
+                        <div class="small text-muted">Display device version information</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickCommand('show interfaces')">
+                        <strong>Show Interfaces</strong>
+                        <div class="small text-muted">Display interface status</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickCommand('show alarms')">
+                        <strong>Show Alarms</strong>
+                        <div class="small text-muted">Display active alarms</div>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="loadQuickCommand('show ip route')">
+                        <strong>Show IP Route</strong>
+                        <div class="small text-muted">Display routing table</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('execute_commands') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Execute
+    </a>
+</div>
+
+<script>
+// Copy individual result
+function copyResult(resultId) {
+    const resultElement = document.getElementById(`result-${resultId}`);
+    const text = resultElement.textContent;
+    
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Copy all results
+function copyAllResults() {
+    let allText = `# Command Execution Results - ${deviceName}\n`;
+    allText += `# Date: ${new Date().toISOString()}\n`;
+    allText += `# Device: ${deviceName}\n\n`;
+    
+    const results = document.querySelectorAll('[id^="result-"]');
+    results.forEach((result, index) => {
+        const command = result.closest('.mb-4').querySelector('code').textContent;
+        allText += `## Command: ${command}\n`;
+        allText += `${result.textContent}\n\n`;
+    });
+    
+    navigator.clipboard.writeText(allText).then(function() {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    });
+}
+
+// Load quick command
+function loadQuickCommand(command) {
+    window.location.href = `{{ url_for('execute_commands') }}?device={{ device_name }}&command=${encodeURIComponent(command)}`;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        copyAllResults();
+    }
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('execute_commands') }}?device={{ device_name }}";
+    }
+});
+
+// Auto-scroll to failed commands
+document.addEventListener('DOMContentLoaded', function() {
+    const failedResults = document.querySelectorAll('.badge.bg-danger');
+    if (failedResults.length > 0) {
+        failedResults[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+
+<script>
+// Set device name for copy functions
+const deviceName = "{{ device_name }}";
+</script>
+{% endblock %} 

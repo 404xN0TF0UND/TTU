@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Quick Note: {{ filename }}</h2>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Edit Quick Note</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="tags" class="form-label">Tags (comma separated)</label>
+                <input type="text" class="form-control" id="tags" name="tags" value="{{ metadata.tags | join(', ') }}" placeholder="e.g. cisco, vlan, troubleshooting, ciena">
+            </div>
+            <div class="mb-3">
+                <label for="content" class="form-label">Command Template</label>
+                <textarea class="form-control" id="content" name="content" rows="15" placeholder="Paste your command template here...">{{ content }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Update Quick Note
+            </button>
+            <a href="{{ url_for('view_quick_note', filename=filename) }}" class="btn btn-secondary ms-2">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %} 

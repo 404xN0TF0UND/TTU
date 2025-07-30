@@ -13,48 +13,68 @@ from pathlib import Path
 def install_pyinstaller():
     """Install PyInstaller if not already installed"""
     try:
-        import PyInstaller
+        import PyInstaller  # type: ignore
         print("✅ PyInstaller already installed")
+        return True
     except ImportError:
         print("📦 Installing PyInstaller...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
-        print("✅ PyInstaller installed successfully")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
+            print("✅ PyInstaller installed successfully")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to install PyInstaller: {e}")
+            print("💡 Please install PyInstaller manually:")
+            print("   pip install pyinstaller")
+            return False
 
 def create_portable_package():
     """Create a portable package"""
     print("📦 Creating portable TTU Notes package...")
     
+    # Verify PyInstaller is available
+    try:
+        import PyInstaller  # type: ignore
+    except ImportError:
+        print("❌ PyInstaller not available. Please install it first:")
+        print("   pip install pyinstaller")
+        return False
+    
     # PyInstaller command for portable package
     cmd = [
-        "pyinstaller",
+        sys.executable, "-m", "PyInstaller",
         "--onedir",                     # Directory mode (portable)
         "--windowed",                   # No console window
         "--name=TTU_Notes_Portable",    # Package name
-        "--icon=static/favicon.ico",    # Icon (if available)
         "--add-data=templates;templates",  # Include templates
-        "--add-data=static;static",     # Include static files
+        "--add-data=saved_notes;saved_notes",  # Include saved notes
+        "--add-data=command_library.json;.",  # Include command library
+        "--add-data=logs_index.json;.",  # Include logs index
         "--hidden-import=netmiko",
         "--hidden-import=jinja2",
         "--hidden-import=flask",
+        "--hidden-import=paramiko",
+        "--hidden-import=cryptography",
         "app.py"
     ]
     
     # Run PyInstaller
-    subprocess.check_call(cmd)
-    
-    # Create launcher script
-    launcher_content = """@echo off
+    try:
+        subprocess.check_call(cmd)
+        
+        # Create launcher script
+        launcher_content = """@echo off
 echo Starting TTU Notes...
 cd /d "%~dp0"
 TTU_Notes_Portable.exe
 """
-    
-    launcher_path = Path("dist/TTU_Notes_Portable/Start_TTU_Notes.bat")
-    with open(launcher_path, "w") as f:
-        f.write(launcher_content)
-    
-    # Create README for portable package
-    readme_content = """# TTU Notes - Portable Version
+        
+        launcher_path = Path("dist/TTU_Notes_Portable/Start_TTU_Notes.bat")
+        with open(launcher_path, "w") as f:
+            f.write(launcher_content)
+        
+        # Create README for portable package
+        readme_content = """# TTU Notes - Portable Version
 
 ## 🚀 Quick Start
 1. Double-click "Start_TTU_Notes.bat" to launch the application
@@ -83,13 +103,17 @@ You can copy this entire folder to another computer to transfer your data.
 ---
 Built for Network Engineers, by Network Engineers 🛠️
 """
-    
-    readme_path = Path("dist/TTU_Notes_Portable/README.txt")
-    with open(readme_path, "w") as f:
-        f.write(readme_content)
-    
-    print("✅ Portable package created successfully!")
-    print("📁 Location: dist/TTU_Notes_Portable/")
+        
+        readme_path = Path("dist/TTU_Notes_Portable/README.txt")
+        with open(readme_path, "w") as f:
+            f.write(readme_content)
+        
+        print("✅ Portable package created successfully!")
+        print("📁 Location: dist/TTU_Notes_Portable/")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to create portable package: {e}")
+        return False
 
 def create_zip_package():
     """Create a zip file for easy distribution"""
@@ -113,10 +137,16 @@ def main():
     print("=" * 45)
     
     # Install PyInstaller
-    install_pyinstaller()
+    if not install_pyinstaller():
+        print("\n❌ Cannot proceed without PyInstaller")
+        print("💡 Please install it manually and try again:")
+        print("   pip install pyinstaller")
+        return
     
     # Create portable package
-    create_portable_package()
+    if not create_portable_package():
+        print("\n❌ Failed to create portable package")
+        return
     
     # Create zip package
     create_zip_package()

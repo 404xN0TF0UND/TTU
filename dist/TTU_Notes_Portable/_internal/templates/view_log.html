@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-file-alt me-2"></i>View Log</h2>
+                    <p class="text-muted mb-0">{{ metadata.filename }}</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('{{ metadata.device_name }}')">
+                        <i class="fas fa-copy me-1"></i>Copy Device Name
+                    </button>
+                    <a href="{{ url_for('logs_search') }}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Metadata -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Log Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Device:</strong><br>
+                            <span class="text-primary">{{ metadata.device_name }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Timestamp:</strong><br>
+                            <span class="text-secondary">{{ metadata.timestamp }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Size:</strong><br>
+                            <span class="text-info">{{ (metadata.size / 1024)|round(1) }} KB</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Lines:</strong><br>
+                            <span class="text-success">{{ metadata.lines }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-code me-2"></i>Log Content</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="toggleWrap()">
+                                <i class="fas fa-text-width me-1"></i>Toggle Wrap
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="copyToClipboard(getLogContent())">
+                                <i class="fas fa-copy me-1"></i>Copy All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <pre id="log-content" class="log-content mb-0">{{ content }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('logs_search', device_name=metadata.device_name) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-search me-1"></i>Search This Device
+                        </a>
+                        <a href="{{ url_for('logs_search', q='po sh') }}" 
+                           class="btn btn-outline-info">
+                            <i class="fas fa-terminal me-1"></i>Search "po sh" Commands
+                        </a>
+                        <a href="{{ url_for('logs_search', q='cfm') }}" 
+                           class="btn btn-outline-warning">
+                            <i class="fas fa-network-wired me-1"></i>Search CFM Commands
+                        </a>
+                        <a href="{{ url_for('logs_search', q='admin show') }}" 
+                           class="btn btn-outline-danger">
+                            <i class="fas fa-cog me-1"></i>Search Admin Commands
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="addToDevices()">
+                            <i class="fas fa-plus me-1"></i>Add to Device List
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.log-content {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.log-content.nowrap {
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* Syntax highlighting for common patterns */
+.log-content .timestamp {
+    color: #569cd6;
+}
+
+.log-content .device-prompt {
+    color: #4ec9b0;
+}
+
+.log-content .command {
+    color: #dcdcaa;
+}
+
+.log-content .output {
+    color: #d4d4d4;
+}
+
+.log-content .error {
+    color: #f44747;
+}
+
+.log-content .warning {
+    color: #ffcc00;
+}
+</style>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show a temporary success message
+        const button = event.target.closest('button');
+        if (button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        }
+    });
+}
+
+function getLogContent() {
+    return document.getElementById('log-content').textContent;
+}
+
+function toggleWrap() {
+    const logContent = document.getElementById('log-content');
+    logContent.classList.toggle('nowrap');
+}
+
+function addToDevices() {
+    const deviceName = '{{ metadata.device_name }}';
+    
+    // Determine device type based on name
+    let deviceType = 'unknown';
+    if (deviceName.startsWith('ce-')) {
+        deviceType = 'ciena_os';
+    } else if (deviceName.startsWith('soag') || deviceName.startsWith('ceg')) {
+        deviceType = 'nokia_sros';
+    }
+    
+    // Create device data
+    const deviceData = {
+        name: deviceName,
+        ip_address: deviceName, // Use name as IP for now
+        device_type: deviceType,
+        username: ''
+    };
+    
+    // Store in localStorage for the add device page
+    localStorage.setItem('deviceFromLog', JSON.stringify(deviceData));
+    
+    // Redirect to add device page
+    window.location.href = "{{ url_for('add_device') }}";
+}
+
+// Apply syntax highlighting
+document.addEventListener('DOMContentLoaded', function() {
+    const logContent = document.getElementById('log-content');
+    let content = logContent.innerHTML;
+    
+    // Highlight timestamps (HH:MM:SS format)
+    content = content.replace(/(\d{2}:\d{2}:\d{2})/g, '<span class="timestamp">$1</span>');
+    
+    // Highlight device prompts (ending with > or #)
+    content = content.replace(/([^>#]*[>#])/g, '<span class="device-prompt">$1</span>');
+    
+    // Highlight common commands
+    const commands = ['po sh', 'cfm', 'admin show', 'show', 'configure'];
+    commands.forEach(cmd => {
+        const regex = new RegExp(`(${cmd.replace(/\s+/g, '\\s+')})`, 'gi');
+        content = content.replace(regex, '<span class="command">$1</span>');
+    });
+    
+    // Highlight errors and warnings
+    content = content.replace(/(ERROR|FAILED|DOWN)/gi, '<span class="error">$1</span>');
+    content = content.replace(/(WARNING|WARN)/gi, '<span class="warning">$1</span>');
+    
+    logContent.innerHTML = content;
+});
+</script>
+
+{% endblock %}

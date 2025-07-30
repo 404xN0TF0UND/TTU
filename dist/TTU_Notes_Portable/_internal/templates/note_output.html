@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Generated Note</h2>
+<div class="card p-3 mb-3">
+    {% if form_data %}
+        <ul class="list-group mb-3">
+        {% for key, value in form_data.items() %}
+            <li class="list-group-item"><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}</li>
+        {% endfor %}
+        </ul>
+        <div class="mb-3">
+            <label for="noteText" class="form-label">Note Text</label>
+            <textarea id="noteText" class="form-control" rows="8" readonly>{{ note_content }}</textarea>
+        </div>
+        <button class="btn btn-outline-secondary mb-2" onclick="copyNote()">Copy to Clipboard</button>
+        {% if filename %}
+            <a href="{{ url_for('download_note', filename=filename) }}" class="btn btn-primary mb-2">Download Note</a>
+            <a href="{{ url_for('email_note', filename=filename) }}" class="btn btn-info mb-2 ms-2">Email Note</a>
+        {% endif %}
+    {% else %}
+        <p>No data submitted.</p>
+    {% endif %}
+</div>
+<a href="/" class="btn btn-secondary mt-3">Back to Templates</a>
+<script>
+function copyNote() {
+    var noteText = document.getElementById('noteText');
+    noteText.select();
+    noteText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    alert('Note copied to clipboard!');
+}
+</script>
+{% endblock %} 

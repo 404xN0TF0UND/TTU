@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-chart-bar me-2"></i>Logs Analytics</h2>
+                    <p class="text-muted mb-0">Insights and trends from {{ analytics.total_files }} log files</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('logs_dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ analytics.total_files }}</h4>
+                            <p class="mb-0">Total Files</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ analytics.date_range.earliest[:10] if analytics.date_range.earliest else 'N/A' }}</h4>
+                            <p class="mb-0">Earliest Log</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-minus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ analytics.date_range.latest[:10] if analytics.date_range.latest else 'N/A' }}</h4>
+                            <p class="mb-0">Latest Log</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-plus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ analytics.device_types|length }}</h4>
+                            <p class="mb-0">Device Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-network-wired fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Types Distribution -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i>Device Types Distribution</h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics.device_types %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Device Type</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                        <th>Bar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device_type, count in analytics.device_types.items() %}
+                                    {% set percentage = (count / analytics.total_files * 100)|round(1) %}
+                                    <tr>
+                                        <td>
+                                            {% if device_type == 'ciena_cpe' %}
+                                                <i class="fas fa-network-wired text-primary me-1"></i>Ciena CPE
+                                            {% elif device_type == 'ciena_metro' %}
+                                                <i class="fas fa-exchange-alt text-success me-1"></i>Ciena Metro
+                                            {% elif device_type == 'ciena_nid' %}
+                                                <i class="fas fa-hdd text-info me-1"></i>Ciena NID
+                                            {% elif device_type == 'nokia_soag' %}
+                                                <i class="fas fa-server text-warning me-1"></i>Nokia SOAG
+                                            {% elif device_type == 'nokia_ceg' %}
+                                                <i class="fas fa-server text-danger me-1"></i>Nokia CEG
+                                            {% else %}
+                                                <i class="fas fa-question text-muted me-1"></i>{{ device_type|title }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ count }}</td>
+                                        <td>{{ percentage }}%</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: {{ percentage }}%;" 
+                                                     aria-valuenow="{{ percentage }}" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    {{ percentage }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No device types data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Most Common Commands</h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics.top_commands %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Command</th>
+                                        <th>Count</th>
+                                        <th>Bar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for command, count in analytics.top_commands.items() %}
+                                    {% set max_count = analytics.top_commands.values()|max %}
+                                    {% set percentage = (count / max_count * 100)|round(1) %}
+                                    <tr>
+                                        <td><code>{{ command }}</code></td>
+                                        <td>{{ count }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {{ percentage }}%;" 
+                                                     aria-valuenow="{{ percentage }}" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    {{ count }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No command data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Devices -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Most Active Devices</h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics.top_devices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Device Name</th>
+                                        <th>Type</th>
+                                        <th>Log Files</th>
+                                        <th>First Seen</th>
+                                        <th>Last Seen</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device_name, device_info in analytics.top_devices %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ device_name }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if device_info.type == 'ciena_cpe' %}
+                                                <span class="badge bg-primary">Ciena CPE</span>
+                                            {% elif device_info.type == 'ciena_metro' %}
+                                                <span class="badge bg-success">Ciena Metro</span>
+                                            {% elif device_info.type == 'ciena_nid' %}
+                                                <span class="badge bg-info">Ciena NID</span>
+                                            {% elif device_info.type == 'nokia_soag' %}
+                                                <span class="badge bg-warning">Nokia SOAG</span>
+                                            {% elif device_info.type == 'nokia_ceg' %}
+                                                <span class="badge bg-danger">Nokia CEG</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ device_info.type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ device_info.file_count }}</td>
+                                        <td>{{ device_info.first_seen[:10] }}</td>
+                                        <td>{{ device_info.last_seen[:10] }}</td>
+                                        <td>
+                                            <a href="{{ url_for('logs_search', device_name=device_name) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-search"></i> Search
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="copyToClipboard('{{ device_name }}')">
+                                                <i class="fas fa-copy"></i> Copy
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No device data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Activity Timeline</h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics.recent_activity %}
+                        <div class="timeline">
+                            {% for file in analytics.recent_activity %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ file.device_name }}</strong>
+                                            <span class="badge bg-secondary ms-2">{{ file.device_type|title }}</span>
+                                        </div>
+                                        <small class="text-muted">{{ file.timestamp[:10] }}</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ file.filename }}</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('view_log', file_path=file.path) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <span class="badge bg-info">{{ (file.size / 1024)|round(1) }} KB</span>
+                                        <span class="badge bg-success">{{ file.command_count }} commands</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No recent activity data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+</style>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show a temporary success message
+        const button = event.target.closest('button');
+        if (button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        }
+    });
+}
+</script>
+
+{% endblock %}

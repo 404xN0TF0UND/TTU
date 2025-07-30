@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Disco Remove Cpe Eohfc</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Tags (comma separated)</label>
+    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
+    <input class="form-control" type="text" name="siteName">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Modem CLLI:</label>
+    <input class="form-control" type="text" name="modemClli">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Modem MAC:</label>
+    <input class="form-control" type="text" name="modemMac">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nid CLLI:</label>
+    <input class="form-control" type="text" name="nidClli">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nid MAC:</label>
+    <input class="form-control" type="text" name="nidMac">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Update CLIPs:</label>
+    <input type="radio" name="clipsUpdate" value="Yes"> Yes
+    <input type="radio" name="clipsUpdate" value="No"> No
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Additional notes:</label>
+    <textarea class="form-control" name="addInfo" rows="4"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Generate Note</button>
+</form>
+{% endblock %}

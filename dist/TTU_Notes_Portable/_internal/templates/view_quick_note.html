@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Quick Note: {{ filename }}</h2>
+<div class="mb-2 small text-muted">
+    Created: {{ metadata.created or 'N/A' }} | Modified: {{ metadata.modified or 'N/A' }}
+</div>
+{% if metadata.tags %}
+    <div class="mb-3">
+        {% for tag in metadata.tags %}
+            <span class="badge bg-info text-dark me-1">{{ tag }}</span>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Command Template</h5>
+        <div>
+            <button class="btn btn-success btn-sm" onclick="copyToClipboard()">
+                <i class="fas fa-copy me-1"></i>Copy Commands
+            </button>
+            <a href="{{ url_for('edit_quick_note', filename=filename) }}" class="btn btn-primary btn-sm ms-2">
+                <i class="fas fa-edit me-1"></i>Edit
+            </a>
+            <a href="{{ url_for('download_note', filename=filename) }}" class="btn btn-secondary btn-sm ms-2">
+                <i class="fas fa-download me-1"></i>Download
+            </a>
+            <a href="{{ url_for('email_note', filename=filename) }}" class="btn btn-info btn-sm ms-2">
+                <i class="fas fa-envelope me-1"></i>Email
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="command-display" id="commandContent">
+            <pre class="bg-dark text-light p-3 rounded command-text" style="font-family: 'Courier New', monospace; font-size: 0.9rem; white-space: pre-wrap; margin: 0;">{{ content }}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Variable Replacement Modal -->
+<div class="modal fade" id="variableModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Replace Variables</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="variableForm">
+                    <!-- Variables will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applyVariables()">Apply & Copy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <button class="btn btn-warning" onclick="showVariableModal()">
+        <i class="fas fa-magic me-1"></i>Replace Variables
+    </button>
+    <a href="{{ url_for('quick_notes') }}" class="btn btn-secondary ms-2">
+        <i class="fas fa-arrow-left me-1"></i>Back to Quick Notes
+    </a>
+    <form method="post" action="{{ url_for('delete_quick_note', filename=filename) }}" style="display: inline;">
+        <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Delete this quick note?');">
+            <i class="fas fa-trash me-1"></i>Delete
+        </button>
+    </form>
+</div>
+
+<script>
+function copyToClipboard() {
+    const text = document.querySelector('.command-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-success');
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy to clipboard');
+    });
+}
+
+function showVariableModal() {
+    const content = `{{ content }}`;
+    const variables = extractVariables(content);
+    
+    if (variables.length === 0) {
+        alert('No variables found in this template. Use {variable} format.');
+        return;
+    }
+    
+    const form = document.getElementById('variableForm');
+    form.innerHTML = '';
+    
+    variables.forEach(variable => {
+        const div = document.createElement('div');
+        div.className = 'mb-3';
+        div.innerHTML = `
+            <label class="form-label">${variable}</label>
+            <input type="text" class="form-control" id="var_${variable}" placeholder="Enter value for ${variable}">
+        `;
+        form.appendChild(div);
+    });
+    
+    new bootstrap.Modal(document.getElementById('variableModal')).show();
+}
+
+function extractVariables(text) {
+    const regex = /\{([^}]+)\}/g;
+    const variables = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        if (!variables.includes(match[1])) {
+            variables.push(match[1]);
+        }
+    }
+    return variables;
+}
+
+function applyVariables() {
+    let content = `{{ content }}`;
+    const variables = extractVariables(content);
+    
+    variables.forEach(variable => {
+        const value = document.getElementById(`var_${variable}`).value;
+        const regex = new RegExp(`\\{${variable}\\}`, 'g');
+        content = content.replace(regex, value);
+    });
+    
+    // Copy the modified content
+    navigator.clipboard.writeText(content).then(() => {
+        bootstrap.Modal.getInstance(document.getElementById('variableModal')).hide();
+        alert('Commands with variables replaced have been copied to clipboard!');
+    });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+C to copy
+    if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        copyToClipboard();
+    }
+    // Ctrl+E to edit
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('edit_quick_note', filename=filename) }}";
+    }
+});
+</script>
+{% endblock %} 

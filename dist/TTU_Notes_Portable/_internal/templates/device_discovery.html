@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-search me-2"></i>Device Discovery</h2>
+                    <p class="text-muted mb-0">Discover devices from your log analysis and add them to your device list</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Devices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-server fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ stats.total_discovered }}</h4>
+                    <small>Total Discovered</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ stats.new_devices }}</h4>
+                    <small>New Devices</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ stats.already_added }}</h4>
+                    <small>Already Added</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h4 class="mb-0">{{ stats.most_active|length }}</h4>
+                    <small>Most Active</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Type Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i>Device Types</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.device_types %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Device Type</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device_type, count in stats.device_types.items() %}
+                                    <tr>
+                                        <td>
+                                            {% if device_type == 'ciena_os' %}
+                                                <span class="badge bg-primary">Ciena OS</span>
+                                            {% elif device_type == 'nokia_sros' %}
+                                                <span class="badge bg-warning">Nokia SROS</span>
+                                            {% elif device_type == 'cisco_xr' %}
+                                                <span class="badge bg-success">Cisco XR</span>
+                                            {% elif device_type == 'juniper' %}
+                                                <span class="badge bg-info">Juniper</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ device_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ count }}</td>
+                                        <td>{{ ((count / stats.total_discovered) * 100)|round(1) }}%</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No device types found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Most Active Devices</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.most_active %}
+                        <div class="list-group list-group-flush">
+                            {% for device in stats.most_active[:5] %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ device.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ device.file_count }} log files</small>
+                                </div>
+                                <a href="{{ url_for('add_discovered_device', device_name=device.name) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Add
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No active devices found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discovered Devices Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Discovered Devices</h5>
+                        {% if discovered_devices %}
+                        <form method="post" action="{{ url_for('bulk_add_discovered_devices') }}" style="display: inline;">
+                            <button type="submit" class="btn btn-success" id="bulkAddBtn" disabled>
+                                <i class="fas fa-plus me-1"></i>Add Selected
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if discovered_devices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="selectAll" class="form-check-input">
+                                        </th>
+                                        <th>Device Name</th>
+                                        <th>Type</th>
+                                        <th>Log Files</th>
+                                        <th>First Seen</th>
+                                        <th>Last Seen</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device in discovered_devices %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="selected_devices" value="{{ device.name }}" 
+                                                   class="form-check-input device-checkbox">
+                                        </td>
+                                        <td>
+                                            <strong>{{ device.name }}</strong>
+                                            {% if device.description %}
+                                                <br><small class="text-muted">{{ device.description }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if device.device_type == 'ciena_os' %}
+                                                <span class="badge bg-primary">Ciena OS</span>
+                                            {% elif device.device_type == 'nokia_sros' %}
+                                                <span class="badge bg-warning">Nokia SROS</span>
+                                            {% elif device.device_type == 'cisco_xr' %}
+                                                <span class="badge bg-success">Cisco XR</span>
+                                            {% elif device.device_type == 'juniper' %}
+                                                <span class="badge bg-info">Juniper</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ device.device_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ device.file_count }}</span>
+                                        </td>
+                                        <td>{{ device.first_seen[:10] }}</td>
+                                        <td>{{ device.last_seen[:10] }}</td>
+                                        <td>
+                                            <a href="{{ url_for('add_discovered_device', device_name=device.name) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-plus me-1"></i>Add
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Devices Discovered</h5>
+                            <p class="text-muted">No devices found in your log analysis.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Select all functionality
+document.getElementById('selectAll').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.device-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+    updateBulkAddButton();
+});
+
+// Individual checkbox functionality
+document.querySelectorAll('.device-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', updateBulkAddButton);
+});
+
+function updateBulkAddButton() {
+    const checkedBoxes = document.querySelectorAll('.device-checkbox:checked');
+    const bulkAddBtn = document.getElementById('bulkAddBtn');
+    if (bulkAddBtn) {
+        bulkAddBtn.disabled = checkedBoxes.length === 0;
+        bulkAddBtn.textContent = `Add Selected (${checkedBoxes.length})`;
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'a') {
+        e.preventDefault();
+        document.getElementById('selectAll').click();
+    }
+    if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        window.location.href = "{{ url_for('manage_devices') }}";
+    }
+});
+</script>
+
+{% endblock %}

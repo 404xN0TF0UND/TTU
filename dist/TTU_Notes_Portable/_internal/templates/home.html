@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.feature-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.feature-card .card-body {
+    padding: 2rem;
+}
+
+.feature-card .btn {
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.feature-card .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.category-btn {
+    border-radius: 20px;
+    padding: 0.5rem 1.5rem;
+    margin: 0.25rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.category-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-btn.active {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.template-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.template-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent-color);
+}
+
+.welcome-section {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(88, 101, 242, 0.2);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-sticky-note me-3"></i>Welcome to TTU Notes
+                </h1>
+                <p class="lead text-muted mb-0">
+                    Your comprehensive network engineering toolkit for notes, templates, automation, and device management.
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex flex-column align-items-end">
+                    <span class="badge bg-primary fs-6 px-3 py-2 mb-2">
+                        <i class="fas fa-clock me-1"></i>{{ current_date }}
+                    </span>
+                    <small class="text-muted">Ready to streamline your workflow</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ templates_by_category|length if templates_by_category else 0 }}</div>
+            <div class="stat-label">Template Categories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ devices|length if devices else 0 }}</div>
+            <div class="stat-label">Managed Devices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ notes|length if notes else 0 }}</div>
+            <div class="stat-label">Saved Notes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ quick_notes|length if quick_notes else 0 }}</div>
+            <div class="stat-label">Quick Notes</div>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">
+                <i class="fas fa-rocket me-2"></i>Quick Actions
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- AI-Powered Template Suggestions -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-gradient-primary text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-lightbulb fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">AI-Powered Template Suggestions</h4>
+                        <p class="card-text opacity-90">Get personalized template suggestions based on your device logs and usage patterns.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('template_suggestions') }}" class="btn btn-light btn-lg w-100">
+                            <i class="fas fa-magic me-2"></i>Get Suggestions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automated Device Discovery -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-gradient-warning text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">Automated Device Discovery</h4>
+                        <p class="card-text opacity-90">Discover and add devices from your log analysis automatically.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('device_discovery') }}" class="btn btn-light btn-lg w-100">
+                            <i class="fas fa-search me-2"></i>Discover Devices
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Operations -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-gradient-danger text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-layer-group fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">Batch Operations</h4>
+                        <p class="card-text opacity-90">Execute commands across multiple devices simultaneously with progress tracking.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('batch_operations') }}" class="btn btn-light btn-lg w-100">
+                            <i class="fas fa-play me-2"></i>Run Batch
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Management -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-gradient-success text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-server fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">Device Management</h4>
+                        <p class="card-text opacity-90">Manage your network devices for SSH automation and command execution.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('manage_devices') }}" class="btn btn-light btn-lg w-100">
+                            <i class="fas fa-cog me-2"></i>Manage Devices
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Library -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-gradient-info text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-book fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">Command Library</h4>
+                        <p class="card-text opacity-90">Access a comprehensive library of network commands organized by vendor and category.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('command_library') }}" class="btn btn-light btn-lg w-100">
+                            <i class="fas fa-book me-2"></i>Browse Library
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Notes -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card bg-dark text-white h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-bolt fa-3x mb-3"></i>
+                        <h4 class="card-title fw-bold">Quick Notes</h4>
+                        <p class="card-text opacity-90">Create and manage quick command templates with variable replacement.</p>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('quick_notes') }}" class="btn btn-outline-light btn-lg w-100">
+                            <i class="fas fa-plus me-2"></i>Create Quick Note
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Categories -->
+    {% if templates_by_category %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-4">
+                <i class="fas fa-folder me-2"></i>Template Categories
+            </h3>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <button class="btn category-btn btn-outline-primary active" onclick="filterTemplates('all')">
+                    <i class="fas fa-th-large me-1"></i>All Templates
+                </button>
+                {% for category in templates_by_category.keys() %}
+                <button class="btn category-btn btn-outline-secondary" onclick="filterTemplates('{{ category }}')">
+                    <i class="fas fa-folder me-1"></i>{{ category }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4" id="templatesContainer">
+        {% for category, templates in templates_by_category.items() %}
+            {% for template in templates %}
+            <div class="col-lg-4 col-md-6 template-item" data-category="{{ category }}">
+                <div class="card template-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ template.replace('.html', '').replace('_', ' ').title() }}</h5>
+                            <span class="badge bg-primary">{{ category }}</span>
+                        </div>
+                        <p class="card-text text-muted mb-3">Template for {{ template.replace('.html', '').replace('_', ' ').title() }} operations.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-file-code me-1"></i>{{ template }}
+                            </small>
+                            <a href="{{ url_for('show_form', form_name=template.replace('.html', '')) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-play me-1"></i>Use Template
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-file-code fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Templates Available</h4>
+                    <p class="text-muted mb-3">Get started by creating your first template or using AI-powered suggestions.</p>
+                    <a href="{{ url_for('manage_templates') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function filterTemplates(category) {
+    // Update active button
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        btn.classList.add('btn-outline-secondary');
+    });
+    
+    event.target.classList.remove('btn-outline-secondary');
+    event.target.classList.add('active', 'btn-primary');
+    
+    // Filter templates
+    const templates = document.querySelectorAll('.template-item');
+    templates.forEach(template => {
+        if (category === 'all' || template.dataset.category === category) {
+            template.style.display = 'block';
+        } else {
+            template.style.display = 'none';
+        }
+    });
+}
+
+// Add some animation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+
+{% endblock %} 
