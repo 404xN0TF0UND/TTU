@@ -1,4 +1,4 @@
-y#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Create a portable package for TTU Notes
 This includes Python runtime and all dependencies in a single folder
