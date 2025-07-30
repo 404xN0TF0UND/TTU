@@ -3,7 +3,7 @@
 <style>
 /* Improved font styling for better readability */
 .form-control, .form-select {
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 14px;
     line-height: 1.4;
 }
@@ -75,6 +75,34 @@ textarea.form-control:focus {
 .card-body {
     color: #e6e9ea;
 }
+
+/* Modal styling */
+.modal-content {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    color: #e6e9ea;
+}
+
+.modal-header {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.modal-body {
+    background-color: #1e2124;
+    color: #e6e9ea;
+}
+
+.modal-footer {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+}
 </style>
 
 <h2>Execute Commands</h2>
@@ -93,7 +121,7 @@ textarea.form-control:focus {
                 <h5 class="mb-0">Command Execution</h5>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="executeForm">
                     <div class="mb-3">
                         <label for="device_name" class="form-label">Device *</label>
                         <select class="form-select" id="device_name" name="device_name" required>
@@ -107,21 +135,11 @@ textarea.form-control:focus {
                         <div class="form-text">Select the device to execute commands on</div>
                     </div>
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Leave empty for RADIUS prompt">
-                        <div class="form-text">Username for SSH connection (will prompt for password)</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Leave empty for secure prompt">
-                        <div class="form-text">Password for SSH connection (recommended to leave empty for secure prompt)</div>
-                    </div>
-                    <div class="mb-3">
                         <label for="commands" class="form-label">Commands *</label>
                         <textarea class="form-control" id="commands" name="commands" rows="10" required placeholder="Enter commands to execute (one per line)&#10;&#10;Example:&#10;show version&#10;show interfaces&#10;show ip route"></textarea>
                         <div class="form-text">Enter commands to execute, one per line</div>
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="executeBtn">
                         <i class="fas fa-play me-1"></i>Execute Commands
                     </button>
                     <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary ms-2">
@@ -198,6 +216,43 @@ textarea.form-control:focus {
     </div>
 </div>
 
+<!-- Credentials Modal -->
+<div class="modal fade" id="credentialsModal" tabindex="-1" aria-labelledby="credentialsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="credentialsModalLabel">
+                    <i class="fas fa-key me-2"></i>Enter Device Credentials
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="modal_username" class="form-label">Username *</label>
+                    <input type="text" class="form-control" id="modal_username" name="username" required>
+                    <div class="form-text">Your RADIUS username</div>
+                </div>
+                <div class="mb-3">
+                    <label for="modal_password" class="form-label">Password *</label>
+                    <input type="password" class="form-control" id="modal_password" name="password" required>
+                    <div class="form-text">Your RADIUS password</div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Device:</strong> <span id="modalDeviceName"></span><br>
+                    <strong>Commands:</strong> <span id="modalCommandCount"></span> command(s)
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="executeWithCredentials">
+                    <i class="fas fa-play me-1"></i>Execute Commands
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Load quick templates
 function loadTemplate(type) {
@@ -237,6 +292,68 @@ show logging`
     }
 }
 
+// Form submission with credentials modal
+document.getElementById('executeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const deviceName = document.getElementById('device_name').value;
+    const commands = document.getElementById('commands').value;
+    
+    if (!deviceName || !commands.trim()) {
+        return;
+    }
+    
+    // Show credentials modal
+    document.getElementById('modalDeviceName').textContent = deviceName;
+    document.getElementById('modalCommandCount').textContent = commands.split('\n').filter(cmd => cmd.trim()).length;
+    
+    const modal = new bootstrap.Modal(document.getElementById('credentialsModal'));
+    modal.show();
+});
+
+// Execute with credentials
+document.getElementById('executeWithCredentials').addEventListener('click', function() {
+    const username = document.getElementById('modal_username').value;
+    const password = document.getElementById('modal_password').value;
+    
+    if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+    }
+    
+    // Show loading state
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Connecting...';
+    btn.disabled = true;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('device_name', document.getElementById('device_name').value);
+    formData.append('commands', document.getElementById('commands').value);
+    formData.append('username', username);
+    formData.append('password', password);
+    
+    // Submit the form
+    fetch('{{ url_for("execute_commands") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Replace the current page content with the response
+        document.documentElement.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error executing commands: ' + error.message);
+        
+        // Reset button
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+});
+
 // Auto-select device if specified in URL
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -250,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
-        document.querySelector('form').submit();
+        document.getElementById('executeForm').dispatchEvent(new Event('submit'));
     }
 });
 </script>

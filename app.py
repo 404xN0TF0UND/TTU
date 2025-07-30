@@ -86,12 +86,9 @@ def execute_command_on_device(device_name, commands, username=None, password=Non
         
         device_type = get_device_type(device_name)
         
-        # For RADIUS authentication, we'll always prompt for credentials
-        # since they're not stored and change frequently
-        if not username:
-            username = getpass.getpass(f'Enter username for {device_name}: ')
-        if not password:
-            password = getpass.getpass(f'Enter password for {device_name}: ')
+        # Validate credentials are provided
+        if not username or not password:
+            return {'success': False, 'error': 'Username and password are required for SSH connection'}
         
         device_config = {
             'device_type': device_type,
