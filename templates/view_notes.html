@@ -51,32 +51,32 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ notes|length }}</h5>
-                <p class="card-text text-muted">Total Notes</p>
+                <h5 class="card-title text-light">{{ notes|length }}</h5>
+                <p class="card-text text-light">Total Notes</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ notes|selectattr('favorite', 'equalto', true)|list|length }}</h5>
-                <p class="card-text text-muted">Favorites</p>
+                <h5 class="card-title text-light">{{ notes|selectattr('favorite', 'equalto', true)|list|length }}</h5>
+                <p class="card-text text-light">Favorites</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ notes|selectattr('type', 'equalto', 'quick_note')|list|length }}</h5>
-                <p class="card-text text-muted">Quick Notes</p>
+                <h5 class="card-title text-light">{{ notes|selectattr('type', 'equalto', 'quick_note')|list|length }}</h5>
+                <p class="card-text text-light">Quick Notes</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ notes|selectattr('type', 'equalto', 'template_note')|list|length }}</h5>
-                <p class="card-text text-muted">Template Notes</p>
+                <h5 class="card-title text-light">{{ notes|selectattr('type', 'equalto', 'template_note')|list|length }}</h5>
+                <p class="card-text text-light">Template Notes</p>
             </div>
         </div>
     </div>
@@ -85,7 +85,7 @@
 <!-- Bulk Operations -->
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Bulk Operations</h6>
+        <h6 class="mb-0 text-light">Bulk Operations</h6>
         <div>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">Select All</button>
             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">Deselect All</button>
@@ -124,7 +124,7 @@
                         </a>
                         <span class="badge bg-secondary ms-2">{{ note.type.replace('_', ' ').title() }}</span>
                     </div>
-                    <div class="small text-muted">Created: {{ note.created or 'N/A' }} | Modified: {{ note.modified or 'N/A' }}</div>
+                                            <div class="small text-light">Created: {{ note.created or 'N/A' }} | Modified: {{ note.modified or 'N/A' }}</div>
                     {% if note.tags %}
                         <div class="mt-1">
                             {% for tag in note.tags %}
