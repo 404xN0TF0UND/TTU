@@ -109,7 +109,7 @@ h2 {
 </style>
 
 <h2>Device Management</h2>
-<p class="text-muted mb-4">Manage your network devices for SSH automation and command execution.</p>
+                <p style="color: var(--text-secondary);" class="mb-4">Manage your network devices for SSH automation and command execution.</p>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -122,7 +122,7 @@ h2 {
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h2><i class="fas fa-server me-2"></i>Device Management</h2>
-                    <p class="text-muted mb-0">Manage your network devices for SSH automation and command execution</p>
+                    <p style="color: var(--text-secondary);" class="mb-0">Manage your network devices for SSH automation and command execution</p>
                 </div>
                 <div class="text-end">
                     <span class="badge bg-primary fs-6 px-3 py-2">{{ devices|length }} Devices</span>
@@ -234,9 +234,9 @@ h2 {
 {% else %}
     <div class="card">
         <div class="card-body text-center">
-            <i class="fas fa-server fa-3x text-muted mb-3"></i>
+            <i class="fas fa-server fa-3x mb-3" style="color: var(--text-secondary);"></i>
             <h5>No Devices Added</h5>
-            <p class="text-muted">Add your first device to start using SSH automation.</p>
+            <p style="color: var(--text-secondary);">Add your first device to start using SSH automation.</p>
             <a href="{{ url_for('add_device') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Add Device
             </a>

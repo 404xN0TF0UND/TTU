@@ -36,7 +36,7 @@
                             <div class="list-group list-group-flush">
                                 {% for command in commands %}
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <code class="text-light">{{ command }}</code>
+                                        <code style="color: var(--text-primary);">{{ command }}</code>
                                         <button class="btn btn-sm btn-outline-secondary" onclick="copyCommand('{{ command }}')">
                                             <i class="fas fa-copy"></i>
                                         </button>
@@ -82,7 +82,7 @@
                 <h5 class="mb-0">Usage Tips</h5>
             </div>
             <div class="card-body">
-                <ul class="list-unstyled small text-light">
+                                        <ul class="list-unstyled small" style="color: var(--text-primary);">
                     <li><i class="fas fa-lightbulb text-warning me-1"></i>Click copy button to copy commands</li>
                     <li><i class="fas fa-lightbulb text-warning me-1"></i>Replace variables like {interface} with actual values</li>
                     <li><i class="fas fa-lightbulb text-warning me-1"></i>Use batch execute for multiple devices</li>
