@@ -7,7 +7,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h2><i class="fas fa-play me-2"></i>Use Template: {{ template.name }}</h2>
-                    <p class="text-muted mb-0">{{ template.description }}</p>
+                    <p style="color: var(--text-secondary);" class="mb-0">{{ template.description }}</p>
                 </div>
                 <div>
                     <a href="{{ url_for('batch_templates') }}" class="btn btn-secondary">
@@ -77,7 +77,7 @@
                                                 <div>
                                                     <strong>{{ device_name }}</strong>
                                                     <br>
-                                                    <small class="text-muted">
+                                                    <small style="color: var(--text-secondary);">
                                                         {% if device_info.device_type == 'ciena_os' %}
                                                             <span class="badge bg-primary">Ciena OS</span>
                                                         {% elif device_info.device_type == 'nokia_sros' %}
@@ -99,15 +99,15 @@
                                 {% endfor %}
                             </div>
                             <div class="mt-3">
-                                <small class="text-muted">
-                                    <span id="selectedCount">0</span> of {{ devices|length }} devices selected
-                                </small>
+                                                            <small style="color: var(--text-secondary);">
+                                <span id="selectedCount">0</span> of {{ devices|length }} devices selected
+                            </small>
                             </div>
                         {% else %}
                             <div class="text-center py-4">
-                                <i class="fas fa-server fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">No Devices Available</h5>
-                                <p class="text-muted">Add devices to your device list first.</p>
+                                <i class="fas fa-server fa-3x mb-3" style="color: var(--text-secondary);"></i>
+                                <h5 style="color: var(--text-secondary);">No Devices Available</h5>
+                                <p style="color: var(--text-secondary);">Add devices to your device list first.</p>
                                 <a href="{{ url_for('add_device') }}" class="btn btn-primary">
                                     <i class="fas fa-plus me-1"></i>Add Device
                                 </a>
@@ -133,7 +133,7 @@
                         <div class="mb-3">
                             <label for="commands" class="form-label">Commands (pre-filled from template)</label>
                             <textarea class="form-control" id="commands" name="commands" rows="8" required>{{ template.commands|join('\n') }}</textarea>
-                            <div class="form-text">You can modify these commands as needed for your environment</div>
+                            <div style="color: var(--text-secondary); font-size: 0.875em;">You can modify these commands as needed for your environment</div>
                         </div>
                         
                         <!-- Credentials -->
@@ -143,7 +143,7 @@
                                     <label for="username" class="form-label">Username</label>
                                     <input type="text" class="form-control" id="username" name="username" 
                                            placeholder="Leave empty for RADIUS prompt">
-                                    <div class="form-text">Username for SSH connection (will prompt for password)</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.875em;">Username for SSH connection (will prompt for password)</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -151,7 +151,7 @@
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control" id="password" name="password" 
                                            placeholder="Leave empty for secure prompt">
-                                    <div class="form-text">Password for SSH connection (recommended to leave empty)</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.875em;">Password for SSH connection (recommended to leave empty)</div>
                                 </div>
                             </div>
                         </div>
@@ -162,7 +162,7 @@
                                 <button type="submit" class="btn btn-primary" id="executeBtn" disabled>
                                     <i class="fas fa-play me-1"></i>Execute {{ template.name }}
                                 </button>
-                                <small class="text-muted ms-2">Select devices to enable execution</small>
+                                <small style="color: var(--text-secondary);" class="ms-2">Select devices to enable execution</small>
                             </div>
                             <div>
                                 <button type="button" class="btn btn-outline-secondary" onclick="resetCommands()">

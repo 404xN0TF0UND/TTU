@@ -116,6 +116,73 @@
             color: white !important;
         }
         
+        /* Outline button styling for better visibility */
+        .btn-outline-primary {
+            background: transparent !important;
+            color: var(--accent-color) !important;
+            border: 1px solid var(--accent-color) !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--accent-color) !important;
+            color: white !important;
+        }
+        
+        .btn-outline-secondary {
+            background: transparent !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .btn-outline-success {
+            background: transparent !important;
+            color: var(--success-color) !important;
+            border: 1px solid var(--success-color) !important;
+        }
+        
+        .btn-outline-success:hover {
+            background: var(--success-color) !important;
+            color: #000 !important;
+        }
+        
+        .btn-outline-warning {
+            background: transparent !important;
+            color: var(--warning-color) !important;
+            border: 1px solid var(--warning-color) !important;
+        }
+        
+        .btn-outline-warning:hover {
+            background: var(--warning-color) !important;
+            color: #000 !important;
+        }
+        
+        .btn-outline-info {
+            background: transparent !important;
+            color: var(--info-color) !important;
+            border: 1px solid var(--info-color) !important;
+        }
+        
+        .btn-outline-info:hover {
+            background: var(--info-color) !important;
+            color: white !important;
+        }
+        
+        .btn-outline-danger {
+            background: transparent !important;
+            color: var(--danger-color) !important;
+            border: 1px solid var(--danger-color) !important;
+        }
+        
+        .btn-outline-danger:hover {
+            background: var(--danger-color) !important;
+            color: white !important;
+        }
+        
         /* Form Elements */
         .form-control, .form-select {
             background: var(--bg-secondary) !important;
@@ -130,10 +197,32 @@
             box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1) !important;
         }
         
+        /* Placeholder text styling for better visibility */
+        .form-control::placeholder, .form-select::placeholder {
+            color: var(--text-secondary) !important;
+            opacity: 0.8;
+        }
+        
         .form-label {
-            color: var(--text-secondary);
+            color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 0.5rem;
+        }
+        
+        /* Card header styling for better visibility */
+        .card-header {
+            background: var(--bg-secondary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        
+        .card-header h5 {
+            color: var(--text-primary) !important;
+            font-weight: 600;
+        }
+        
+        .card-header h6 {
+            color: var(--text-primary) !important;
+            font-weight: 600;
         }
         
         /* List Groups */
@@ -189,6 +278,41 @@
         
         .text-primary {
             color: var(--accent-color) !important;
+        }
+        
+        /* Fix for text-light class to use proper dark theme colors */
+        .text-light {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Fix for text-muted class to use proper dark theme colors */
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+        
+        /* Fix for text-white class to use proper dark theme colors */
+        .text-white {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Fix for text-success class to use proper dark theme colors */
+        .text-success {
+            color: var(--success-color) !important;
+        }
+        
+        /* Fix for text-info class to use proper dark theme colors */
+        .text-info {
+            color: var(--info-color) !important;
+        }
+        
+        /* Fix for text-warning class to use proper dark theme colors */
+        .text-warning {
+            color: var(--warning-color) !important;
+        }
+        
+        /* Fix for text-danger class to use proper dark theme colors */
+        .text-danger {
+            color: var(--danger-color) !important;
         }
         
         /* Custom Scrollbar */

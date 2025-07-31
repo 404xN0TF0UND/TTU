@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Quick Notes</h2>
-<p class="text-light mb-4">Create and save command templates for Cisco, Ciena, Nokia, Juniper devices. Perfect for frequently used commands that need quick modifications.</p>
+<p style="color: var(--text-primary);" class="mb-4">Create and save command templates for Cisco, Ciena, Nokia, Juniper devices. Perfect for frequently used commands that need quick modifications.</p>
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -13,7 +13,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0 text-light">Create New Quick Note</h5>
+                                    <h5 class="mb-0" style="color: var(--text-primary);">Create New Quick Note</h5>
             </div>
             <div class="card-body">
                 <form method="post">
@@ -48,7 +48,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
         <!-- Search and Filter -->
         <div class="card mb-3">
             <div class="card-header">
-                <h5 class="mb-0 text-light">Search Quick Notes</h5>
+                                    <h5 class="mb-0" style="color: var(--text-primary);">Search Quick Notes</h5>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -81,7 +81,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
         <!-- Recent Quick Notes -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-light">Quick Notes</h5>
+                                    <h5 class="mb-0" style="color: var(--text-primary);">Quick Notes</h5>
                 <span class="badge bg-primary" id="noteCount">0</span>
             </div>
             <div class="card-body">
@@ -100,7 +100,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
                                    data-tags="{{ note.metadata.tags | join(' ') }}" data-content="{{ note.filename.replace('.txt', '') }}">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h6 class="mb-1">{{ note.filename.replace('.txt', '') }}</h6>
-                                        <small class="text-light">{{ note.metadata.created.split(' ')[0] if note.metadata.created else 'N/A' }}</small>
+                                        <small style="color: var(--text-primary);">{{ note.metadata.created.split(' ')[0] if note.metadata.created else 'N/A' }}</small>
                                     </div>
                                     {% if note.metadata.tags %}
                                         <div class="mt-1">
@@ -116,7 +116,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="text-light">No quick notes yet. Create your first one!</p>
+                        <p style="color: var(--text-primary);">No quick notes yet. Create your first one!</p>
                     {% endif %}
                 </div>
                 
@@ -130,14 +130,14 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
         
         <div class="card mt-3">
             <div class="card-header">
-                <h5 class="mb-0 text-light">Tips</h5>
+                                    <h5 class="mb-0" style="color: var(--text-primary);">Tips</h5>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
-                    <li class="mb-2 text-light"><i class="fas fa-lightbulb text-warning me-2"></i>Use tags to organize by device type</li>
-                    <li class="mb-2 text-light"><i class="fas fa-lightbulb text-warning me-2"></i>Include placeholders like {vlan} for easy find/replace</li>
-                    <li class="mb-2 text-light"><i class="fas fa-lightbulb text-warning me-2"></i>Add comments with # for better organization</li>
-                    <li class="text-light"><i class="fas fa-lightbulb text-warning me-2"></i>Use descriptive first lines for better filenames</li>
+                                            <li class="mb-2" style="color: var(--text-primary);"><i class="fas fa-lightbulb text-warning me-2"></i>Use tags to organize by device type</li>
+                        <li class="mb-2" style="color: var(--text-primary);"><i class="fas fa-lightbulb text-warning me-2"></i>Include placeholders like {vlan} for easy find/replace</li>
+                        <li class="mb-2" style="color: var(--text-primary);"><i class="fas fa-lightbulb text-warning me-2"></i>Add comments with # for better organization</li>
+                        <li style="color: var(--text-primary);"><i class="fas fa-lightbulb text-warning me-2"></i>Use descriptive first lines for better filenames</li>
                 </ul>
             </div>
         </div>
