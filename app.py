@@ -75,6 +75,17 @@ def get_device_type(device_name):
     else:
         return 'cisco_ios'  # Default fallback
 
+def get_logout_command(device_type):
+    """Get the appropriate logout command for a device type"""
+    logout_commands = {
+        'ciena_os': 'exit',
+        'cisco_xr': 'exit',
+        'cisco_ios': 'exit',
+        'nokia_sros': 'logout',
+        'juniper': 'exit'
+    }
+    return logout_commands.get(device_type, 'exit')  # Default to 'exit' if device type not found
+
 def execute_command_on_device(device_name, commands, username=None, password=None):
     """Execute commands on a device using Netmiko with RADIUS authentication"""
     try:
@@ -102,14 +113,32 @@ def execute_command_on_device(device_name, commands, username=None, password=Non
         
         with ConnectHandler(**device_config) as net_connect:
             results = []
-            for command in commands:
+            logout_command = get_logout_command(device_type)
+            
+            for i, command in enumerate(commands):
                 try:
-                    output = net_connect.send_command(command)
-                    results.append({
-                        'command': command,
-                        'output': output,
-                        'success': True
-                    })
+                    # Handle logout command specially to avoid prompt issues
+                    if command.strip().lower() == logout_command.lower():
+                        # For logout command, use send_command_timing to avoid waiting for specific prompt
+                        output = net_connect.send_command_timing(command, strip_prompt=False)
+                        # Add a small delay to ensure the logout command completes
+                        import time
+                        time.sleep(1)
+                        results.append({
+                            'command': command,
+                            'output': output + '\nSession closed successfully.',
+                            'success': True
+                        })
+                        # Break after logout command since session will be closed
+                        break
+                    else:
+                        # For regular commands, use normal send_command
+                        output = net_connect.send_command(command)
+                        results.append({
+                            'command': command,
+                            'output': output,
+                            'success': True
+                        })
                 except Exception as e:
                     results.append({
                         'command': command,
