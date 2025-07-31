@@ -1,40 +1,87 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Disco Remove Cpe Eohfc</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "Disconnect - Remove CPE EoHFC" %}
+{% set form_description = "Generate a comprehensive note for removing CPE EoHFC equipment during disconnect operations." %}
+{% set form_id = "disco_remove_cpe_eohfc_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Modem CLLI:</label>
-    <input class="form-control" type="text" name="modemClli">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Modem MAC:</label>
-    <input class="form-control" type="text" name="modemMac">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Nid CLLI:</label>
-    <input class="form-control" type="text" name="nidClli">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Nid MAC:</label>
-    <input class="form-control" type="text" name="nidMac">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Update CLIPs:</label>
-    <input type="radio" name="clipsUpdate" value="Yes"> Yes
-    <input type="radio" name="clipsUpdate" value="No"> No
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Modem Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Modem CLLI</label>
+                <input class="form-control" type="text" name="modemClli" placeholder="Enter modem CLLI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Modem MAC</label>
+                <input class="form-control" type="text" name="modemMac" placeholder="Enter modem MAC address">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">NID Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">NID CLLI</label>
+                <input class="form-control" type="text" name="nidClli" placeholder="Enter NID CLLI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">NID MAC</label>
+                <input class="form-control" type="text" name="nidMac" placeholder="Enter NID MAC address">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">CLIPs Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Update CLIPs</label>
+                <div class="form-check">
+                    <input type="radio" name="clipsUpdate" value="Yes" id="clips-yes" required>
+                    <label class="form-check-label" for="clips-yes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" name="clipsUpdate" value="No" id="clips-no" required>
+                    <label class="form-check-label" for="clips-no">No</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        <div class="form-group">
+            <label class="form-label">Additional Notes</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}

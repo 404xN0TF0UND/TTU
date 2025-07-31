@@ -1,31 +1,56 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Disco Remove Cpe Fiber</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "Disconnect - Remove CPE Fiber" %}
+{% set form_description = "Generate a comprehensive note for removing CPE fiber equipment during disconnect operations." %}
+{% set form_id = "disco_remove_cpe_fiber_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">CPE IP / CLLI:</label>
-    <input class="form-control" type="text" name="cpeIpClli">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">NNI port:</label>
-    <input class="form-control" type="text" name="nniPort">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">MVT Ticket:</label>
-    <input class="form-control" type="text" name="mvtTicket">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes / CLI output:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Equipment Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">ONT CLLI</label>
+                <input class="form-control" type="text" name="ontClli" placeholder="Enter ONT CLLI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">ONT MAC</label>
+                <input class="form-control" type="text" name="ontMac" placeholder="Enter ONT MAC address">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        <div class="form-group">
+            <label class="form-label">Additional Notes</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}

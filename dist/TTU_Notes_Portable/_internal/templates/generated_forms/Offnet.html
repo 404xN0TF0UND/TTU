@@ -1,114 +1,177 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Offnet</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "Offnet Configuration" %}
+{% set form_description = "Generate a comprehensive note for offnet carrier configurations and handoff operations." %}
+{% set form_id = "offnet_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Offnet Carrier:</label>
-    <input class="form-control" type="text" name="offnetCarrier">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Offnet Contact:</label>
-    <input class="form-control" type="text" name="offnetContact">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Offnet Order OR Ticket Number:</label>
-    <input class="form-control" type="text" name="offnetOrder">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Offnet Vendor CPE:</label>
-    <input class="form-control" type="text" name="offnetCpe">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Handoff Port:</label>
-    <input class="form-control" type="text" name="handoffPort">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Handoff Type:</label>
-    <select class="form-select" name="portType">
-      <option value="Copper">Copper</option>
-      <option value="Fiber - MM">Fiber - MM</option>
-      <option value="Fiber - SM">Fiber - SM</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Speed:</label>
-    <select class="form-select" name="portSpeed">
-      <option value="10 mbps">10 mbps</option>
-      <option value="100 mbps">100 mbps</option>
-      <option value="1000 mbps">1000 mbps</option>
-      <option value="10 gbps">10 gbps</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Auto-Neg:</label>
-    <input type="radio" name="portAutoNeg" value="Yes"> Yes
-    <input type="radio" name="portAutoNeg" value="No"> No
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Service Vlan:</label>
-    <input class="form-control" type="text" name="serviceVlan">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Service Type:</label>
-    <select class="form-select" name="serviceType">
-      <option value="EDI">EDI</option>
-      <option value="ENS">ENS</option>
-      <option value="EPL">EPL</option>
-      <option value="EVPL">EVPL</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Bandwidth:</label>
-    <input class="form-control" type="text" name="serviceSpeed">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">bitsPerSec</label>
-    <select class="form-select" name="bitsPerSec">
-      <option value="mbps">mbps</option>
-      <option value="gbps">gbps</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Class of Service:</label>
-    <select class="form-select" name="classOfService">
-      <option value="Basic">Basic</option>
-      <option value="Priority">Priority</option>
-      <option value="Premium">Premium</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Validation method with offnet:</label>
-    <select class="form-select" name="offnetTest">
-      <option value="Mac Validation">Mac Validation</option>
-      <option value="Loop Test">Loop Test</option>
-      <option value="Traffic Validation">Traffic Validation</option>
-      <option value="Other/Unable">Other/Unable</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Demarc Info:</label>
-    <input class="form-control" type="text" name="demarcInfo">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Comcast ENNI :</label>
-    <input class="form-control" type="text" name="enni">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Offnet ENNI :</label>
-    <input class="form-control" type="text" name="onni">
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Offnet Carrier Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Offnet Carrier</label>
+                <input class="form-control" type="text" name="offnetCarrier" placeholder="Enter offnet carrier name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Offnet Contact</label>
+                <input class="form-control" type="text" name="offnetContact" placeholder="Enter offnet contact information">
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Offnet Order OR Ticket Number</label>
+                <input class="form-control" type="text" name="offnetOrder" placeholder="Enter order or ticket number">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Offnet Vendor CPE</label>
+                <input class="form-control" type="text" name="offnetCpe" placeholder="Enter vendor CPE information">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Handoff Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Handoff Port</label>
+                <input class="form-control" type="text" name="handoffPort" placeholder="Enter handoff port">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Handoff Type</label>
+                <select class="form-select" name="portType">
+                    <option value="">Select handoff type</option>
+                    <option value="Copper">Copper</option>
+                    <option value="Fiber - MM">Fiber - MM</option>
+                    <option value="Fiber - SM">Fiber - SM</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Speed</label>
+                <select class="form-select" name="portSpeed">
+                    <option value="">Select speed</option>
+                    <option value="10 mbps">10 mbps</option>
+                    <option value="100 mbps">100 mbps</option>
+                    <option value="1000 mbps">1000 mbps</option>
+                    <option value="10 gbps">10 gbps</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Auto-Neg</label>
+                <div class="form-check">
+                    <input type="radio" name="portAutoNeg" value="Yes" id="autoneg-yes">
+                    <label class="form-check-label" for="autoneg-yes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" name="portAutoNeg" value="No" id="autoneg-no">
+                    <label class="form-check-label" for="autoneg-no">No</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Service Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Service VLAN</label>
+                <input class="form-control" type="text" name="serviceVlan" placeholder="Enter service VLAN">
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Service Type</label>
+                <select class="form-select" name="serviceType" required>
+                    <option value="">Select service type</option>
+                    <option value="EDI">EDI</option>
+                    <option value="ENS">ENS</option>
+                    <option value="EPL">EPL</option>
+                    <option value="EVPL">EVPL</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Bandwidth</label>
+                <input class="form-control" type="text" name="serviceSpeed" placeholder="Enter bandwidth">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Bits Per Second</label>
+                <select class="form-select" name="bitsPerSec">
+                    <option value="">Select unit</option>
+                    <option value="mbps">mbps</option>
+                    <option value="gbps">gbps</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Class of Service</label>
+                <select class="form-select" name="classOfService">
+                    <option value="">Select class of service</option>
+                    <option value="Basic">Basic</option>
+                    <option value="Priority">Priority</option>
+                    <option value="Premium">Premium</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Validation & Testing</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Validation Method with Offnet</label>
+                <select class="form-select" name="offnetTest">
+                    <option value="">Select validation method</option>
+                    <option value="Mac Validation">Mac Validation</option>
+                    <option value="Loop Test">Loop Test</option>
+                    <option value="Traffic Validation">Traffic Validation</option>
+                    <option value="Other/Unable">Other/Unable</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Demarc Info</label>
+                <input class="form-control" type="text" name="demarcInfo" placeholder="Enter demarc information">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        <div class="form-group">
+            <label class="form-label">Additional Notes / CLI Output</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}

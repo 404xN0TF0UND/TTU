@@ -103,6 +103,61 @@ textarea.form-control:focus {
     width: 1rem;
     height: 1rem;
 }
+
+/* Custom Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    background-color: #1e2124;
+    border: 1px solid #2f3136;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #e6e9ea;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.modal-close:hover {
+    background-color: #2f3136;
+    color: #e6e9ea;
+}
+
+/* Ensure modal inputs are properly styled */
+.modal-overlay .form-control {
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border: 1px solid #2f3136;
+}
+
+.modal-overlay .form-control:focus {
+    background-color: #1e2124;
+    color: #e6e9ea;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 0.2rem rgba(88, 101, 242, 0.25);
+}
 </style>
 
 <h2>Execute Commands</h2>
@@ -217,14 +272,16 @@ textarea.form-control:focus {
 </div>
 
 <!-- Credentials Modal -->
-<div class="modal fade" id="credentialsModal" tabindex="-1" aria-labelledby="credentialsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div id="credentialsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="credentialsModalLabel">
+                <h5 class="modal-title">
                     <i class="fas fa-key me-2"></i>Enter Device Credentials
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="modal-close" onclick="closeCredentialsModal()" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
@@ -244,7 +301,7 @@ textarea.form-control:focus {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="closeCredentialsModal()">Cancel</button>
                 <button type="button" class="btn btn-primary" id="executeWithCredentials">
                     <i class="fas fa-play me-1"></i>Execute Commands
                 </button>
@@ -307,9 +364,23 @@ document.getElementById('executeForm').addEventListener('submit', function(e) {
     document.getElementById('modalDeviceName').textContent = deviceName;
     document.getElementById('modalCommandCount').textContent = commands.split('\n').filter(cmd => cmd.trim()).length;
     
-    const modal = new bootstrap.Modal(document.getElementById('credentialsModal'));
-    modal.show();
+    // Clear previous values
+    document.getElementById('modal_username').value = '';
+    document.getElementById('modal_password').value = '';
+    
+    // Show modal
+    document.getElementById('credentialsModal').style.display = 'flex';
+    
+    // Focus on username field
+    setTimeout(() => {
+        document.getElementById('modal_username').focus();
+    }, 100);
 });
+
+// Close modal function
+function closeCredentialsModal() {
+    document.getElementById('credentialsModal').style.display = 'none';
+}
 
 // Execute with credentials
 document.getElementById('executeWithCredentials').addEventListener('click', function() {
@@ -327,31 +398,31 @@ document.getElementById('executeWithCredentials').addEventListener('click', func
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Connecting...';
     btn.disabled = true;
     
-    // Create form data
-    const formData = new FormData();
-    formData.append('device_name', document.getElementById('device_name').value);
-    formData.append('commands', document.getElementById('commands').value);
-    formData.append('username', username);
-    formData.append('password', password);
+    // Create a hidden form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ url_for("execute_commands") }}';
+    form.style.display = 'none';
     
-    // Submit the form
-    fetch('{{ url_for("execute_commands") }}', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(html => {
-        // Replace the current page content with the response
-        document.documentElement.innerHTML = html;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error executing commands: ' + error.message);
-        
-        // Reset button
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
+    // Add form fields
+    const fields = {
+        'device_name': document.getElementById('device_name').value,
+        'commands': document.getElementById('commands').value,
+        'username': username,
+        'password': password
+    };
+    
+    for (const [name, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    // Add form to page and submit
+    document.body.appendChild(form);
+    form.submit();
 });
 
 // Auto-select device if specified in URL
@@ -361,6 +432,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (device) {
         document.getElementById('device_name').value = device;
     }
+    
+    // Add keyboard event listeners for modal
+    document.addEventListener('keydown', function(e) {
+        // Close modal with Escape key
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('credentialsModal');
+            if (modal.style.display === 'flex') {
+                closeCredentialsModal();
+            }
+        }
+        
+        // Submit modal with Enter key (when in password field)
+        if (e.key === 'Enter' && e.target.id === 'modal_password') {
+            e.preventDefault();
+            document.getElementById('executeWithCredentials').click();
+        }
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('credentialsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCredentialsModal();
+        }
+    });
 });
 
 // Keyboard shortcuts

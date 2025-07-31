@@ -1,59 +1,100 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Disco Issue Soft Disco</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "Disconnect Issue - Soft Disconnect" %}
+{% set form_description = "Generate a comprehensive note for soft disconnect operations. Document service disconnection and troubleshooting steps." %}
+{% set form_id = "disco_soft_disco_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">CPE IP/CLLI or Modem/NID MAC:</label>
-    <input class="form-control" type="text" name="cpeIpOrEoHFCMacs">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">UNI port:</label>
-    <select class="form-select" name="portNum">
-      <option value="N/A">N/A</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="ge-0/0/0">ge-0/0/0</option>
-      <option value="ge-0/0/1">ge-0/0/1</option>
-      <option value="ge-0/0/2">ge-0/0/2</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">otherPortNum</label>
-    <input class="form-control" type="text" name="otherPortNum">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Service:</label>
-    <select class="form-select" name="serviceType">
-      <option value="EDI">EDI</option>
-      <option value="ENS">ENS</option>
-      <option value="EPL">EPL</option>
-      <option value="EVPL">EVPL</option>
-      <option value="E Access EPL">E Access EPL</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">SUR Sub-interface:</label>
-    <input class="form-control" type="text" name="surSubInterface">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes / CLI output:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Device Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">CPE IP/CLLI or Modem/NID MAC</label>
+                <input class="form-control" type="text" name="cpeIpOrEoHFCMacs" placeholder="Enter device identifier" required>
+                <div class="form-text">Enter the CPE IP address, CLLI code, or MAC address</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">UNI Port</label>
+                <select class="form-select" name="portNum">
+                    <option value="N/A">N/A</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="ge-0/0/0">ge-0/0/0</option>
+                    <option value="ge-0/0/1">ge-0/0/1</option>
+                    <option value="ge-0/0/2">ge-0/0/2</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Other Port Number</label>
+                <input class="form-control" type="text" name="otherPortNum" placeholder="Enter other port if needed">
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Service Type</label>
+                <select class="form-select" name="serviceType" required>
+                    <option value="">Select service type</option>
+                    <option value="EDI">EDI</option>
+                    <option value="ENS">ENS</option>
+                    <option value="EPL">EPL</option>
+                    <option value="EVPL">EVPL</option>
+                    <option value="E Access EPL">E Access EPL</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Disconnect Details</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">SUR Sub-interface</label>
+                <input class="form-control" type="text" name="surSubInterface" placeholder="Enter SUR sub-interface">
+                <div class="form-text">Enter the SUR sub-interface if applicable</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        <div class="form-group">
+            <label class="form-label">Additional Notes / CLI Output</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}

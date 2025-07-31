@@ -1,57 +1,73 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Enni</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "ENNI Configuration" %}
+{% set form_description = "Generate a comprehensive note for ENNI (External Network-to-Network Interface) configuration operations." %}
+{% set form_id = "enni_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">ENNI Handoff Interface:</label>
-    <input class="form-control" type="text" name="handoffInt">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Handoff Type:</label>
-    <select class="form-select" name="portType">
-      <option value="Copper">Copper</option>
-      <option value="Fiber - MM">Fiber - MM</option>
-      <option value="Fiber - SM">Fiber - SM</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Speed:</label>
-    <select class="form-select" name="portSpeed">
-      <option value="10 mbps">10 mbps</option>
-      <option value="100 mbps">100 mbps</option>
-      <option value="1000 mbps">1000 mbps</option>
-      <option value="10 gbps">10 gbps</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Duplex:</label>
-    <select class="form-select" name="portDuplex">
-      <option value="Full">Full</option>
-      <option value="Half">Half</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Auto-Neg:</label>
-    <input type="radio" name="portAutoNeg" value="Yes"> Yes
-    <input type="radio" name="portAutoNeg" value="No"> No
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Interface Enabled:</label>
-    <input type="radio" name="intEnabled" value="Yes"> Yes
-    <input type="radio" name="intEnabled" value="No"> No
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes / CLI output:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">ENNI Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">ENNI Port</label>
+                <input class="form-control" type="text" name="enniPort" placeholder="Enter ENNI port" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Service Type</label>
+                <select class="form-select" name="serviceType" required>
+                    <option value="">Select service type</option>
+                    <option value="EDI">EDI</option>
+                    <option value="ENS">ENS</option>
+                    <option value="EPL">EPL</option>
+                    <option value="EVPL">EVPL</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">VLAN</label>
+                <input class="form-control" type="text" name="serviceVlan" placeholder="Enter VLAN" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Bandwidth</label>
+                <input class="form-control" type="text" name="bandwidth" placeholder="Enter bandwidth">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Additional Information</h3>
+        <div class="form-group">
+            <label class="form-label">Additional Notes / CLI Output</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}

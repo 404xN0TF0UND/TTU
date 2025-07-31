@@ -1,96 +1,158 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Bw Upgrade</h2>
+{% extends "base_form.html" %}
+{% block form_content %}
+{% set form_title = "Bandwidth Upgrade" %}
+{% set form_description = "Generate a comprehensive note for bandwidth upgrade operations. Fill in the details below to create your note." %}
+{% set form_id = "bw_upgrade_form" %}
+
 <form method="post">
-  <div class="mb-3">
-    <label class="form-label">Tags (comma separated)</label>
-    <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Customer Name, SRID or SOID: (don't include \/:*?"<>|.)</label>
-    <input class="form-control" type="text" name="siteName">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">CPE IP / CLLI:</label>
-    <input class="form-control" type="text" name="cpeIpClli">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Service:</label>
-    <select class="form-select" name="serviceType">
-      <option value="EDI">EDI</option>
-      <option value="ENS">ENS</option>
-      <option value="EPL">EPL</option>
-      <option value="EVPL">EVPL</option>
-      <option value="E Access EPL">E Access EPL</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">UNI port:</label>
-    <select class="form-select" name="portNum">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="ge-0/0/0">ge-0/0/0</option>
-      <option value="ge-0/0/1">ge-0/0/1</option>
-      <option value="ge-0/0/2">ge-0/0/2</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Other Port Number:</label>
-    <input class="form-control" type="text" name="otherPortNum">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Previous Bandwidth:</label>
-    <input class="form-control" type="text" name="prevServiceSpeed">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Previous Bits Per Second:</label>
-    <select class="form-select" name="prevBitsPerSec">
-      <option value="mbps">mbps</option>
-      <option value="gbps">gbps</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">New Bandwidth:</label>
-    <input class="form-control" type="text" name="newServiceSpeed">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">New Bits Per Second:</label>
-    <select class="form-select" name="newBitsPerSec">
-      <option value="mbps">mbps</option>
-      <option value="gbps">gbps</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Update CLIPs:</label>
-    <input type="radio" name="clipsUpdate" value="Yes"> Yes
-    <input type="radio" name="clipsUpdate" value="No"> No
-  </div>
-  <div class="mb-3">
-    <label class="form-label">CLIPs Project ID:</label>
-    <input class="form-control" type="text" name="clipsPid">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Change Type:</label>
-    <select class="form-select" name="changeType">
-      <option value="Bandwidth">Bandwidth</option>
-      <option value="NNI">NNI</option>
-      <option value="VLAN">VLAN</option>
-      <option value="MSC">MSC</option>
-      <option value="COS">COS</option>
-      <option value="Tower Move">Tower Move</option>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Additional notes / CLI output:</label>
-    <textarea class="form-control" name="addInfo" rows="4"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Generate Note</button>
+    <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Tags (comma separated)</label>
+                <input class="form-control" type="text" name="tags" placeholder="e.g. urgent, customer, fiber" required>
+                <div class="form-text">Add relevant tags to categorize your note</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Customer Name, SRID or SOID</label>
+                <input class="form-control" type="text" name="siteName" placeholder="Enter customer identifier" required>
+                <div class="form-text">Don't include \/:*?"<>| characters</div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">CPE IP / CLLI</label>
+                <input class="form-control" type="text" name="cpeIpClli" placeholder="Enter CPE IP or CLLI" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Service Type</label>
+                <select class="form-select" name="serviceType" required>
+                    <option value="">Select service type</option>
+                    <option value="EDI">EDI</option>
+                    <option value="ENS">ENS</option>
+                    <option value="EPL">EPL</option>
+                    <option value="EVPL">EVPL</option>
+                    <option value="E Access EPL">E Access EPL</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Port Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">UNI Port</label>
+                <select class="form-select" name="portNum" required>
+                    <option value="">Select port</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="ge-0/0/0">ge-0/0/0</option>
+                    <option value="ge-0/0/1">ge-0/0/1</option>
+                    <option value="ge-0/0/2">ge-0/0/2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Other Port Number</label>
+                <input class="form-control" type="text" name="otherPortNum" placeholder="Enter other port if needed">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Bandwidth Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Previous Bandwidth</label>
+                <input class="form-control" type="text" name="prevServiceSpeed" placeholder="Enter previous bandwidth" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Previous Bits Per Second</label>
+                <select class="form-select" name="prevBitsPerSec" required>
+                    <option value="">Select unit</option>
+                    <option value="mbps">Mbps</option>
+                    <option value="gbps">Gbps</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">New Bandwidth</label>
+                <input class="form-control" type="text" name="newServiceSpeed" placeholder="Enter new bandwidth" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">New Bits Per Second</label>
+                <select class="form-select" name="newBitsPerSec" required>
+                    <option value="">Select unit</option>
+                    <option value="mbps">Mbps</option>
+                    <option value="gbps">Gbps</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">CLIPs Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Update CLIPs</label>
+                <div class="form-check">
+                    <input type="radio" name="clipsUpdate" value="Yes" id="clips-yes" required>
+                    <label class="form-check-label" for="clips-yes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" name="clipsUpdate" value="No" id="clips-no" required>
+                    <label class="form-check-label" for="clips-no">No</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">CLIPs Project ID</label>
+                <input class="form-control" type="text" name="clipsPid" placeholder="Enter CLIPs Project ID">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Change Details</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Change Type</label>
+                <select class="form-select" name="changeType" required>
+                    <option value="">Select change type</option>
+                    <option value="Bandwidth">Bandwidth</option>
+                    <option value="NNI">NNI</option>
+                    <option value="VLAN">VLAN</option>
+                    <option value="MSC">MSC</option>
+                    <option value="COS">COS</option>
+                    <option value="Tower Move">Tower Move</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Additional Notes / CLI Output</label>
+            <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
+            <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Home
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-file-alt me-1"></i>Generate Note
+        </button>
+    </div>
 </form>
 {% endblock %}
+

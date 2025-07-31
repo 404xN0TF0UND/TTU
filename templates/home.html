@@ -1,5 +1,129 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* Improved font styling for template cards and overall readability */
+.card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+}
+
+.card-body {
+    color: #e6e9ea;
+}
+
+.card-title {
+    color: #e6e9ea;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.card-text {
+    color: #e6e9ea;
+}
+
+.text-muted {
+    color: #72767d !important;
+}
+
+.badge {
+    font-weight: 500;
+    font-size: 12px;
+    padding: 0.4rem 0.6rem;
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.btn-sm {
+    font-size: 12px;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Template card specific styling */
+.template-card {
+    background-color: #1e2124;
+    border-color: #2f3136;
+    transition: all 0.2s ease;
+}
+
+.template-card:hover {
+    border-color: #5865f2;
+    box-shadow: 0 0 0 1px rgba(88, 101, 242, 0.25);
+    transform: translateY(-2px);
+}
+
+.template-card .card-title {
+    color: #e6e9ea;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.template-card .card-text {
+    color: #e6e9ea;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.template-card small {
+    color: #72767d;
+    font-size: 12px;
+}
+
+/* Category buttons */
+.category-btn {
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Improve overall readability */
+h2, h3, h4, h5, h6 {
+    color: #e6e9ea;
+    font-weight: 600;
+}
+
+/* Better button styling */
+.btn-primary {
+    background-color: #5865f2;
+    border-color: #5865f2;
+}
+
+.btn-primary:hover {
+    background-color: #4752c4;
+    border-color: #4752c4;
+}
+
+.btn-outline-primary {
+    color: #5865f2;
+    border-color: #5865f2;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.active {
+    background-color: #5865f2;
+    border-color: #5865f2;
+    color: #ffffff;
+}
+
+.btn-outline-secondary {
+    color: #72767d;
+    border-color: #72767d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #72767d;
+    border-color: #72767d;
+    color: #ffffff;
+}
+</style>
 
 <style>
 .bg-gradient-primary {
@@ -318,10 +442,23 @@
                 <div class="card template-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="card-title mb-0">{{ template.replace('.html', '').replace('_', ' ').title() }}</h5>
+                                                         <h5 class="card-title mb-0">
+                                 {% if template == 'BW_Upgrade.html' %}BW Upgrade
+                                 {% elif template == 'ENNI.html' %}ENNI
+                                 {% elif template == 'General_FE.html' %}General FE
+                                 {% elif template == 'New_ME_EoHFC.html' %}New ME EoHFC
+                                 {% elif template == 'New_ME_Fiber.html' %}New ME Fiber
+                                 {% else %}{{ template.replace('.html', '').replace('_', ' ').title() }}{% endif %}
+                             </h5>
                             <span class="badge bg-primary">{{ category }}</span>
                         </div>
-                        <p class="card-text text-muted mb-3">Template for {{ template.replace('.html', '').replace('_', ' ').title() }} operations.</p>
+                                                 <p class="card-text text-muted mb-3">Template for 
+                             {% if template == 'BW_Upgrade.html' %}BW Upgrade
+                             {% elif template == 'ENNI.html' %}ENNI
+                             {% elif template == 'General_FE.html' %}General FE
+                             {% elif template == 'New_ME_EoHFC.html' %}New ME EoHFC
+                             {% elif template == 'New_ME_Fiber.html' %}New ME Fiber
+                             {% else %}{{ template.replace('.html', '').replace('_', ' ').title() }}{% endif %} operations.</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
                                 <i class="fas fa-file-code me-1"></i>{{ template }}
