@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for customer acceptance operations. Document customer sign-off and service verification." %}
 {% set form_id = "customer_acceptance_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='Customer_Acceptance') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

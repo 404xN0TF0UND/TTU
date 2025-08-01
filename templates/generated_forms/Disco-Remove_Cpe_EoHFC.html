@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for removing CPE EoHFC equipment during disconnect operations." %}
 {% set form_id = "disco_remove_cpe_eohfc_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='Disco-Remove_Cpe_EoHFC') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

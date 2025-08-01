@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for offnet carrier configurations and handoff operations." %}
 {% set form_id = "offnet_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='Offnet') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

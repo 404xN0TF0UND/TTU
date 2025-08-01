@@ -382,9 +382,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Loading state for submit button
     const submitBtn = document.querySelector('button[type="submit"]');
     if (submitBtn) {
-        submitBtn.addEventListener('click', function() {
-            this.classList.add('btn-loading');
-            this.disabled = true;
+        form.addEventListener('submit', function() {
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
         });
     }
 });

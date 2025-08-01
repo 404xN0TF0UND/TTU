@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for general front end operations and configurations." %}
 {% set form_id = "general_fe_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='General_FE') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

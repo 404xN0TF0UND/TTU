@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for bandwidth upgrade operations. Fill in the details below to create your note." %}
 {% set form_id = "bw_upgrade_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='BW_Upgrade') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for ENNI (External Network-to-Network Interface) configuration operations." %}
 {% set form_id = "enni_form" %}
 
-<form method="post">
+<form method="post" action="{{ url_for('show_form', form_name='ENNI') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">

@@ -1,0 +1,17 @@
+Sitename: ghg
+Offnetcarrier: ghg
+Offnetcontact: fg
+Offnetorder: fg
+Offnetcpe: fsd
+Handoffport: d
+Porttype: Copper
+Portspeed: 10 mbps
+Portautoneg: No
+Servicevlan: 5
+Servicetype: ENS
+Servicespeed: 1
+Bitspersec: mbps
+Classofservice: Basic
+Offnettest: Mac Validation
+Demarcinfo: 
+Addinfo: 
