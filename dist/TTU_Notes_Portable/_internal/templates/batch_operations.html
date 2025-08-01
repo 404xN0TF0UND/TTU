@@ -26,7 +26,7 @@
 
     <!-- Quick Stats -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-primary">
                 <div class="card-body text-center" style="color: var(--text-primary);">
                     <i class="fas fa-server fa-2x mb-2"></i>
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-success">
                 <div class="card-body text-center" style="color: var(--text-primary);">
                     <i class="fas fa-terminal fa-2x mb-2"></i>
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-info">
                 <div class="card-body text-center" style="color: var(--text-primary);">
                     <i class="fas fa-clock fa-2x mb-2"></i>
@@ -53,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-warning">
                 <div class="card-body text-center" style="color: var(--text-primary);">
                     <i class="fas fa-file-alt fa-2x mb-2"></i>
@@ -62,12 +62,21 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card bg-dark">
+                <div class="card-body text-center" style="color: var(--text-primary);">
+                    <i class="fas fa-keyboard fa-2x mb-2"></i>
+                    <h4 class="mb-0">Shortcuts</h4>
+                    <small>Ctrl+A: Select All | Ctrl+D: Deselect</small>
+                </div>
+            </div>
+        </div>
     </div>
 
     <form method="post" action="{{ url_for('execute_batch_operations') }}">
         <div class="row">
             <!-- Device Selection -->
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">

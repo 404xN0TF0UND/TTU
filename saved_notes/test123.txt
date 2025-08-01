@@ -1,13 +1,11 @@
-Sitename: test123
-Cpeipclli: 1.1.1.1
-Servicetype: EDI
-Portnum: 1
-Otherportnum: 3
-Prevservicespeed: 100
-Prevbitspersec: mbps
-Newservicespeed: 200
-Newbitspersec: mbps
-Clipsupdate: Yes
-Clipspid: na
-Changetype: Bandwidth
-Addinfo: test
+Customer: test123
+Technician Name: sds
+Technician Phone #: sds
+Tech ID: dfd
+Issue: Demarc
+
+Solution:
+dfdsf
+
+Additional notes / CLI output:
+dsfds

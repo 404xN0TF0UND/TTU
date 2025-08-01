@@ -420,6 +420,7 @@ def show_form(form_name):
         
         # Define field groupings and their display names
         field_mappings = {
+            'tags': 'Tags',
             'siteName': 'Customer',
             'techName': 'Technician Name',
             'techNum': 'Technician Phone #',
@@ -428,6 +429,7 @@ def show_form(form_name):
             'solution': 'Solution',
             'addInfo': 'Additional notes / CLI output',
             'cpeIpClli': 'CPE IP / CLLI',
+            'cpeIpOrEoHFCMacs': 'CPE IP/CLLI or Modem/NID MAC',
             'serviceType': 'Service Type',
             'portNum': 'UNI Port',
             'otherPortNum': 'Other Port Number',
@@ -445,22 +447,50 @@ def show_form(form_name):
             'handoffPort': 'Handoff Port',
             'portType': 'Port Type',
             'portSpeed': 'Port Speed',
+            'portDuplex': 'Port Duplex',
+            'portAutoNeg': 'Port Auto-Neg',
             'portAutoneg': 'Port Autoneg',
             'serviceVlan': 'Service VLAN',
             'serviceSpeed': 'Service Speed',
             'bitsPerSec': 'Bits Per Second',
             'classOfService': 'Class of Service',
             'offnetTest': 'Offnet Test',
-            'demarcInfo': 'Demarc Info'
+            'demarcInfo': 'Demarc Info',
+            'customerAccepting': 'Customer Accepting Service',
+            'pocName': 'POC Name',
+            'pocPhone': 'POC Phone',
+            'pocNumber': 'POC Number',
+            'custName': 'Customer Name',
+            'custNum': 'Customer Phone #',
+            'modemClli': 'Modem CLLI',
+            'modemMac': 'Modem MAC',
+            'nidClli': 'NID CLLI',
+            'nidMac': 'NID MAC',
+            'nidIP': 'NID IP',
+            'ontClli': 'CLLI',
+            'ontMac': 'MAC',
+            'rxPower': 'Downstream Rx Power',
+            'txPower': 'Upstream Tx Power',
+            'cmts': 'CMTS',
+            'firmwareVersion': 'Firmware Version',
+            'enniPort': 'ENNI Port',
+            'bandwidth': 'Bandwidth',
+            'surSubInterface': 'SUR Sub-interface'
         }
         
         # Group fields by type for better organization
-        basic_fields = ['siteName', 'techName', 'techNum', 'techId', 'issue']
-        service_fields = ['cpeIpClli', 'serviceType', 'portNum', 'otherPortNum', 'serviceVlan']
-        bandwidth_fields = ['prevServiceSpeed', 'prevBitsPerSec', 'newServiceSpeed', 'newBitsPerSec']
+        basic_fields = ['tags', 'siteName', 'techName', 'techNum', 'techId', 'issue']
+        equipment_fields = ['modemClli', 'modemMac', 'nidClli', 'nidMac', 'nidIP', 'ontClli', 'ontMac']
+        service_fields = ['cpeIpClli', 'cpeIpOrEoHFCMacs', 'serviceType', 'portNum', 'otherPortNum', 'serviceVlan']
+        port_fields = ['portSpeed', 'portDuplex', 'portAutoNeg', 'portAutoneg', 'enniPort']
+        bandwidth_fields = ['prevServiceSpeed', 'prevBitsPerSec', 'newServiceSpeed', 'newBitsPerSec', 'serviceSpeed', 'bandwidth']
         offnet_fields = ['offnetCarrier', 'offnetContact', 'offnetOrder', 'offnetCpe', 'handoffPort', 'portType', 'portSpeed', 'portAutoneg', 'serviceSpeed', 'bitsPerSec', 'classOfService', 'offnetTest']
         clips_fields = ['clipsUpdate', 'clipsPid']
         change_fields = ['changeType']
+        customer_fields = ['customerAccepting', 'pocName', 'pocPhone', 'pocNumber', 'custName', 'custNum']
+        power_fields = ['rxPower', 'txPower']
+        system_fields = ['cmts', 'firmwareVersion']
+        disconnect_fields = ['surSubInterface']
         text_fields = ['solution', 'addInfo', 'demarcInfo']
         
         # Add basic information
@@ -474,6 +504,17 @@ def show_form(form_name):
             note_lines.extend(basic_info)
             note_lines.append("")  # Empty line for spacing
         
+        # Add equipment information
+        equipment_info = []
+        for field in equipment_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                equipment_info.append(f"{display_name}: {form_data[field]}")
+        
+        if equipment_info:
+            note_lines.extend(equipment_info)
+            note_lines.append("")
+        
         # Add service configuration
         service_info = []
         for field in service_fields:
@@ -483,6 +524,17 @@ def show_form(form_name):
         
         if service_info:
             note_lines.extend(service_info)
+            note_lines.append("")
+        
+        # Add port configuration
+        port_info = []
+        for field in port_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                port_info.append(f"{display_name}: {form_data[field]}")
+        
+        if port_info:
+            note_lines.extend(port_info)
             note_lines.append("")
         
         # Add bandwidth configuration
@@ -535,6 +587,50 @@ def show_form(form_name):
                 display_name = field_mappings.get(field, field.replace('_', ' ').title())
                 note_lines.append(f"{display_name}: {form_data[field]}")
                 note_lines.append("")
+        
+        # Add customer acceptance information
+        customer_info = []
+        for field in customer_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                customer_info.append(f"{display_name}: {form_data[field]}")
+        
+        if customer_info:
+            note_lines.extend(customer_info)
+            note_lines.append("")
+        
+        # Add power levels
+        power_info = []
+        for field in power_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                power_info.append(f"{display_name}: {form_data[field]}")
+        
+        if power_info:
+            note_lines.extend(power_info)
+            note_lines.append("")
+        
+        # Add system information
+        system_info = []
+        for field in system_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                system_info.append(f"{display_name}: {form_data[field]}")
+        
+        if system_info:
+            note_lines.extend(system_info)
+            note_lines.append("")
+        
+        # Add disconnect information
+        disconnect_info = []
+        for field in disconnect_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                disconnect_info.append(f"{display_name}: {form_data[field]}")
+        
+        if disconnect_info:
+            note_lines.extend(disconnect_info)
+            note_lines.append("")
         
         # Add text fields with proper formatting
         for field in text_fields:

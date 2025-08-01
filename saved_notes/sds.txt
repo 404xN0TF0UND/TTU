@@ -1,0 +1,16 @@
+Customer: sds
+Technician Name: sds
+Technician Phone #: sds
+
+Service Type: EDI
+
+Port Speed: 100 mbps
+Service Speed: 100
+Class of Service: Basic
+
+Customer Accepting Service: Yes
+POC Name: fdfd
+POC Phone: sdsd
+
+Additional notes / CLI output:
+dsdfdfgdgdbfgbhfdyu

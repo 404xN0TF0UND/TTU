@@ -2,19 +2,19 @@
 {% block content %}
 <h2>Saved Notes</h2>
 <form method="get" class="row g-3 mb-4">
-    <div class="col-md-2">
+    <div class="col-md-1">
         <input type="text" name="search" class="form-control" placeholder="Search by filename..." value="{{ search }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
         <input type="text" name="content_search" class="form-control" placeholder="Search in note content..." value="{{ content_search }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
         <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
         <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
         <select name="tag" class="form-select">
             <option value="">All Tags</option>
             {% for tag in all_tags %}
@@ -22,14 +22,14 @@
             {% endfor %}
         </select>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
         <select name="type" class="form-select">
             <option value="">All Types</option>
             <option value="template_note" {% if note_type_filter == 'template_note' %}selected{% endif %}>Template Notes</option>
             <option value="quick_note" {% if note_type_filter == 'quick_note' %}selected{% endif %}>Quick Notes</option>
         </select>
     </div>
-    <div class="col-md-12">
+    <div class="col-md-6">
         <button type="submit" class="btn btn-primary">Filter</button>
         <a href="{{ url_for('view_notes') }}" class="btn btn-secondary ms-2">Clear</a>
         <a href="{{ url_for('view_notes') }}?favorites=true" class="btn btn-warning ms-2">
@@ -48,7 +48,7 @@
 
 <!-- Quick Stats -->
 <div class="row mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card text-center">
             <div class="card-body">
                                         <h5 class="card-title" style="color: var(--text-primary);">{{ notes|length }}</h5>
@@ -56,7 +56,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card text-center">
             <div class="card-body">
                                         <h5 class="card-title" style="color: var(--text-primary);">{{ notes|selectattr('favorite', 'equalto', true)|list|length }}</h5>
@@ -64,7 +64,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card text-center">
             <div class="card-body">
                                         <h5 class="card-title" style="color: var(--text-primary);">{{ notes|selectattr('type', 'equalto', 'quick_note')|list|length }}</h5>
@@ -72,11 +72,19 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="card text-center">
             <div class="card-body">
                                         <h5 class="card-title" style="color: var(--text-primary);">{{ notes|selectattr('type', 'equalto', 'template_note')|list|length }}</h5>
                         <p class="card-text" style="color: var(--text-primary);">Template Notes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title" style="color: var(--text-primary);">Actions</h5>
+                <p class="card-text" style="color: var(--text-primary);">Use Ctrl+A to select all, Ctrl+D to deselect</p>
             </div>
         </div>
     </div>
@@ -93,17 +101,21 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-6">
-                <form method="post" action="{{ url_for('bulk_delete_notes') }}" id="bulkDeleteForm">
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirmBulkDelete()">
-                        <i class="fas fa-trash me-1"></i>Delete Selected
-                    </button>
-                </form>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-danger btn-sm" onclick="submitBulkDelete()">
+                    <i class="fas fa-trash me-1"></i>Delete Selected
+                </button>
             </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-3">
                 <a href="{{ url_for('export_all_notes') }}" class="btn btn-success btn-sm">
                     <i class="fas fa-download me-1"></i>Export All Notes
                 </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted" style="color: var(--text-secondary) !important;">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Selected: <span id="selectedCount">0</span> notes
+                </small>
             </div>
         </div>
     </div>
@@ -156,12 +168,19 @@ function selectAll() {
     document.querySelectorAll('input[name="selected_notes"]').forEach(checkbox => {
         checkbox.checked = true;
     });
+    updateSelectedCount();
 }
 
 function deselectAll() {
     document.querySelectorAll('input[name="selected_notes"]').forEach(checkbox => {
         checkbox.checked = false;
     });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const selectedCount = document.querySelectorAll('input[name="selected_notes"]:checked').length;
+    document.getElementById('selectedCount').textContent = selectedCount;
 }
 
 function confirmBulkDelete() {
@@ -172,6 +191,42 @@ function confirmBulkDelete() {
     }
     return confirm(`Are you sure you want to delete ${selectedNotes.length} note(s)?`);
 }
+
+function submitBulkDelete() {
+    const selectedNotes = document.querySelectorAll('input[name="selected_notes"]:checked');
+    if (selectedNotes.length === 0) {
+        alert('Please select at least one note to delete.');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ${selectedNotes.length} note(s)?`)) {
+        // Create a form and submit it with the selected notes
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("bulk_delete_notes") }}';
+        
+        // Add each selected note as a hidden input
+        selectedNotes.forEach(checkbox => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_notes';
+            input.value = checkbox.value;
+            form.appendChild(input);
+        });
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Add event listeners to checkboxes for real-time count updates
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name="selected_notes"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+    updateSelectedCount(); // Initialize count
+});
 
 // Keyboard shortcuts for bulk operations
 document.addEventListener('keydown', function(e) {

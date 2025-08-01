@@ -272,22 +272,38 @@ h2, h3, h4, h5, h6 {
     </div>
 
     <!-- Quick Stats -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number">{{ templates_by_category|length if templates_by_category else 0 }}</div>
-            <div class="stat-label">Template Categories</div>
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-number">{{ templates_by_category|length if templates_by_category else 0 }}</div>
+                <div class="stat-label">Template Categories</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ devices|length if devices else 0 }}</div>
-            <div class="stat-label">Managed Devices</div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-number">{{ devices|length if devices else 0 }}</div>
+                <div class="stat-label">Managed Devices</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ notes|length if notes else 0 }}</div>
-            <div class="stat-label">Saved Notes</div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-number">{{ notes|length if notes else 0 }}</div>
+                <div class="stat-label">Saved Notes</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ quick_notes|length if quick_notes else 0 }}</div>
-            <div class="stat-label">Quick Notes</div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-number">{{ quick_notes|length if quick_notes else 0 }}</div>
+                <div class="stat-label">Quick Notes</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number">
+                    <i class="fas fa-keyboard me-2"></i>Shortcuts
+                </div>
+                <div class="stat-label">Ctrl+H: Home | Ctrl+N: Notes | Ctrl+Q: Quick Notes</div>
+            </div>
         </div>
     </div>
 
@@ -302,7 +318,7 @@ h2, h3, h4, h5, h6 {
 
     <div class="row g-4 mb-5">
         <!-- AI-Powered Template Suggestions -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-gradient-primary text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -320,7 +336,7 @@ h2, h3, h4, h5, h6 {
         </div>
 
         <!-- Automated Device Discovery -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-gradient-warning text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -338,7 +354,7 @@ h2, h3, h4, h5, h6 {
         </div>
 
         <!-- Batch Operations -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-gradient-danger text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -356,7 +372,7 @@ h2, h3, h4, h5, h6 {
         </div>
 
         <!-- Device Management -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-gradient-success text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -374,7 +390,7 @@ h2, h3, h4, h5, h6 {
         </div>
 
         <!-- Command Library -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-gradient-info text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -392,7 +408,7 @@ h2, h3, h4, h5, h6 {
         </div>
 
         <!-- Quick Notes -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-4">
             <div class="card feature-card bg-dark text-white h-100">
                 <div class="card-body d-flex flex-column">
                     <div class="mb-3">
@@ -438,7 +454,7 @@ h2, h3, h4, h5, h6 {
     <div class="row g-4" id="templatesContainer">
         {% for category, templates in templates_by_category.items() %}
             {% for template in templates %}
-            <div class="col-lg-4 col-md-6 template-item" data-category="{{ category }}">
+            <div class="col-lg-3 col-md-4 template-item" data-category="{{ category }}">
                 <div class="card template-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
