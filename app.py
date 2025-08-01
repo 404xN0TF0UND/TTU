@@ -40,6 +40,39 @@ def save_notes_metadata(metadata):
     with open(NOTES_METADATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2)
 
+def fix_notes_metadata():
+    """Fix existing notes metadata to include type field"""
+    metadata = load_notes_metadata()
+    updated = False
+    
+    for filename, meta in metadata.items():
+        if isinstance(meta, dict) and 'type' not in meta:
+            # If it's a quick note file, it should have 'type': 'quick_note'
+            # Otherwise, it's a template note
+            if filename.endswith('.txt'):
+                # Check if it's a quick note by looking at the content
+                filepath = os.path.join(SAVED_NOTES_DIR, filename)
+                if os.path.exists(filepath):
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        # Quick notes are typically shorter and don't have structured field labels
+                        # Template notes have structured content with field labels
+                        if len(content.split('\n')) < 10 and not any(':' in line for line in content.split('\n')[:5]):
+                            meta['type'] = 'quick_note'
+                        else:
+                            meta['type'] = 'template_note'
+                        updated = True
+                    except:
+                        # Default to template_note if we can't read the file
+                        meta['type'] = 'template_note'
+                        updated = True
+    
+    if updated:
+        save_notes_metadata(metadata)
+    
+    return updated
+
 def load_templates_metadata():
     if os.path.exists(TEMPLATES_METADATA_FILE):
         with open(TEMPLATES_METADATA_FILE, 'r', encoding='utf-8') as f:
@@ -161,6 +194,9 @@ def execute_command_on_device(device_name, commands, username=None, password=Non
 
 @app.route('/')
 def home():
+    # Fix existing notes metadata to include type field
+    fix_notes_metadata()
+    
     # Load templates and metadata
     templates_metadata = load_templates_metadata()
     form_files = [f for f in os.listdir(GENERATED_FORMS_DIR) if f.endswith('.html')]
@@ -181,7 +217,7 @@ def home():
     
     # Count quick notes from metadata
     quick_notes = [filename for filename, meta in notes_metadata.items() 
-                   if meta.get('type') == 'quick_note']
+                   if isinstance(meta, dict) and meta.get('type') == 'quick_note']
     
     # Get current date for display
     current_date = datetime.now().strftime('%B %d, %Y')
@@ -651,7 +687,7 @@ def show_form(form_name):
             metadata[filename]['modified'] = now
             metadata[filename]['tags'] = tags
         else:
-            metadata[filename] = {'created': now, 'modified': now, 'tags': tags}
+            metadata[filename] = {'created': now, 'modified': now, 'tags': tags, 'type': 'template_note'}
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(note_content)
         save_notes_metadata(metadata)
