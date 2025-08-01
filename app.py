@@ -32,8 +32,12 @@ os.makedirs(LOGS_DIR, exist_ok=True)
 
 def load_notes_metadata():
     if os.path.exists(NOTES_METADATA_FILE):
-        with open(NOTES_METADATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(NOTES_METADATA_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            # Return empty dict if file is corrupted or doesn't exist
+            return {}
     return {}
 
 def save_notes_metadata(metadata):
@@ -86,8 +90,12 @@ def save_templates_metadata(metadata):
 # Device management
 def load_devices():
     if os.path.exists(DEVICES_FILE):
-        with open(DEVICES_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(DEVICES_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            # Return empty dict if file is corrupted or doesn't exist
+            return {}
     return {}
 
 def save_devices(devices):
@@ -765,7 +773,10 @@ def quick_notes():
             return redirect(url_for('quick_notes'))
     
     notes_metadata = load_notes_metadata()
-    return render_template('quick_notes.html', notes_metadata=notes_metadata)
+    # Filter out any non-dictionary entries to prevent template errors
+    filtered_metadata = {filename: meta for filename, meta in notes_metadata.items() 
+                        if isinstance(meta, dict)}
+    return render_template('quick_notes.html', notes_metadata=filtered_metadata)
 
 @app.route('/quick-notes/view/<filename>')
 def view_quick_note(filename):
@@ -799,7 +810,10 @@ def edit_quick_note(filename):
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
             
-            save_notes_metadata(metadata)
+            # Update the full metadata dictionary
+            all_metadata = load_notes_metadata()
+            all_metadata[filename] = metadata
+            save_notes_metadata(all_metadata)
             flash('Quick note updated successfully!')
             return redirect(url_for('view_quick_note', filename=filename))
     
