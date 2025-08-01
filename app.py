@@ -415,7 +415,139 @@ def show_form(form_name):
             safe_name = 'note'
         filename = f"{safe_name}.txt"
         filepath = os.path.join(SAVED_NOTES_DIR, filename)
-        note_lines = [f"{k.replace('_', ' ').title()}: {v}" for k, v in form_data.items()]
+        # Create properly formatted note content
+        note_lines = []
+        
+        # Define field groupings and their display names
+        field_mappings = {
+            'siteName': 'Customer',
+            'techName': 'Technician Name',
+            'techNum': 'Technician Phone #',
+            'techId': 'Tech ID',
+            'issue': 'Issue',
+            'solution': 'Solution',
+            'addInfo': 'Additional notes / CLI output',
+            'cpeIpClli': 'CPE IP / CLLI',
+            'serviceType': 'Service Type',
+            'portNum': 'UNI Port',
+            'otherPortNum': 'Other Port Number',
+            'prevServiceSpeed': 'Previous Bandwidth',
+            'prevBitsPerSec': 'Previous Bits Per Second',
+            'newServiceSpeed': 'New Bandwidth',
+            'newBitsPerSec': 'New Bits Per Second',
+            'clipsUpdate': 'Update CLIPs',
+            'clipsPid': 'CLIPs Project ID',
+            'changeType': 'Change Type',
+            'offnetCarrier': 'Offnet Carrier',
+            'offnetContact': 'Offnet Contact',
+            'offnetOrder': 'Offnet Order',
+            'offnetCpe': 'Offnet CPE',
+            'handoffPort': 'Handoff Port',
+            'portType': 'Port Type',
+            'portSpeed': 'Port Speed',
+            'portAutoneg': 'Port Autoneg',
+            'serviceVlan': 'Service VLAN',
+            'serviceSpeed': 'Service Speed',
+            'bitsPerSec': 'Bits Per Second',
+            'classOfService': 'Class of Service',
+            'offnetTest': 'Offnet Test',
+            'demarcInfo': 'Demarc Info'
+        }
+        
+        # Group fields by type for better organization
+        basic_fields = ['siteName', 'techName', 'techNum', 'techId', 'issue']
+        service_fields = ['cpeIpClli', 'serviceType', 'portNum', 'otherPortNum', 'serviceVlan']
+        bandwidth_fields = ['prevServiceSpeed', 'prevBitsPerSec', 'newServiceSpeed', 'newBitsPerSec']
+        offnet_fields = ['offnetCarrier', 'offnetContact', 'offnetOrder', 'offnetCpe', 'handoffPort', 'portType', 'portSpeed', 'portAutoneg', 'serviceSpeed', 'bitsPerSec', 'classOfService', 'offnetTest']
+        clips_fields = ['clipsUpdate', 'clipsPid']
+        change_fields = ['changeType']
+        text_fields = ['solution', 'addInfo', 'demarcInfo']
+        
+        # Add basic information
+        basic_info = []
+        for field in basic_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                basic_info.append(f"{display_name}: {form_data[field]}")
+        
+        if basic_info:
+            note_lines.extend(basic_info)
+            note_lines.append("")  # Empty line for spacing
+        
+        # Add service configuration
+        service_info = []
+        for field in service_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                service_info.append(f"{display_name}: {form_data[field]}")
+        
+        if service_info:
+            note_lines.extend(service_info)
+            note_lines.append("")
+        
+        # Add bandwidth configuration
+        bandwidth_info = []
+        for field in bandwidth_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                bandwidth_info.append(f"{display_name}: {form_data[field]}")
+        
+        if bandwidth_info:
+            note_lines.extend(bandwidth_info)
+            note_lines.append("")
+        
+        # Add offnet configuration
+        offnet_info = []
+        for field in offnet_fields:
+            if field in form_data and form_data[field]:
+                # Special handling for service speed and bits per second combination
+                if field == 'serviceSpeed' and 'bitsPerSec' in form_data and form_data['bitsPerSec']:
+                    # Skip this field as it will be combined with bitsPerSec
+                    continue
+                elif field == 'bitsPerSec' and 'serviceSpeed' in form_data and form_data['serviceSpeed']:
+                    # Combine service speed and bits per second
+                    service_speed = form_data['serviceSpeed']
+                    bits_per_sec = form_data['bitsPerSec']
+                    offnet_info.append(f"Service Speed: {service_speed} {bits_per_sec}")
+                else:
+                    # Handle individual fields normally
+                    display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                    offnet_info.append(f"{display_name}: {form_data[field]}")
+        
+        if offnet_info:
+            note_lines.extend(offnet_info)
+            note_lines.append("")
+        
+        # Add CLIPs configuration
+        clips_info = []
+        for field in clips_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                clips_info.append(f"{display_name}: {form_data[field]}")
+        
+        if clips_info:
+            note_lines.extend(clips_info)
+            note_lines.append("")
+        
+        # Add change type
+        for field in change_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                note_lines.append(f"{display_name}: {form_data[field]}")
+                note_lines.append("")
+        
+        # Add text fields with proper formatting
+        for field in text_fields:
+            if field in form_data and form_data[field]:
+                display_name = field_mappings.get(field, field.replace('_', ' ').title())
+                note_lines.append(f"{display_name}:")
+                note_lines.append(form_data[field])
+                note_lines.append("")
+        
+        # Remove trailing empty lines
+        while note_lines and note_lines[-1] == "":
+            note_lines.pop()
+        
         note_content = '\n'.join(note_lines)
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         metadata = load_notes_metadata()

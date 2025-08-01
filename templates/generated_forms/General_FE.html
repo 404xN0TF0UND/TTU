@@ -1,7 +1,7 @@
 {% extends "base_form.html" %}
 {% block form_content %}
-{% set form_title = "General Front End" %}
-{% set form_description = "Generate a comprehensive note for general front end operations and configurations." %}
+{% set form_title = "General Field Engineer" %}
+{% set form_description = "Generate a comprehensive note for general field engineer operations. Fill in the details below to create your note." %}
 {% set form_id = "general_fe_form" %}
 
 <form method="post" action="{{ url_for('show_form', form_name='General_FE') }}">
@@ -22,54 +22,61 @@
     </div>
 
     <div class="form-section">
-        <h3 class="section-title">Service Configuration</h3>
+        <h3 class="section-title">Technician Information</h3>
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label required">Service Type</label>
-                <select class="form-select" name="serviceType" required>
-                    <option value="">Select service type</option>
-                    <option value="EDI">EDI</option>
-                    <option value="ENS">ENS</option>
-                    <option value="EPL">EPL</option>
-                    <option value="EVPL">EVPL</option>
-                </select>
+                <label class="form-label">Technician Name</label>
+                <input class="form-control" type="text" name="techName" placeholder="Enter technician name">
             </div>
             <div class="form-group">
-                <label class="form-label required">UNI Port</label>
-                <select class="form-select" name="portNum" required>
-                    <option value="">Select port</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="ge-0/0/0">ge-0/0/0</option>
-                    <option value="ge-0/0/1">ge-0/0/1</option>
-                    <option value="ge-0/0/2">ge-0/0/2</option>
-                </select>
+                <label class="form-label">Technician Phone #</label>
+                <input class="form-control" type="text" name="techNum" placeholder="Enter technician phone number">
             </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">Other Port Number</label>
-                <input class="form-control" type="text" name="otherPortNum" placeholder="Enter other port if needed">
+                <label class="form-label">Tech ID</label>
+                <input class="form-control" type="text" name="techId" placeholder="Enter technician ID">
             </div>
             <div class="form-group">
-                <label class="form-label">VLAN</label>
-                <input class="form-control" type="text" name="serviceVlan" placeholder="Enter VLAN">
+                <label class="form-label required">Issue</label>
+                <select class="form-select" name="issue" required>
+                    <option value="">Select issue type</option>
+                    <option value="Optic Tuning">Optic Tuning</option>
+                    <option value="Check Light Levels">Check Light Levels</option>
+                    <option value="General Questions">General Questions</option>
+                    <option value="Troubleshooting">Troubleshooting</option>
+                    <option value="Provisioning Modem">Provisioning Modem</option>
+                    <option value="Generate Configs">Generate Configs</option>
+                    <option value="Port Turnup">Port Turnup</option>
+                    <option value="Manual Test">Manual Test</option>
+                    <option value="TTUA Failed">TTUA Failed</option>
+                    <option value="Demarc">Demarc</option>
+                    <option value="Customer Acceptance">Customer Acceptance</option>
+                    <option value="Mac Validation">Mac Validation</option>
+                    <option value="Ping Test">Ping Test</option>
+                    <option value="Policy Question">Policy Question</option>
+                    <option value="Trouble After Install">Trouble After Install</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3 class="section-title">Solution Details</h3>
+        <div class="form-group">
+            <label class="form-label">Solution</label>
+            <textarea class="form-control" name="solution" rows="6" placeholder="Describe the solution implemented..."></textarea>
+            <div class="form-text">Provide detailed information about the solution</div>
         </div>
     </div>
 
     <div class="form-section">
         <h3 class="section-title">Additional Information</h3>
         <div class="form-group">
-            <label class="form-label">Additional Notes / CLI Output</label>
+            <label class="form-label">Additional notes / CLI output</label>
             <textarea class="form-control" name="addInfo" rows="6" placeholder="Enter any additional notes, CLI output, or special instructions..."></textarea>
             <div class="form-text">Include any relevant CLI commands, error messages, or special considerations</div>
         </div>
