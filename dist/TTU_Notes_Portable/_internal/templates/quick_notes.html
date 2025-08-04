@@ -59,7 +59,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
                         <option value="">All Tags</option>
                         {% set all_tags = [] %}
                         {% for filename, meta in notes_metadata.items() %}
-                            {% if meta.get('type') == 'quick_note' and meta.tags %}
+                            {% if meta is mapping and meta.get('type') == 'quick_note' and meta.tags %}
                                 {% for tag in meta.tags %}
                                     {% if tag not in all_tags %}
                                         {% set _ = all_tags.append(tag) %}
@@ -87,7 +87,7 @@ You can use placeholders like {vlan}, {port}, {device} that you can quickly find
             <div class="card-body">
                 {% set quick_notes = [] %}
                 {% for filename in notes_metadata.keys() %}
-                    {% if notes_metadata[filename].get('type') == 'quick_note' %}
+                    {% if notes_metadata[filename] is mapping and notes_metadata[filename].get('type') == 'quick_note' %}
                         {% set _ = quick_notes.append({'filename': filename, 'metadata': notes_metadata[filename]}) %}
                     {% endif %}
                 {% endfor %}

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-cog me-2"></i>Logs Configuration</h2>
+                    <p class="text-muted mb-0">Manage external log folders and monitoring settings</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('logs_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add External Folder -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-folder-plus me-2"></i>Add External Log Folder</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('logs_config') }}">
+                        <input type="hidden" name="action" value="add_folder">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="folder_name" class="form-label">Folder Name</label>
+                                    <input type="text" class="form-control" id="folder_name" name="folder_name" 
+                                           placeholder="e.g., SecureCRT Logs" required>
+                                    <div class="form-text">A friendly name to identify this folder</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="folder_path" class="form-label">Folder Path</label>
+                                    <input type="text" class="form-control" id="folder_path" name="folder_path" 
+                                           placeholder="C:\Users\username\Documents\SecureCRT\Logs" required>
+                                    <div class="form-text">Full path to your SecureCRT logs folder</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Folder
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Folders List -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-folder me-2"></i>External Log Folders</h5>
+                </div>
+                <div class="card-body">
+                    {% if config.external_folders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Path</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for folder in config.external_folders %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ folder.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <code>{{ folder.path }}</code>
+                                            {% if not folder.enabled %}
+                                                <span class="badge bg-warning ms-2">Disabled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if os.path.exists(folder.path) %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Not Found</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="POST" action="{{ url_for('logs_config') }}" style="display: inline;">
+                                                <input type="hidden" name="action" value="remove_folder">
+                                                <input type="hidden" name="folder_path" value="{{ folder.path }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Are you sure you want to remove this folder?')">
+                                                    <i class="fas fa-trash"></i> Remove
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No external folders configured yet.</p>
+                            <p class="text-muted">Add your SecureCRT logs folder above to get started.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-eye me-2"></i>Folder Monitoring</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6>Automatic Folder Monitoring</h6>
+                            <p class="text-muted mb-0">
+                                When enabled, TTU Notes will automatically detect new log files in your external folders 
+                                and update the index. This allows you to see new logs without manually rebuilding the index.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <form method="POST" action="{{ url_for('logs_config') }}" style="display: inline;">
+                                <input type="hidden" name="action" value="toggle_monitoring">
+                                <button type="submit" class="btn btn-lg {% if config.monitoring_enabled %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                                    <i class="fas {% if config.monitoring_enabled %}fa-toggle-on{% else %}fa-toggle-off{% endif %} me-1"></i>
+                                    {% if config.monitoring_enabled %}Enabled{% else %}Disabled{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="POST" action="{{ url_for('logs_config') }}">
+                                <input type="hidden" name="action" value="rebuild_index">
+                                <button type="submit" class="btn btn-warning btn-lg w-100">
+                                    <i class="fas fa-sync me-2"></i>Rebuild Logs Index
+                                </button>
+                                <div class="form-text mt-2">
+                                    Scan all configured folders and rebuild the search index
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('logs_dashboard') }}" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-chart-line me-2"></i>View Dashboard
+                            </a>
+                            <div class="form-text mt-2">
+                                Return to the logs dashboard to see statistics and recent activity
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('check_new_logs') }}" class="btn btn-info btn-lg w-100">
+                                <i class="fas fa-search me-2"></i>Check for New Logs
+                            </a>
+                            <div class="form-text mt-2">
+                                Manually scan external folders for new log files
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('logs_search') }}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-search me-2"></i>Search Logs
+                            </a>
+                            <div class="form-text mt-2">
+                                Search through all indexed log files
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 

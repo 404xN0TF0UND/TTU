@@ -25,6 +25,7 @@ TEMPLATES_METADATA_FILE = os.path.join(GENERATED_FORMS_DIR, 'templates_metadata.
 DEVICES_FILE = os.path.join(os.path.dirname(__file__), 'devices.json')
 LOGS_DIR = os.path.join(os.path.dirname(__file__), 'Logs', 'Logs')
 LOGS_INDEX_FILE = os.path.join(os.path.dirname(__file__), 'logs_index.json')
+LOGS_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'logs_config.json')
 
 os.makedirs(SAVED_NOTES_DIR, exist_ok=True)
 os.makedirs(SCRIPTS_DIR, exist_ok=True)
@@ -101,6 +102,69 @@ def load_devices():
 def save_devices(devices):
     with open(DEVICES_FILE, 'w', encoding='utf-8') as f:
         json.dump(devices, f, indent=2)
+
+# Logs configuration management
+def load_logs_config():
+    """Load logs configuration including external folders"""
+    if os.path.exists(LOGS_CONFIG_FILE):
+        try:
+            with open(LOGS_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                # Ensure required fields exist
+                if 'external_folders' not in config:
+                    config['external_folders'] = []
+                if 'monitoring_enabled' not in config:
+                    config['monitoring_enabled'] = False
+                return config
+        except (json.JSONDecodeError, FileNotFoundError):
+            pass
+    return {
+        'external_folders': [],
+        'monitoring_enabled': False
+    }
+
+def save_logs_config(config):
+    """Save logs configuration"""
+    with open(LOGS_CONFIG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(config, f, indent=2)
+
+def check_for_new_logs():
+    """Check external folders for new log files and update index if needed"""
+    config = load_logs_config()
+    
+    if not config.get('monitoring_enabled', False):
+        return False
+    
+    # Get current index
+    current_index = load_logs_index()
+    if not current_index:
+        return False
+    
+    # Get list of all files in external folders
+    external_files = set()
+    for folder in config.get('external_folders', []):
+        if not folder.get('enabled', True) or not os.path.exists(folder['path']):
+            continue
+            
+        for root, dirs, files in os.walk(folder['path']):
+            for file in files:
+                if file.endswith('.txt'):
+                    file_path = os.path.join(root, file)
+                    folder_name = os.path.basename(folder['path'])
+                    relative_path = os.path.join(folder_name, os.path.relpath(file_path, folder['path']))
+                    external_files.add(relative_path)
+    
+    # Check if there are new files
+    current_files = {f['path'] for f in current_index.get('files', [])}
+    new_files = external_files - current_files
+    
+    if new_files:
+        # Rebuild index to include new files
+        new_index = scan_and_index_logs()
+        save_logs_index(new_index)
+        return True
+    
+    return False
 
 def get_device_type(device_name):
     """Determine device type based on device name or IP"""
@@ -2336,14 +2400,28 @@ def scan_and_index_logs():
         'files': []
     }
     
-    if not os.path.exists(LOGS_DIR):
-        return logs_index
+    # Load logs configuration
+    logs_config = load_logs_config()
     
-    for root, dirs, files in os.walk(LOGS_DIR):
-        for file in files:
-            if file.endswith('.txt'):
-                file_path = os.path.join(root, file)
-                relative_path = os.path.relpath(file_path, LOGS_DIR)
+    # List of folders to scan (default + external)
+    folders_to_scan = [LOGS_DIR] + [folder['path'] for folder in logs_config.get('external_folders', [])]
+    
+    for folder_path in folders_to_scan:
+        if not os.path.exists(folder_path):
+            continue
+            
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                if file.endswith('.txt'):
+                    file_path = os.path.join(root, file)
+                    
+                    # Determine relative path based on source folder
+                    if folder_path == LOGS_DIR:
+                        relative_path = os.path.relpath(file_path, LOGS_DIR)
+                    else:
+                        # For external folders, use the folder name as prefix
+                        folder_name = os.path.basename(folder_path)
+                        relative_path = os.path.join(folder_name, os.path.relpath(file_path, folder_path))
                 
                 # Parse filename for metadata
                 try:
@@ -2586,6 +2664,93 @@ def logs_analytics():
     }
     
     return render_template('logs_analytics.html', analytics=analytics)
+
+@app.route('/logs/config', methods=['GET', 'POST'])
+def logs_config():
+    """Manage logs configuration including external folders"""
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'add_folder':
+            folder_path = request.form.get('folder_path', '').strip()
+            folder_name = request.form.get('folder_name', '').strip()
+            
+            if not folder_path or not folder_name:
+                flash('Both folder path and name are required', 'error')
+                return redirect(url_for('logs_config'))
+            
+            if not os.path.exists(folder_path):
+                flash('Folder path does not exist', 'error')
+                return redirect(url_for('logs_config'))
+            
+            config = load_logs_config()
+            
+            # Check if folder already exists
+            for folder in config['external_folders']:
+                if folder['path'] == folder_path:
+                    flash('Folder already exists in configuration', 'error')
+                    return redirect(url_for('logs_config'))
+            
+            config['external_folders'].append({
+                'name': folder_name,
+                'path': folder_path,
+                'enabled': True
+            })
+            
+            save_logs_config(config)
+            flash(f'External folder "{folder_name}" added successfully!', 'success')
+            
+        elif action == 'remove_folder':
+            folder_path = request.form.get('folder_path', '').strip()
+            
+            config = load_logs_config()
+            config['external_folders'] = [f for f in config['external_folders'] if f['path'] != folder_path]
+            save_logs_config(config)
+            
+            flash('External folder removed successfully!', 'success')
+            
+        elif action == 'toggle_monitoring':
+            config = load_logs_config()
+            config['monitoring_enabled'] = not config.get('monitoring_enabled', False)
+            save_logs_config(config)
+            
+            status = 'enabled' if config['monitoring_enabled'] else 'disabled'
+            flash(f'Folder monitoring {status}!', 'success')
+            
+        elif action == 'rebuild_index':
+            try:
+                index = scan_and_index_logs()
+                save_logs_index(index)
+                flash(f'Logs index rebuilt successfully! Found {index["total_files"]} files.', 'success')
+            except Exception as e:
+                flash(f'Error rebuilding index: {str(e)}', 'error')
+    
+    config = load_logs_config()
+    return render_template('logs_config.html', config=config)
+
+@app.route('/logs/check-new')
+def check_new_logs():
+    """Manually check for new log files in external folders"""
+    try:
+        if check_for_new_logs():
+            flash('New log files detected and index updated!', 'success')
+        else:
+            flash('No new log files found.', 'info')
+    except Exception as e:
+        flash(f'Error checking for new logs: {str(e)}', 'error')
+    
+    return redirect(url_for('logs_config'))
+
+@app.route('/logs/check-new-ajax')
+def check_new_logs_ajax():
+    """AJAX endpoint to check for new logs without page redirect"""
+    try:
+        if check_for_new_logs():
+            return {'success': True, 'message': 'New log files detected and index updated!'}
+        else:
+            return {'success': True, 'message': 'No new log files found.'}
+    except Exception as e:
+        return {'success': False, 'message': f'Error checking for new logs: {str(e)}'}
 
 def generate_smart_template_suggestions():
     """Generate smart template suggestions based on log analysis"""
