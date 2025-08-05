@@ -33,6 +33,7 @@ A comprehensive web-based network engineering toolkit designed to streamline you
 - **Smart Template Suggestions** - AI analyzes your logs to suggest relevant templates
 - **Automated Device Discovery** - Parse device names from logs to auto-populate device list
 - **Log Analysis & Search** - Index and search through thousands of historical device logs
+- **External Log Integration** - Import and monitor existing SecureCRT log folders
 - **Command Pattern Recognition** - Learn from your usage to suggest improvements
 - **Device Type Auto-Detection** - Automatic device type detection based on naming
 
@@ -141,6 +142,7 @@ The application will be available at `http://127.0.0.1:5000`
 3. **Create Templates** - Build reusable command templates
 4. **Execute Commands** - Run commands on individual or multiple devices
 5. **Take Notes** - Document your work with the advanced note system
+6. **Configure Logs** - Import existing SecureCRT log folders for analysis and monitoring
 
 ### **Device Management**
 - **Add Devices** - Enter device names/IPs and device types
@@ -166,13 +168,22 @@ The application will be available at `http://127.0.0.1:5000`
 - **Searchable** - Find commands quickly with search functionality
 - **Editable** - Add, edit, and organize commands as needed
 
+### **External Log Integration**
+- **Import Existing Logs** - Add your existing SecureCRT log folders to the application
+- **Folder Monitoring** - Automatically detect new log files in configured folders
+- **Unified Search** - Search across all log sources (internal and external) simultaneously
+- **Configuration Management** - Add, remove, and manage external log folders
+- **Manual Refresh** - Check for new logs on demand or enable automatic monitoring
+
 ## 🔧 **Advanced Features**
 
 ### **Log Analysis**
 - **Historical Log Processing** - Analyze thousands of device logs
+- **External Log Integration** - Import existing SecureCRT log folders and monitor for changes
 - **Command Extraction** - Automatically extract commands from logs
 - **Pattern Recognition** - Identify common command patterns
 - **Device Discovery** - Find devices mentioned in logs
+- **Unified Search** - Search across all log sources (internal and external) simultaneously
 
 ### **Batch Operations**
 - **Multi-Device Execution** - Run commands on multiple devices simultaneously
@@ -192,15 +203,18 @@ TTU/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
 ├── README.md             # This file
+├── EXTERNAL_LOGS_GUIDE.md # External logs integration guide
 ├── templates/            # HTML templates
 │   ├── base.html         # Base template with navigation
 │   ├── home.html         # Enhanced dashboard
 │   ├── manage_devices.html # Device management
+│   ├── logs_config.html  # External logs configuration
 │   └── ...               # Other templates
 ├── saved_notes/          # Saved notes and metadata
 ├── scripts/              # Python automation scripts
 ├── devices.json          # Device configuration
-└── logs_index.json       # Log analysis index
+├── logs_index.json       # Log analysis index
+└── logs_config.json      # External logs configuration
 ```
 
 ## 🔒 **Security Features**
@@ -232,10 +246,12 @@ For issues, questions, or feature requests:
 2. Review the template system for common tasks
 3. Use the device discovery feature for large environments
 4. Leverage batch operations for efficiency
+5. Consult the `EXTERNAL_LOGS_GUIDE.md` for external log integration help
 
 ## 🎉 **What's New**
 
 ### **Latest Updates**
+- ✅ **External Log Integration** - Import and monitor existing SecureCRT log folders
 - ✅ **Enhanced Home Dashboard** - Beautiful new interface with statistics
 - ✅ **Improved Device Management** - Better layout and organization
 - ✅ **Keyboard Shortcuts** - Global and context-specific shortcuts
