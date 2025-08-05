@@ -950,6 +950,85 @@ def export_all_notes():
     response.headers['Content-Disposition'] = 'attachment; filename=ttu_notes_export.json'
     return response
 
+@app.route('/notes/import', methods=['GET', 'POST'])
+def import_notes():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if not file.filename.endswith('.json'):
+            flash('Please select a JSON file', 'error')
+            return redirect(request.url)
+        
+        try:
+            # Read and parse the JSON file
+            import_data = json.loads(file.read().decode('utf-8'))
+            
+            if not isinstance(import_data, list):
+                flash('Invalid import file format', 'error')
+                return redirect(request.url)
+            
+            # Load existing metadata
+            metadata = load_notes_metadata()
+            imported_count = 0
+            skipped_count = 0
+            
+            for note_data in import_data:
+                if not isinstance(note_data, dict) or 'filename' not in note_data or 'content' not in note_data:
+                    continue
+                
+                filename = note_data['filename']
+                content = note_data['content']
+                note_metadata = note_data.get('metadata', {})
+                
+                # Check if file already exists
+                filepath = os.path.join(SAVED_NOTES_DIR, filename)
+                if os.path.exists(filepath):
+                    # Add timestamp to filename to avoid conflicts
+                    name, ext = os.path.splitext(filename)
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f"{name}_{timestamp}{ext}"
+                    filepath = os.path.join(SAVED_NOTES_DIR, filename)
+                    note_metadata['filename'] = filename
+                
+                # Save the note file
+                try:
+                    with open(filepath, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    
+                    # Update metadata
+                    metadata[filename] = note_metadata
+                    imported_count += 1
+                    
+                except Exception as e:
+                    skipped_count += 1
+                    continue
+            
+            # Save updated metadata
+            save_notes_metadata(metadata)
+            
+            if imported_count > 0:
+                flash(f'Successfully imported {imported_count} notes!', 'success')
+                if skipped_count > 0:
+                    flash(f'Skipped {skipped_count} notes due to errors', 'warning')
+            else:
+                flash('No notes were imported', 'warning')
+                
+        except json.JSONDecodeError:
+            flash('Invalid JSON file format', 'error')
+        except Exception as e:
+            flash(f'Error importing notes: {str(e)}', 'error')
+        
+        return redirect(url_for('view_notes'))
+    
+    return render_template('import_notes.html')
+
 @app.route('/notes/templates')
 def note_templates():
     templates = {
