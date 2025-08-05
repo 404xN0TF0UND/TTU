@@ -1,24 +1,108 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Python Scripts</h2>
-{% if scripts %}
-    <form method="post">
-        <div class="mb-3">
-            <label for="script" class="form-label">Select a script to run:</label>
-            <select name="script" id="script" class="form-select mb-2">
-                {% for script in scripts %}
-                    <option value="{{ script }}" {% if script == selected_script %}selected{% endif %}>{{ script }}</option>
-                {% endfor %}
-            </select>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-code me-2"></i>Python Scripts
+                </h1>
+                <a href="/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Home
+                </a>
+            </div>
+
+            <!-- Special Scripts Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-star me-2"></i>Specialized Scripts
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-network-wired fa-2x text-primary"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">Ciena CFM Script</h6>
+                                            <p class="mb-2 text-muted small">SSH to Ciena devices, run CFM tests, and capture outputs</p>
+                                            <a href="{{ url_for('ciena_cfm_script') }}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-play me-1"></i>Run Ciena CFM
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-tachometer-alt fa-2x text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">Bandwidth Change Script</h6>
+                                            <p class="mb-2 text-muted small">Modify CIR, PIR, and shaper rates on Ciena device ports</p>
+                                            <a href="{{ url_for('bandwidth_change_script') }}" class="btn btn-success btn-sm">
+                                                <i class="fas fa-play me-1"></i>Run Bandwidth Change
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Scripts Section -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2"></i>General Scripts
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if scripts %}
+                                <form method="post">
+                                    <div class="mb-3">
+                                        <label for="script" class="form-label">Select a script to run:</label>
+                                        <select name="script" id="script" class="form-select mb-2">
+                                            {% for script in scripts %}
+                                                <option value="{{ script }}" {% if script == selected_script %}selected{% endif %}>{{ script }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-play me-1"></i>Run Script
+                                    </button>
+                                </form>
+                                
+                                {% if output is not none %}
+                                    <div class="mt-4">
+                                        <h6>Script Output:</h6>
+                                        <div class="card">
+                                            <div class="card-body bg-dark text-light">
+                                                <pre class="mb-0" style="max-height: 400px; overflow-y: auto;">{{ output }}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-secondary">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No Python scripts found in the scripts/ directory. Add scripts to enable this feature.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Run Script</button>
-    </form>
-    {% if output is not none %}
-        <h4 class="mt-4">Output:</h4>
-        <pre class="bg-light p-3 border rounded">{{ output }}</pre>
-    {% endif %}
-{% else %}
-    <div class="alert alert-secondary">No Python scripts found in the scripts/ directory. Add scripts to enable this feature.</div>
-{% endif %}
-<a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+    </div>
+</div>
 {% endblock %} 

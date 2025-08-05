@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Bandwidth Change Script - TTU Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Bandwidth Change Script
+                </h1>
+                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Scripts
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cog me-2"></i>Script Configuration
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <div class="mb-3">
+                                    <label for="device_ip" class="form-label">
+                                        <i class="fas fa-server me-1"></i>Device IP Address *
+                                    </label>
+                                    <input type="text" class="form-control" id="device_ip" name="device_ip" 
+                                           placeholder="192.168.1.1" required>
+                                    <div class="form-text">Enter the IP address of the Ciena device</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">
+                                        <i class="fas fa-user me-1"></i>Username
+                                    </label>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           value="rvaugh200" placeholder="Username">
+                                    <div class="form-text">SSH username (default: rvaugh200)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Password *
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="Enter SSH password" required>
+                                    <div class="form-text">SSH password for the device</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="port" class="form-label">
+                                        <i class="fas fa-ethernet me-1"></i>Port Number *
+                                    </label>
+                                    <input type="number" class="form-control" id="port" name="port" 
+                                           placeholder="1" min="1" max="100" required>
+                                    <div class="form-text">Port number to modify (e.g., 1, 2, 3...)</div>
+                                </div>
+
+                                                                       <div class="mb-3">
+                                           <label for="cir_pir_shaper" class="form-label">
+                                               <i class="fas fa-chart-line me-1"></i>CIR/PIR/Shaper Rate *
+                                           </label>
+                                           <input type="number" class="form-control" id="cir_pir_shaper" name="cir_pir_shaper" 
+                                                  placeholder="1000000" min="1" required>
+                                           <div class="form-text">Bandwidth value in kbps (e.g., 1000000 for 1Gbps, 110000 for 110Mbps)</div>
+                                       </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>What this script does:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Connects to Ciena SAOS device via SSH</li>
+                                        <li>Shows current traffic profile settings</li>
+                                        <li>Sets CIR and PIR for the specified port</li>
+                                        <li>Sets shaper rate for the specified port</li>
+                                        <li>Saves configuration changes</li>
+                                        <li>Shows updated traffic profile</li>
+                                    </ul>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-play me-1"></i>Run Bandwidth Change Script
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    {% if result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-terminal me-2"></i>Script Results
+                                {% if result.success %}
+                                    <span class="badge bg-success ms-2">Success</span>
+                                {% else %}
+                                    <span class="badge bg-warning ms-2">Completed with Errors</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Device:</strong> {{ result.device_ip }}<br>
+                                <strong>Port:</strong> {{ result.port }}<br>
+                                <strong>Bandwidth:</strong> {{ result.cir_pir_shaper }} kbps<br>
+                                <strong>Timestamp:</strong> {{ result.timestamp }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#scriptOutput" 
+                                        aria-expanded="false" aria-controls="scriptOutput">
+                                    <i class="fas fa-eye me-1"></i>Toggle Output
+                                </button>
+                            </div>
+
+                            <div class="collapse" id="scriptOutput">
+                                <div class="card card-body bg-dark text-light">
+                                    <pre class="mb-0" style="max-height: 400px; overflow-y: auto;">{{ result.output }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Instructions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb me-2"></i>How to use:</h6>
+                                <ol class="mb-0">
+                                    <li>Enter the Ciena device IP address</li>
+                                    <li>Provide SSH credentials (username/password)</li>
+                                    <li>Specify the port number to modify</li>
+                                    <li>Enter the new bandwidth value in kbps</li>
+                                    <li>Click "Run Bandwidth Change Script"</li>
+                                    <li>Wait for the script to complete</li>
+                                    <li>Review the results and configuration changes</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Notes:</h6>
+                                <ul class="mb-0">
+                                    <li>This script modifies live device configuration</li>
+                                    <li>Changes are automatically saved to device memory</li>
+                                    <li>Ensure you have proper authorization before running</li>
+                                    <li>Bandwidth values should be in kilobits per second (kbps)</li>
+                                    <li>Results are logged to timestamped files in the scripts directory</li>
+                                </ul>
+                            </div>
+
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-check-circle me-2"></i>Example Values:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>110 Mbps:</strong> 110000</li>
+                                    <li><strong>1 Gbps:</strong> 1000000</li>
+                                    <li><strong>10 Gbps:</strong> 10000000</li>
+                                    <li><strong>100 Gbps:</strong> 100000000</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

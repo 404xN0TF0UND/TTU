@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, make_response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, make_response, jsonify, session
 import os
 import urllib.parse
 import subprocess
@@ -798,6 +798,104 @@ def scripts():
             except Exception as e:
                 output = f'Error running script: {e}'
     return render_template('scripts.html', scripts=scripts, output=output, selected_script=selected_script)
+
+@app.route('/scripts/ciena-cfm', methods=['GET', 'POST'])
+def ciena_cfm_script():
+    """Handle Ciena CFM script execution with web form inputs."""
+    if request.method == 'POST':
+        device_ip = request.form.get('device_ip', '').strip()
+        username = request.form.get('username', 'rvaugh200').strip()
+        password = request.form.get('password', '').strip()
+        local_mepid = request.form.get('local_mepid', '9').strip()
+        
+        # Validation
+        if not device_ip or not password:
+            flash('Device IP and password are required!', 'error')
+            return redirect(url_for('ciena_cfm_script'))
+        
+        try:
+            local_mepid = int(local_mepid)
+        except ValueError:
+            local_mepid = 9
+        
+        # Import and run the script
+        try:
+            import sys
+            sys.path.append(SCRIPTS_DIR)
+            from Ciena_CFM import run_ciena_cfm_web
+            
+            result = run_ciena_cfm_web(device_ip, username, password, local_mepid)
+            
+            if result['success']:
+                flash(f'Ciena CFM script completed successfully for {device_ip}!', 'success')
+            else:
+                flash(f'Ciena CFM script completed with errors for {device_ip}. Check output for details.', 'warning')
+            
+            # Store result in session for display
+            session['ciena_cfm_result'] = result
+            
+        except ImportError as e:
+            flash(f'Error importing Ciena CFM script: {str(e)}', 'error')
+        except Exception as e:
+            flash(f'Error running Ciena CFM script: {str(e)}', 'error')
+        
+        return redirect(url_for('ciena_cfm_script'))
+    
+    # Get result from session if available
+    result = session.pop('ciena_cfm_result', None)
+    return render_template('ciena_cfm.html', result=result)
+
+@app.route('/scripts/bandwidth-change', methods=['GET', 'POST'])
+def bandwidth_change_script():
+    """Handle Bandwidth Change script execution with web form inputs."""
+    if request.method == 'POST':
+        device_ip = request.form.get('device_ip', '').strip()
+        username = request.form.get('username', 'rvaugh200').strip()
+        password = request.form.get('password', '').strip()
+        port = request.form.get('port', '').strip()
+        cir_pir_shaper = request.form.get('cir_pir_shaper', '').strip()
+        
+        # Validation
+        if not device_ip or not password or not port or not cir_pir_shaper:
+            flash('All fields are required (Device IP, Password, Port, CIR/PIR/Shaper Rate)!', 'error')
+            return redirect(url_for('bandwidth_change_script'))
+        
+        try:
+            port_int = int(port)
+            cir_int = int(cir_pir_shaper)
+            if port_int <= 0 or cir_int <= 0:
+                flash('Port and CIR/PIR/Shaper Rate must be positive numbers!', 'error')
+                return redirect(url_for('bandwidth_change_script'))
+        except ValueError:
+            flash('Port and CIR/PIR/Shaper Rate must be valid numbers!', 'error')
+            return redirect(url_for('bandwidth_change_script'))
+        
+        # Import and run the script
+        try:
+            import sys
+            sys.path.append(SCRIPTS_DIR)
+            from Bandwidth_Change import run_bandwidth_change_web
+            
+            result = run_bandwidth_change_web(device_ip, username, password, port, cir_pir_shaper)
+            
+            if result['success']:
+                flash(f'Bandwidth change completed successfully for {device_ip} port {port}!', 'success')
+            else:
+                flash(f'Bandwidth change completed with errors for {device_ip}. Check output for details.', 'warning')
+            
+            # Store result in session for display
+            session['bandwidth_change_result'] = result
+            
+        except ImportError as e:
+            flash(f'Error importing Bandwidth Change script: {str(e)}', 'error')
+        except Exception as e:
+            flash(f'Error running Bandwidth Change script: {str(e)}', 'error')
+        
+        return redirect(url_for('bandwidth_change_script'))
+    
+    # Get result from session if available
+    result = session.pop('bandwidth_change_result', None)
+    return render_template('bandwidth_change.html', result=result)
 
 @app.route('/quick-notes', methods=['GET', 'POST'])
 def quick_notes():

@@ -28,6 +28,7 @@ A comprehensive web-based network engineering toolkit designed to streamline you
 - **Command Library** - Comprehensive reference organized by vendor and category
 - **Device Health Monitoring** - Real-time connectivity status
 - **Configuration Backup** - Automated device configuration backups
+- **Specialized Scripts** - Pre-built automation scripts for common tasks
 
 ### **🤖 Intelligent Features**
 - **Smart Template Suggestions** - AI analyzes your logs to suggest relevant templates
@@ -43,6 +44,8 @@ A comprehensive web-based network engineering toolkit designed to streamline you
 - **CN-3903, CN-3916, CN-3930, CN-3924, 5160, 5170**
 - Light level checks, performance monitoring, alarm management
 - Fiber troubleshooting workflows, CFM monitoring
+- **Bandwidth Management** - CIR/PIR/shaper rate configuration
+- **CFM Testing** - Automated CFM connectivity and performance testing
 
 ### **Cisco Devices**
 - **ASR9k and NCS5500 series**
@@ -72,6 +75,7 @@ The enhanced home page provides:
   - Device Management
   - Command Library
   - Quick Notes
+  - Specialized Scripts
 - **Template Categories** - Organized template display with filtering
 
 ## 🎮 **Keyboard Shortcuts**
@@ -143,6 +147,7 @@ The application will be available at `http://127.0.0.1:5000`
 4. **Execute Commands** - Run commands on individual or multiple devices
 5. **Take Notes** - Document your work with the advanced note system
 6. **Configure Logs** - Import existing SecureCRT log folders for analysis and monitoring
+7. **Run Scripts** - Execute specialized automation scripts for common tasks
 
 ### **Device Management**
 - **Add Devices** - Enter device names/IPs and device types
@@ -161,12 +166,20 @@ The application will be available at `http://127.0.0.1:5000`
 - **Advanced Search** - Find notes by content, tags, or date
 - **Bulk Operations** - Manage multiple notes at once
 - **Export/Import** - Backup and restore your notes
+- **Notes Import** - Import notes from other TTU Notes instances (handles filename conflicts)
 
 ### **Command Library**
 - **Vendor-Specific** - Commands organized by Cisco, Ciena, Nokia, Juniper
 - **Category-Based** - Commands grouped by function (show, configure, etc.)
 - **Searchable** - Find commands quickly with search functionality
 - **Editable** - Add, edit, and organize commands as needed
+
+### **Specialized Scripts**
+- **Ciena CFM Testing** - Automated CFM connectivity and performance testing
+- **Bandwidth Management** - Configure CIR, PIR, and shaper rates on Ciena devices
+- **Web-Based Interface** - No console input required, all parameters via web form
+- **Logging & Results** - Detailed execution logs and formatted output display
+- **Extensible Framework** - Easy to add new scripts following the established pattern
 
 ### **External Log Integration**
 - **Import Existing Logs** - Add your existing SecureCRT log folders to the application
@@ -196,6 +209,22 @@ The application will be available at `http://127.0.0.1:5000`
 - **Command Suggestions** - Get command recommendations for specific devices
 - **Workflow Optimization** - Identify patterns to improve your processes
 
+### **Specialized Automation Scripts**
+- **Ciena CFM Testing Script** - Automated CFM connectivity and performance testing
+  - Tests CFM connectivity between devices
+  - Validates MEP (Maintenance End Point) configurations
+  - Performs performance measurements
+  - Handles multiple EVC (Ethernet Virtual Circuit) scenarios
+  - Web-based parameter input (device IP, credentials, local MEP ID)
+
+- **Bandwidth Management Script** - Configure CIR, PIR, and shaper rates on Ciena devices
+  - Sets traffic profiling parameters for specified ports
+  - Configures CIR (Committed Information Rate) and PIR (Peak Information Rate)
+  - Sets shaper rates for egress port queuing
+  - Automatically saves configuration changes
+  - Bandwidth values in kbps (e.g., 110000 for 110Mbps, 1000000 for 1Gbps)
+  - Web-based parameter input with validation
+
 ## 📁 **File Structure**
 
 ```
@@ -212,6 +241,8 @@ TTU/
 │   └── ...               # Other templates
 ├── saved_notes/          # Saved notes and metadata
 ├── scripts/              # Python automation scripts
+│   ├── Ciena_CFM.py      # CFM testing script
+│   └── Bandwidth_Change.py # Bandwidth management script
 ├── devices.json          # Device configuration
 ├── logs_index.json       # Log analysis index
 └── logs_config.json      # External logs configuration
@@ -247,10 +278,13 @@ For issues, questions, or feature requests:
 3. Use the device discovery feature for large environments
 4. Leverage batch operations for efficiency
 5. Consult the `EXTERNAL_LOGS_GUIDE.md` for external log integration help
+6. Review specialized script documentation for bandwidth values and parameters
 
 ## 🎉 **What's New**
 
 ### **Latest Updates**
+- ✅ **Specialized Scripts** - Ciena CFM testing and bandwidth management scripts
+- ✅ **Web-Based Script Interface** - No console input required, all parameters via web forms
 - ✅ **External Log Integration** - Import and monitor existing SecureCRT log folders
 - ✅ **Enhanced Home Dashboard** - Beautiful new interface with statistics
 - ✅ **Improved Device Management** - Better layout and organization
