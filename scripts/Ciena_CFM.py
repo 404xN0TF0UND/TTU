@@ -35,7 +35,6 @@ def ssh_to_ciena(device_ip, username, password, commands, logger, cfm_test=False
     output_dict = {}
 
     try:
-        print(f"Connecting to {device_ip}...")
         logger.info(f"[{device_ip}] Connecting to device")
 
         with ConnectHandler(**device) as net_connect:
@@ -43,19 +42,16 @@ def ssh_to_ciena(device_ip, username, password, commands, logger, cfm_test=False
 
             # Run standard commands
             for command in commands:
-                print(f"\nExecuting command: {command}")
                 logger.info(f"[{device_ip}] Executing command: {command}")
 
                 try:
                     use_textfsm = False  # Avoid auto-parsing unless template available
                     output = net_connect.send_command(command, use_textfsm=use_textfsm)
                     output_dict[command] = output
-                    print(f"Output for '{command}':\n{output}\n{'-'*50}")
                     logger.info(f"[{device_ip}] Output for '{command}':\n{output}")
                 except Exception as e:
                     error_msg = f"Error executing command '{command}': {str(e)}"
                     output_dict[command] = error_msg
-                    print(f"{error_msg}\n{'-'*50}")
                     logger.error(f"[{device_ip}] {error_msg}")
 
             # Run CFM tests if enabled
@@ -78,25 +74,21 @@ def ssh_to_ciena(device_ip, username, password, commands, logger, cfm_test=False
 
                 if evc_services:
                     for service_name, remote_mep_ids in evc_services.items():
-                        print(f"\nProcessing EVC Service: {service_name} with {len(remote_mep_ids)} remote MEP(s)")
                         logger.info(f"[{device_ip}] Processing EVC Service: {service_name} with MEP IDs: {remote_mep_ids}")
                         
                         for remote_mepid in remote_mep_ids:
                             cfm_command = f"cfm delay send service {service_name} local-mepid {local_mepid} mepid {remote_mepid} count 30"
-                            print(f"\nExecuting CFM command: {cfm_command}")
                             logger.info(f"[{device_ip}] Executing CFM command: {cfm_command}")
                             try:
                                 output = net_connect.send_command(cfm_command)
                                 output_dict[cfm_command] = output
-                                print(f"Output for '{cfm_command}':\n{output}\n{'-'*50}")
                                 logger.info(f"[{device_ip}] Output for '{cfm_command}':\n{output}")
                             except Exception as e:
                                 error_msg = f"Error executing CFM command '{cfm_command}': {str(e)}"
                                 output_dict[cfm_command] = error_msg
-                                print(f"{error_msg}\n{'-'*50}")
                                 logger.error(f"[{device_ip}] {error_msg}")
 
-                    print("Waiting 60 seconds for CFM tests to complete...")
+                    logger.info(f"[{device_ip}] Waiting 60 seconds for CFM tests to complete...")
                     time.sleep(60)
 
                     cfm_show_command = "cfm delay show"
@@ -121,19 +113,16 @@ def ssh_to_ciena(device_ip, username, password, commands, logger, cfm_test=False
 
     except NetmikoTimeoutException:
         error_msg = f"Connection to {device_ip} timed out."
-        print(error_msg)
         logger.error(f"[{device_ip}] {error_msg}")
         output_dict['connection_error'] = error_msg
 
     except NetmikoAuthenticationException:
         error_msg = f"Authentication failed for {device_ip}. Check username/password."
-        print(error_msg)
         logger.error(f"[{device_ip}] {error_msg}")
         output_dict['connection_error'] = error_msg
 
     except Exception as e:
         error_msg = f"Unexpected error connecting to {device_ip}: {str(e)}"
-        print(error_msg)
         logger.error(f"[{device_ip}] {error_msg}")
         output_dict['connection_error'] = error_msg
 
@@ -163,12 +152,9 @@ def main():
     logger.info(f"[{device_ip}] Device details - Username: {username}, Commands: {commands}, Local MEP ID: {local_mepid}")
     outputs = ssh_to_ciena(device_ip, username, password, commands, logger, cfm_test=True, local_mepid=local_mepid)
 
-    print("\nSummary of Command Outputs:")
     logger.info(f"[{device_ip}] Summary of Command Outputs")
 
     for command, output in outputs.items():
-        print(f"\nCommand: {command}")
-        print(f"Output:\n{output}\n{'='*50}")
         logger.info(f"[{device_ip}] Command: {command}\nOutput:\n{output}")
 
     logger.info("[COMPLETE] Script execution completed")
