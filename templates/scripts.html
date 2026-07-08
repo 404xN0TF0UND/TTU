@@ -26,12 +26,12 @@
                             <div class="alert alert-success py-2 small mb-3">
                                 <i class="fas fa-key me-1"></i>Session credentials active for
                                 <strong>{{ creds_username }}</strong> — script pages won't ask for your password.
-                                <a href="{{ url_for('session_credentials') }}">Manage</a>
+                                <a href="{{ url_for('tools.session_credentials') }}">Manage</a>
                             </div>
                             {% else %}
                             <div class="alert alert-secondary py-2 small mb-3">
                                 <i class="fas fa-key me-1"></i>Tired of retyping your RADIUS password?
-                                <a href="{{ url_for('session_credentials') }}">Set session credentials</a>
+                                <a href="{{ url_for('tools.session_credentials') }}">Set session credentials</a>
                                 once — held in memory only.
                             </div>
                             {% endif %}
@@ -44,7 +44,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Ciena CFM Script</h6>
                                             <p class="mb-2 text-muted small">SSH to Ciena devices, run CFM tests, and capture outputs</p>
-                                            <a href="{{ url_for('ciena_cfm_script') }}" class="btn btn-primary btn-sm">
+                                            <a href="{{ url_for('tools.ciena_cfm_script') }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-play me-1"></i>Run Ciena CFM
                                             </a>
                                         </div>
@@ -58,7 +58,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Bandwidth Change Script</h6>
                                             <p class="mb-2 text-muted small">Modify CIR, PIR, and shaper rates on Ciena device ports</p>
-                                            <a href="{{ url_for('bandwidth_change_script') }}" class="btn btn-success btn-sm">
+                                            <a href="{{ url_for('tools.bandwidth_change_script') }}" class="btn btn-success btn-sm">
                                                 <i class="fas fa-play me-1"></i>Run Bandwidth Change
                                             </a>
                                         </div>
@@ -72,7 +72,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Port Disable (Turn-Down)</h6>
                                             <p class="mb-2 text-muted small">One-way, confirm-gated port disable across Nokia, XR, Juniper, and Ciena with pre/post state capture</p>
-                                            <a href="{{ url_for('port_disable_script') }}" class="btn btn-danger btn-sm">
+                                            <a href="{{ url_for('tools.port_disable_script') }}" class="btn btn-danger btn-sm">
                                                 <i class="fas fa-power-off me-1"></i>Open Port Disable
                                             </a>
                                         </div>
@@ -86,7 +86,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Port Check (Bulk Status)</h6>
                                             <p class="mb-2 text-muted small">Read-only admin/oper state and RX/TX light levels across all four vendors — single port or CSV batch</p>
-                                            <a href="{{ url_for('port_check_script') }}" class="btn btn-info btn-sm">
+                                            <a href="{{ url_for('tools.port_check_script') }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-heartbeat me-1"></i>Open Port Check
                                             </a>
                                         </div>
@@ -100,7 +100,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">Nokia DWDM Retune</h6>
                                             <p class="mb-2 text-muted small">ITU-grid-validated frequency change (THz / GHz / MHz / channel) with before/after optics and captured compare output</p>
-                                            <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-warning btn-sm">
+                                            <a href="{{ url_for('tools.nokia_retune_script') }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-wave-square me-1"></i>Open Nokia Retune
                                             </a>
                                         </div>
@@ -114,7 +114,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1">ITU Grid Reference &amp; Converter</h6>
                                             <p class="mb-2 text-muted small">C-band 100 GHz grid (ch 1-72) with THz / GHz / MHz / nm / XR-unit conversion — no login needed</p>
-                                            <a href="{{ url_for('itu_grid_tool') }}" class="btn btn-outline-info btn-sm">
+                                            <a href="{{ url_for('tools.itu_grid_tool') }}" class="btn btn-outline-info btn-sm">
                                                 <i class="fas fa-ruler-horizontal me-1"></i>Open ITU Grid
                                             </a>
                                         </div>

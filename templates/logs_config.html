@@ -10,7 +10,7 @@
                     <p class="text-muted mb-0">Manage external log folders and monitoring settings</p>
                 </div>
                 <div>
-                    <a href="{{ url_for('logs_dashboard') }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('logs.logs_dashboard') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                     </a>
                 </div>
@@ -26,7 +26,7 @@
                     <h5 class="mb-0"><i class="fas fa-folder-plus me-2"></i>Add External Log Folder</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('logs_config') }}">
+                    <form method="POST" action="{{ url_for('logs.logs_config') }}">
                         <input type="hidden" name="action" value="add_folder">
                         <div class="row">
                             <div class="col-md-6">
@@ -87,14 +87,14 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if os.path.exists(folder.path) %}
+                                            {% if folder.exists %}
                                                 <span class="badge bg-success">Available</span>
                                             {% else %}
                                                 <span class="badge bg-danger">Not Found</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <form method="POST" action="{{ url_for('logs_config') }}" style="display: inline;">
+                                            <form method="POST" action="{{ url_for('logs.logs_config') }}" style="display: inline;">
                                                 <input type="hidden" name="action" value="remove_folder">
                                                 <input type="hidden" name="folder_path" value="{{ folder.path }}">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" 
@@ -137,7 +137,7 @@
                             </p>
                         </div>
                         <div class="col-md-4 text-end">
-                            <form method="POST" action="{{ url_for('logs_config') }}" style="display: inline;">
+                            <form method="POST" action="{{ url_for('logs.logs_config') }}" style="display: inline;">
                                 <input type="hidden" name="action" value="toggle_monitoring">
                                 <button type="submit" class="btn btn-lg {% if config.monitoring_enabled %}btn-success{% else %}btn-outline-secondary{% endif %}">
                                     <i class="fas {% if config.monitoring_enabled %}fa-toggle-on{% else %}fa-toggle-off{% endif %} me-1"></i>
@@ -161,7 +161,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <form method="POST" action="{{ url_for('logs_config') }}">
+                            <form method="POST" action="{{ url_for('logs.logs_config') }}">
                                 <input type="hidden" name="action" value="rebuild_index">
                                 <button type="submit" class="btn btn-warning btn-lg w-100">
                                     <i class="fas fa-sync me-2"></i>Rebuild Logs Index
@@ -172,7 +172,7 @@
                             </form>
                         </div>
                         <div class="col-md-6">
-                            <a href="{{ url_for('logs_dashboard') }}" class="btn btn-primary btn-lg w-100">
+                            <a href="{{ url_for('logs.logs_dashboard') }}" class="btn btn-primary btn-lg w-100">
                                 <i class="fas fa-chart-line me-2"></i>View Dashboard
                             </a>
                             <div class="form-text mt-2">
@@ -182,7 +182,7 @@
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-6">
-                            <a href="{{ url_for('check_new_logs') }}" class="btn btn-info btn-lg w-100">
+                            <a href="{{ url_for('logs.check_new_logs') }}" class="btn btn-info btn-lg w-100">
                                 <i class="fas fa-search me-2"></i>Check for New Logs
                             </a>
                             <div class="form-text mt-2">
@@ -190,7 +190,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <a href="{{ url_for('logs_search') }}" class="btn btn-outline-primary btn-lg w-100">
+                            <a href="{{ url_for('logs.logs_search') }}" class="btn btn-outline-primary btn-lg w-100">
                                 <i class="fas fa-search me-2"></i>Search Logs
                             </a>
                             <div class="form-text mt-2">

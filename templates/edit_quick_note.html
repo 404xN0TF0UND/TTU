@@ -25,7 +25,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save me-1"></i>Update Quick Note
             </button>
-            <a href="{{ url_for('view_quick_note', filename=filename) }}" class="btn btn-secondary ms-2">
+            <a href="{{ url_for('notes.view_quick_note', filename=filename) }}" class="btn btn-secondary ms-2">
                 <i class="fas fa-times me-1"></i>Cancel
             </a>
         </form>

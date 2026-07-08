@@ -13,7 +13,7 @@
                     <button class="btn btn-outline-secondary" onclick="copyToClipboard('{{ metadata.device_name }}')">
                         <i class="fas fa-copy me-1"></i>Copy Device Name
                     </button>
-                    <a href="{{ url_for('logs_search') }}" class="btn btn-secondary ms-2">
+                    <a href="{{ url_for('logs.logs_search') }}" class="btn btn-secondary ms-2">
                         <i class="fas fa-arrow-left me-1"></i>Back to Search
                     </a>
                 </div>
@@ -85,19 +85,19 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url_for('logs_search', device_name=metadata.device_name) }}" 
+                        <a href="{{ url_for('logs.logs_search', device_name=metadata.device_name) }}" 
                            class="btn btn-outline-primary">
                             <i class="fas fa-search me-1"></i>Search This Device
                         </a>
-                        <a href="{{ url_for('logs_search', q='po sh') }}" 
+                        <a href="{{ url_for('logs.logs_search', q='po sh') }}" 
                            class="btn btn-outline-info">
                             <i class="fas fa-terminal me-1"></i>Search "po sh" Commands
                         </a>
-                        <a href="{{ url_for('logs_search', q='cfm') }}" 
+                        <a href="{{ url_for('logs.logs_search', q='cfm') }}" 
                            class="btn btn-outline-warning">
                             <i class="fas fa-network-wired me-1"></i>Search CFM Commands
                         </a>
-                        <a href="{{ url_for('logs_search', q='admin show') }}" 
+                        <a href="{{ url_for('logs.logs_search', q='admin show') }}" 
                            class="btn btn-outline-danger">
                             <i class="fas fa-cog me-1"></i>Search Admin Commands
                         </a>
@@ -208,7 +208,7 @@ function addToDevices() {
     localStorage.setItem('deviceFromLog', JSON.stringify(deviceData));
     
     // Redirect to add device page
-    window.location.href = "{{ url_for('add_device') }}";
+    window.location.href = "{{ url_for('devices.add_device') }}";
 }
 
 // Apply syntax highlighting

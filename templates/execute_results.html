@@ -157,13 +157,13 @@ code {
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="{{ url_for('execute_commands') }}?device={{ device_name }}" class="btn btn-primary">
+                    <a href="{{ url_for('automation.execute_commands') }}?device={{ device_name }}" class="btn btn-primary">
                         <i class="fas fa-redo me-1"></i>Execute More Commands
                     </a>
-                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('devices.manage_devices') }}" class="btn btn-secondary">
                         <i class="fas fa-server me-1"></i>Manage Devices
                     </a>
-                    <a href="{{ url_for('view_notes') }}" class="btn btn-info">
+                    <a href="{{ url_for('notes.view_notes') }}" class="btn btn-info">
                         <i class="fas fa-list me-1"></i>View All Notes
                     </a>
                 </div>
@@ -199,7 +199,7 @@ code {
 </div>
 
 <div class="mt-4">
-    <a href="{{ url_for('execute_commands') }}" class="btn btn-secondary">
+    <a href="{{ url_for('automation.execute_commands') }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-1"></i>Back to Execute
     </a>
 </div>
@@ -257,7 +257,7 @@ function copyAllResults() {
 
 // Load quick command
 function loadQuickCommand(command) {
-    window.location.href = `{{ url_for('execute_commands') }}?device={{ device_name }}&command=${encodeURIComponent(command)}`;
+    window.location.href = `{{ url_for('automation.execute_commands') }}?device={{ device_name }}&command=${encodeURIComponent(command)}`;
 }
 
 // Keyboard shortcuts
@@ -268,7 +268,7 @@ document.addEventListener('keydown', function(e) {
     }
     if (e.ctrlKey && e.key === 'e') {
         e.preventDefault();
-        window.location.href = "{{ url_for('execute_commands') }}?device={{ device_name }}";
+        window.location.href = "{{ url_for('automation.execute_commands') }}?device={{ device_name }}";
     }
 });
 

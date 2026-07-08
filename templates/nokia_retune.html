@@ -15,7 +15,7 @@
                 <h1 class="h3 mb-0">
                     <i class="fas fa-wave-square me-2 text-warning"></i>Nokia DWDM Retune
                 </h1>
-                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                <a href="{{ url_for('tools.scripts') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Back to Scripts
                 </a>
             </div>
@@ -128,7 +128,7 @@
                                 <button type="submit" class="btn btn-warning">
                                     <i class="fas fa-wave-square me-1"></i>Retune Port Now
                                 </button>
-                                <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-outline-secondary">Cancel</a>
+                                <a href="{{ url_for('tools.nokia_retune_script') }}" class="btn btn-outline-secondary">Cancel</a>
                                 <div class="form-text">Preview expires after 10 minutes.</div>
                             </div>
                         </div>
@@ -183,7 +183,7 @@
                         {% endfor %}
                     </details>
                     {% endif %}
-                    <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-primary mt-2">
+                    <a href="{{ url_for('tools.nokia_retune_script') }}" class="btn btn-primary mt-2">
                         <i class="fas fa-redo me-1"></i>New Retune
                     </a>
                 </div>

@@ -1,0 +1,10 @@
+2026-07-08 13:02:13,182 - INFO - [INIT] Port disable PREVIEW (web) — read-only pass
+2026-07-08 13:02:13,184 - INFO - [test-unreachable.invalid] ping: FAIL
+2026-07-08 13:02:13,184 - INFO - [COMPLETE] Preview finished
+2026-07-08 13:02:13,184 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "POST /scripts/port-disable HTTP/1.1" 200 -
+2026-07-08 13:02:13,193 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "POST /scripts/port-disable HTTP/1.1" 200 -
+2026-07-08 13:02:13,201 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "POST /scripts/ciena-cfm HTTP/1.1" 200 -
+2026-07-08 13:02:13,206 - INFO - [INIT] Nokia retune PREVIEW (web) — read-only pass
+2026-07-08 13:02:13,207 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "POST /scripts/nokia-retune HTTP/1.1" 200 -
+2026-07-08 13:02:13,214 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "[32mPOST /credentials HTTP/1.1[0m" 302 -
+2026-07-08 13:02:13,220 - INFO - 127.0.0.1 - - [08/Jul/2026 13:02:13] "GET /scripts HTTP/1.1" 200 -

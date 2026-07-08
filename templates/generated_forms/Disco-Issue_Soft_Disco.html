@@ -4,7 +4,7 @@
 {% set form_description = "Generate a comprehensive note for soft disconnect operations. Document service disconnection and troubleshooting steps." %}
 {% set form_id = "disco_soft_disco_form" %}
 
-<form method="post" action="{{ url_for('show_form', form_name='Disco-Issue_Soft_Disco') }}">
+<form method="post" action="{{ url_for('notes.show_form', form_name='Disco-Issue_Soft_Disco') }}">
     <div class="form-section">
         <h3 class="section-title">Basic Information</h3>
         <div class="form-row">
@@ -89,7 +89,7 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center">
-        <a href="{{ url_for('home') }}" class="btn btn-secondary">
+        <a href="{{ url_for('main.home') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i>Back to Home
         </a>
         <button type="submit" class="btn btn-primary">

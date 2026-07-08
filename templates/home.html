@@ -327,7 +327,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Get personalized template suggestions based on your device logs and usage patterns.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('template_suggestions') }}" class="btn btn-light btn-lg w-100">
+                        <a href="{{ url_for('notes.template_suggestions') }}" class="btn btn-light btn-lg w-100">
                             <i class="fas fa-magic me-2"></i>Get Suggestions
                         </a>
                     </div>
@@ -345,7 +345,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Discover and add devices from your log analysis automatically.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('device_discovery') }}" class="btn btn-light btn-lg w-100">
+                        <a href="{{ url_for('devices.device_discovery') }}" class="btn btn-light btn-lg w-100">
                             <i class="fas fa-search me-2"></i>Discover Devices
                         </a>
                     </div>
@@ -363,7 +363,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Execute commands across multiple devices simultaneously with progress tracking.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('batch_operations') }}" class="btn btn-light btn-lg w-100">
+                        <a href="{{ url_for('automation.batch_operations') }}" class="btn btn-light btn-lg w-100">
                             <i class="fas fa-play me-2"></i>Run Batch
                         </a>
                     </div>
@@ -381,7 +381,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Manage your network devices for SSH automation and command execution.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('manage_devices') }}" class="btn btn-light btn-lg w-100">
+                        <a href="{{ url_for('devices.manage_devices') }}" class="btn btn-light btn-lg w-100">
                             <i class="fas fa-cog me-2"></i>Manage Devices
                         </a>
                     </div>
@@ -399,7 +399,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Access a comprehensive library of network commands organized by vendor and category.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('command_library') }}" class="btn btn-light btn-lg w-100">
+                        <a href="{{ url_for('library.command_library') }}" class="btn btn-light btn-lg w-100">
                             <i class="fas fa-book me-2"></i>Browse Library
                         </a>
                     </div>
@@ -417,7 +417,7 @@ h2, h3, h4, h5, h6 {
                         <p class="card-text opacity-90">Create and manage quick command templates with variable replacement.</p>
                     </div>
                     <div class="mt-auto">
-                        <a href="{{ url_for('quick_notes') }}" class="btn btn-outline-light btn-lg w-100">
+                        <a href="{{ url_for('notes.quick_notes') }}" class="btn btn-outline-light btn-lg w-100">
                             <i class="fas fa-plus me-2"></i>Create Quick Note
                         </a>
                     </div>
@@ -479,7 +479,7 @@ h2, h3, h4, h5, h6 {
                             <small class="text-muted">
                                 <i class="fas fa-file-code me-1"></i>{{ template }}
                             </small>
-                            <a href="{{ url_for('show_form', form_name=template.replace('.html', '')) }}" class="btn btn-primary btn-sm">
+                            <a href="{{ url_for('notes.show_form', form_name=template.replace('.html', '')) }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-play me-1"></i>Use Template
                             </a>
                         </div>
@@ -497,7 +497,7 @@ h2, h3, h4, h5, h6 {
                     <i class="fas fa-file-code fa-4x text-muted mb-3"></i>
                     <h4 class="text-muted">No Templates Available</h4>
                     <p class="text-muted mb-3">Get started by creating your first template or using AI-powered suggestions.</p>
-                    <a href="{{ url_for('manage_templates') }}" class="btn btn-primary">
+                    <a href="{{ url_for('notes.manage_templates') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-1"></i>Create Template
                     </a>
                 </div>

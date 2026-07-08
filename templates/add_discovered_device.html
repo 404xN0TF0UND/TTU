@@ -10,7 +10,7 @@
                     <p class="text-muted mb-0">Add {{ device.name }} to your device list</p>
                 </div>
                 <div>
-                    <a href="{{ url_for('device_discovery') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('devices.device_discovery') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i>Back to Discovery
                     </a>
                 </div>
@@ -61,7 +61,7 @@
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Device Configuration</h5>
                 </div>
                 <div class="card-body">
-                    <form method="post" action="{{ url_for('add_device') }}">
+                    <form method="post" action="{{ url_for('devices.add_device') }}">
                         <div class="mb-3">
                             <label for="device_name" class="form-label">Device Name</label>
                             <input type="text" class="form-control" id="device_name" name="device_name" 
@@ -108,7 +108,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i>Add Device
                             </button>
-                            <a href="{{ url_for('device_discovery') }}" class="btn btn-secondary">
+                            <a href="{{ url_for('devices.device_discovery') }}" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i>Cancel
                             </a>
                         </div>
@@ -138,13 +138,13 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ url_for('execute_commands') }}?device={{ device.name }}" class="btn btn-outline-primary btn-sm">
+                        <a href="{{ url_for('automation.execute_commands') }}?device={{ device.name }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-terminal me-1"></i>Execute Commands
                         </a>
-                        <a href="{{ url_for('template_suggestions') }}" class="btn btn-outline-info btn-sm">
+                        <a href="{{ url_for('notes.template_suggestions') }}" class="btn btn-outline-info btn-sm">
                             <i class="fas fa-lightbulb me-1"></i>Get Template Suggestions
                         </a>
-                        <a href="{{ url_for('logs_search') }}?device_name={{ device.name }}" class="btn btn-outline-secondary btn-sm">
+                        <a href="{{ url_for('logs.logs_search') }}?device_name={{ device.name }}" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-search me-1"></i>View Device Logs
                         </a>
                     </div>
@@ -170,7 +170,7 @@ document.addEventListener('keydown', function(e) {
     }
     if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
-        window.location.href = "{{ url_for('device_discovery') }}";
+        window.location.href = "{{ url_for('devices.device_discovery') }}";
     }
 });
 </script>

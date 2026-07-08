@@ -10,7 +10,7 @@
                     <p class="text-muted mb-0">Fast batch operations for common tasks</p>
                 </div>
                 <div>
-                    <a href="{{ url_for('batch_operations') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('automation.batch_operations') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i>Back to Batch Operations
                     </a>
                 </div>
@@ -310,7 +310,7 @@ function executeQuickBatch(devices, commands, description) {
     // Create a form and submit it
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = "{{ url_for('execute_batch_operations') }}";
+    form.action = "{{ url_for('automation.execute_batch_operations') }}";
     
     // Add devices
     devices.forEach(device => {

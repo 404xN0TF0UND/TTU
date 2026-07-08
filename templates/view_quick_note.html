@@ -19,13 +19,13 @@
             <button class="btn btn-success btn-sm" onclick="copyToClipboard()">
                 <i class="fas fa-copy me-1"></i>Copy Commands
             </button>
-            <a href="{{ url_for('edit_quick_note', filename=filename) }}" class="btn btn-primary btn-sm ms-2">
+            <a href="{{ url_for('notes.edit_quick_note', filename=filename) }}" class="btn btn-primary btn-sm ms-2">
                 <i class="fas fa-edit me-1"></i>Edit
             </a>
-            <a href="{{ url_for('download_note', filename=filename) }}" class="btn btn-secondary btn-sm ms-2">
+            <a href="{{ url_for('notes.download_note', filename=filename) }}" class="btn btn-secondary btn-sm ms-2">
                 <i class="fas fa-download me-1"></i>Download
             </a>
-            <a href="{{ url_for('email_note', filename=filename) }}" class="btn btn-info btn-sm ms-2">
+            <a href="{{ url_for('notes.email_note', filename=filename) }}" class="btn btn-info btn-sm ms-2">
                 <i class="fas fa-envelope me-1"></i>Email
             </a>
         </div>
@@ -62,10 +62,10 @@
     <button class="btn btn-warning" onclick="showVariableModal()">
         <i class="fas fa-magic me-1"></i>Replace Variables
     </button>
-    <a href="{{ url_for('quick_notes') }}" class="btn btn-secondary ms-2">
+    <a href="{{ url_for('notes.quick_notes') }}" class="btn btn-secondary ms-2">
         <i class="fas fa-arrow-left me-1"></i>Back to Quick Notes
     </a>
-    <form method="post" action="{{ url_for('delete_quick_note', filename=filename) }}" style="display: inline;">
+    <form method="post" action="{{ url_for('notes.delete_quick_note', filename=filename) }}" style="display: inline;">
         <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Delete this quick note?');">
             <i class="fas fa-trash me-1"></i>Delete
         </button>
@@ -155,7 +155,7 @@ document.addEventListener('keydown', function(e) {
     // Ctrl+E to edit
     if (e.ctrlKey && e.key === 'e') {
         e.preventDefault();
-        window.location.href = "{{ url_for('edit_quick_note', filename=filename) }}";
+        window.location.href = "{{ url_for('notes.edit_quick_note', filename=filename) }}";
     }
 });
 </script>

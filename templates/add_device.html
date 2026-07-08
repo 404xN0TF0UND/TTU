@@ -197,7 +197,7 @@ h2 {
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Add Device
                     </button>
-                    <a href="{{ url_for('manage_devices') }}" class="btn btn-secondary ms-2">
+                    <a href="{{ url_for('devices.manage_devices') }}" class="btn btn-secondary ms-2">
                         <i class="fas fa-times me-1"></i>Cancel
                     </a>
                 </form>
@@ -373,7 +373,7 @@ document.getElementById('device_name').addEventListener('input', function(e) {
     
     // Debounce the search
     suggestionTimeout = setTimeout(() => {
-        fetch(`{{ url_for('auto_suggest_devices') }}?q=${encodeURIComponent(query)}`)
+        fetch(`{{ url_for('devices.auto_suggest_devices') }}?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(suggestions => {
                 if (suggestions.length > 0) {

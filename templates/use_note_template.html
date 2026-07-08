@@ -16,7 +16,7 @@
                 <h5 class="mb-0">Create Quick Note from Template</h5>
             </div>
             <div class="card-body">
-                <form method="post" action="{{ url_for('quick_notes') }}">
+                <form method="post" action="{{ url_for('notes.quick_notes') }}">
                     <div class="mb-3">
                         <label for="tags" class="form-label">Tags (comma separated)</label>
                         <input type="text" class="form-control" id="tags" name="tags" value="{{ template.tags }}" placeholder="e.g. cisco, vlan, troubleshooting, ciena">
@@ -28,7 +28,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Save as Quick Note
                     </button>
-                    <a href="{{ url_for('note_templates') }}" class="btn btn-secondary ms-2">
+                    <a href="{{ url_for('notes.note_templates') }}" class="btn btn-secondary ms-2">
                         <i class="fas fa-times me-1"></i>Cancel
                     </a>
                 </form>
@@ -75,23 +75,23 @@
             </div>
             <div class="card-body">
                 <div class="list-group list-group-flush">
-                    <a href="{{ url_for('use_note_template', template_id='cisco_vlan_config') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('notes.use_note_template', template_id='cisco_vlan_config') }}" class="list-group-item list-group-item-action">
                         <strong>Cisco VLAN Configuration</strong>
                         <div class="small text-muted">VLAN setup and port configuration</div>
                     </a>
-                    <a href="{{ url_for('use_note_template', template_id='cisco_interface_troubleshooting') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('notes.use_note_template', template_id='cisco_interface_troubleshooting') }}" class="list-group-item list-group-item-action">
                         <strong>Cisco Interface Troubleshooting</strong>
                         <div class="small text-muted">Interface status and diagnostics</div>
                     </a>
-                    <a href="{{ url_for('use_note_template', template_id='ciena_light_levels') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('notes.use_note_template', template_id='ciena_light_levels') }}" class="list-group-item list-group-item-action">
                         <strong>Ciena Light Level Check</strong>
                         <div class="small text-muted">Optical interface monitoring</div>
                     </a>
-                    <a href="{{ url_for('use_note_template', template_id='juniper_interface_config') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('notes.use_note_template', template_id='juniper_interface_config') }}" class="list-group-item list-group-item-action">
                         <strong>Juniper Interface Configuration</strong>
                         <div class="small text-muted">Juniper switch configuration</div>
                     </a>
-                    <a href="{{ url_for('use_note_template', template_id='nokia_interface_status') }}" class="list-group-item list-group-item-action">
+                    <a href="{{ url_for('notes.use_note_template', template_id='nokia_interface_status') }}" class="list-group-item list-group-item-action">
                         <strong>Nokia Interface Status</strong>
                         <div class="small text-muted">Nokia port monitoring</div>
                     </a>
