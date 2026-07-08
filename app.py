@@ -812,9 +812,7 @@ def ciena_cfm_script():
     if request.method == 'POST':
         mode = request.form.get('mode', 'status')
         device_ip = request.form.get('device_ip', '').strip()
-        username = (request.form.get('username', '').strip()
-                    or default_username)
-        password = request.form.get('password', '').strip()
+        username, password = resolve_creds(request.form)
 
         if not device_ip or not username or not password:
             flash('Device IP, username, and password are required!', 'error')
@@ -879,9 +877,7 @@ def bandwidth_change_script():
     """Handle Bandwidth Change script execution with web form inputs."""
     if request.method == 'POST':
         device_ip = request.form.get('device_ip', '').strip()
-        username = (request.form.get('username', '').strip()
-                    or os.environ.get('TTU_SSH_USER', ''))
-        password = request.form.get('password', '').strip()
+        username, password = resolve_creds(request.form)
         port = request.form.get('port', '').strip()
         cir_pir_shaper = request.form.get('cir_pir_shaper', '').strip()
         
@@ -928,6 +924,72 @@ def bandwidth_change_script():
     return render_template('bandwidth_change.html', result=result,
                            default_username=os.environ.get('TTU_SSH_USER', ''))
 
+# --- Session credentials (one prompt per app run) --------------------------
+# Held in module memory only — never written to disk, cleared on restart,
+# TTL-bounded. Script pages fall back to these when form fields are empty.
+SESSION_CREDS = {}
+SESSION_CREDS_TTL = 8 * 3600  # a workday
+
+
+def get_session_creds():
+    if SESSION_CREDS and \
+            time_module.time() - SESSION_CREDS['ts'] < SESSION_CREDS_TTL:
+        return SESSION_CREDS['username'], SESSION_CREDS['password']
+    SESSION_CREDS.clear()
+    return None, None
+
+
+def resolve_creds(form):
+    """Form credentials win; fall back to session creds, then env username."""
+    su, sp = get_session_creds()
+    username = (form.get('username', '').strip() or su
+                or os.environ.get('TTU_SSH_USER', ''))
+    password = form.get('password', '') or sp or ''
+    return username, password
+
+
+@app.context_processor
+def inject_creds_status():
+    su, _ = get_session_creds()
+    return {'creds_active': bool(su), 'creds_username': su or '',
+            'default_username': su or os.environ.get('TTU_SSH_USER', '')}
+
+
+@app.route('/credentials', methods=['GET', 'POST'])
+def session_credentials():
+    """Set or clear in-memory session credentials."""
+    if request.method == 'POST':
+        if request.form.get('action') == 'clear':
+            SESSION_CREDS.clear()
+            flash('Session credentials cleared.', 'success')
+        else:
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+            if not username or not password:
+                flash('Username and password are required!', 'error')
+            else:
+                SESSION_CREDS.update(username=username, password=password,
+                                     ts=time_module.time())
+                flash(f'Credentials for {username} held in memory for this '
+                      'app session (8h max). Script pages will use them '
+                      'automatically.', 'success')
+        return redirect(url_for('session_credentials'))
+    return render_template('credentials.html')
+
+
+# --- ITU grid converter (client-side tool) --------------------------------
+@app.route('/tools/itu-grid')
+def itu_grid_tool():
+    """ITU C-band 100 GHz grid reference and unit converter."""
+    import sys
+    sys.path.append(SCRIPTS_DIR)
+    from Nokia_Retune import ITU_GRID_GHZ, ghz_to_nm
+    rows = [{'channel': ch, 'ghz': ghz, 'thz': ghz / 1000.0,
+             'mhz': ghz * 1000, 'nm': round(ghz_to_nm(ghz), 2)}
+            for ghz, ch in sorted(ITU_GRID_GHZ.items())]
+    return render_template('itu_grid.html', rows=rows)
+
+
 # --- Nokia DWDM Retune (ITU-grid validated, confirm-gated) ----------------
 PENDING_RETUNES = {}
 
@@ -964,7 +1026,7 @@ def nokia_retune_script():
         if action == 'preview':
             form = {k: request.form.get(k, '').strip()
                     for k in ('host', 'port', 'frequency', 'username')}
-            password = request.form.get('password', '')
+            form['username'], password = resolve_creds(request.form)
             if not all(form.values()) or not password:
                 flash('All fields are required!', 'error')
             else:
@@ -1029,8 +1091,7 @@ def port_check_script():
                                    targets_text='', username='')
 
         targets_text = request.form.get('targets', '').strip()
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
+        username, password = resolve_creds(request.form)
         if not targets_text or not username or not password:
             flash('Targets, username, and password are required!', 'error')
         else:
@@ -1096,8 +1157,7 @@ def port_disable_script():
 
         if action == 'preview':
             targets_text = request.form.get('targets', '').strip()
-            username = request.form.get('username', '').strip()
-            password = request.form.get('password', '')
+            username, password = resolve_creds(request.form)
             if not targets_text or not username or not password:
                 flash('Targets, username, and password are required!', 'error')
             else:

@@ -71,6 +71,35 @@
       "show ip ospf configuration",
       "show interface {interface} description"
     ],
+    "DWDM Tuning (ASR9k)": [
+      "# NOTE: same 10-GHz frequency units as NCS5500 (19540 = 195.40 THz)",
+      "configure exclusive",
+      "interface tengigE {r/s/i/p}",
+      "shutdown",
+      "commit",
+      "controller dwdm {r/s/i/p}",
+      "admin-state out-of-service",
+      "commit",
+      "wavelength 50GHz-Grid frequency {freq-10ghz}",
+      "commit",
+      "admin-state in-service",
+      "commit",
+      "interface tengigE {r/s/i/p}",
+      "no shutdown",
+      "commit"
+    ],
+    "DWDM Tuning (NCS5500)": [
+      "# NOTE: XR 50GHz-grid frequency arg is in 10-GHz units (19250 = 192.50 THz); wavelength in 0.001 nm (1533465 = 1533.465 nm)",
+      "configure exclusive",
+      "controller optics {r/s/i/p}",
+      "shutdown",
+      "commit",
+      "dwdm-carrier 50GHz-grid frequency {freq-10ghz}",
+      "dwdm-carrier 50GHz-grid wavelength {wavelength-pm}",
+      "commit",
+      "no shutdown",
+      "commit"
+    ],
     "NCS5500 Specific": [
       "show platform hardware qfp active statistics drop",
       "show platform hardware qfp active statistics interface {interface}",
@@ -125,6 +154,12 @@
       "show configuration protocols bgp",
       "show configuration"
     ],
+    "DWDM Tuning": [
+      "# NOTE: Juniper takes wavelength in nm (1554.94)",
+      "edit interfaces {interface}",
+      "edit optics-options",
+      "set wavelength {wavelength-nm}"
+    ],
     "Troubleshooting": [
       "show interface {interface} detail",
       "show route {prefix}",
@@ -148,6 +183,15 @@
       "show configuration router interface {interface}",
       "admin show configuration full-context",
       "admin show configuration full-context | match {pattern}"
+    ],
+    "DWDM Tuning": [
+      "# NOTE: Nokia takes frequency in MHz (193300000 = 193.3 THz)",
+      "configure exclusive",
+      "port {port}",
+      "dwdm frequency {freq-mhz}",
+      "validate",
+      "compare",
+      "commit"
     ],
     "Troubleshooting": [
       "show port {port} statistics",

@@ -48,7 +48,8 @@
                                         <i class="fas fa-lock me-1"></i>Password *
                                     </label>
                                     <input type="password" class="form-control" id="password" name="password" 
-                                           placeholder="Enter SSH password" required>
+                                           placeholder="Enter SSH password" {% if not creds_active %}required{% endif %}>
+                                    {% if creds_active %}<div class="form-text text-success"><i class="fas fa-key me-1"></i>Session credentials active for {{ creds_username }} — leave blank to use them</div>{% endif %}
                                     <div class="form-text">SSH password for the device</div>
                                 </div>
 

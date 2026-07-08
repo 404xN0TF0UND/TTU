@@ -46,12 +46,13 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="username" class="form-label"><i class="fas fa-user me-1"></i>Username *</label>
                                         <input type="text" class="form-control" id="username" name="username"
-                                               value="{{ default_username }}" placeholder="SSH username" required>
+                                               value="{{ default_username }}" placeholder="SSH username" {% if not creds_active %}required{% endif %}>
                                         <div class="form-text">Defaults from TTU_SSH_USER env var</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="password" class="form-label"><i class="fas fa-lock me-1"></i>Password *</label>
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <input type="password" class="form-control" id="password" name="password" {% if not creds_active %}required{% endif %}>
+                                        {% if creds_active %}<div class="form-text text-success"><i class="fas fa-key me-1"></i>Session credentials active for {{ creds_username }} — leave blank to use them</div>{% endif %}
                                         <div class="form-text">Never stored</div>
                                     </div>
                                 </div>

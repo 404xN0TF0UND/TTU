@@ -22,6 +22,19 @@
                             </h5>
                         </div>
                         <div class="card-body">
+                            {% if creds_active %}
+                            <div class="alert alert-success py-2 small mb-3">
+                                <i class="fas fa-key me-1"></i>Session credentials active for
+                                <strong>{{ creds_username }}</strong> — script pages won't ask for your password.
+                                <a href="{{ url_for('session_credentials') }}">Manage</a>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-secondary py-2 small mb-3">
+                                <i class="fas fa-key me-1"></i>Tired of retyping your RADIUS password?
+                                <a href="{{ url_for('session_credentials') }}">Set session credentials</a>
+                                once — held in memory only.
+                            </div>
+                            {% endif %}
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center p-3 border rounded">
@@ -89,6 +102,20 @@
                                             <p class="mb-2 text-muted small">ITU-grid-validated frequency change (THz / GHz / MHz / channel) with before/after optics and captured compare output</p>
                                             <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-wave-square me-1"></i>Open Nokia Retune
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-ruler-horizontal fa-2x text-info"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">ITU Grid Reference &amp; Converter</h6>
+                                            <p class="mb-2 text-muted small">C-band 100 GHz grid (ch 1-72) with THz / GHz / MHz / nm / XR-unit conversion — no login needed</p>
+                                            <a href="{{ url_for('itu_grid_tool') }}" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-ruler-horizontal me-1"></i>Open ITU Grid
                                             </a>
                                         </div>
                                     </div>

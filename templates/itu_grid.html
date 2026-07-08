@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}ITU Grid - TTU Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-ruler-horizontal me-2 text-info"></i>ITU C-Band Grid (100 GHz)
+                </h1>
+                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Scripts
+                </a>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-exchange-alt me-2"></i>Converter</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-2">
+                            <label for="convInput" class="form-label">Frequency / wavelength / channel</label>
+                            <input type="text" class="form-control font-monospace" id="convInput"
+                                   placeholder="193.3 | 193300 | 193300000 | 1550.92 | ch33"
+                                   oninput="convert()">
+                            <div class="form-text">
+                                THz (193.3) &middot; GHz (193300) &middot; MHz (193300000) &middot;
+                                nm (1520-1580) &middot; channel (ch33 or 33)
+                            </div>
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <div id="convOut" class="font-monospace"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-table me-2"></i>Full grid — channels 1-72</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped w-auto font-monospace">
+                            <thead>
+                                <tr><th>Ch</th><th>THz</th><th>GHz</th><th>MHz (Nokia CLI)</th><th>nm</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for r in rows %}
+                                <tr id="ch{{ r.channel }}">
+                                    <td>{{ r.channel }}</td>
+                                    <td>{{ '%.1f' | format(r.thz) }}</td>
+                                    <td>{{ r.ghz }}</td>
+                                    <td>{{ r.mhz }}</td>
+                                    <td>{{ '%.2f' | format(r.nm) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var GRID = [{% for r in rows %}{ch:{{ r.channel }},ghz:{{ r.ghz }},nm:{{ r.nm }}}{% if not loop.last %},{% endif %}{% endfor %}];
+var C_NM_GHZ = 299792458.0;  // c in nm*GHz
+
+function fmt(g) {
+    return 'ch ' + g.ch + ' &nbsp;=&nbsp; ' + (g.ghz/1000).toFixed(1) + ' THz &nbsp;=&nbsp; '
+         + g.ghz + ' GHz &nbsp;=&nbsp; ' + (g.ghz*1000) + ' MHz (Nokia CLI) &nbsp;=&nbsp; '
+         + (g.ghz/10).toFixed(0) + ' (XR 10-GHz units) &nbsp;=&nbsp; ' + g.nm.toFixed(2) + ' nm';
+}
+
+function convert() {
+    var t = document.getElementById('convInput').value.trim().toLowerCase().replace(',', '');
+    var out = document.getElementById('convOut');
+    document.querySelectorAll('tr.table-info').forEach(function(r){r.classList.remove('table-info');});
+    if (!t) { out.innerHTML = ''; return; }
+    var m = t.match(/^c(?:h)?\s*(\d{1,2})$/);
+    var ghz = null;
+    if (m) {
+        ghz = 190000 + parseInt(m[1]) * 100;
+    } else {
+        var v = parseFloat(t);
+        if (isNaN(v)) { out.innerHTML = '<span class="text-danger">unrecognized input</span>'; return; }
+        if (v >= 190 && v <= 198) ghz = Math.round(v * 1000);          // THz
+        else if (v >= 1500 && v <= 1600) ghz = Math.round(C_NM_GHZ / v / 100) * 100;  // nm -> nearest 100 GHz
+        else if (v >= 190000 && v <= 198000) ghz = Math.round(v);      // GHz
+        else if (v >= 19000 && v <= 19800) ghz = Math.round(v) * 10;   // XR 10-GHz units
+        else if (v >= 190000000 && v <= 198000000) ghz = Math.round(v / 1000);  // MHz
+        else if (v >= 1 && v <= 72 && v === Math.floor(v)) ghz = 190000 + v * 100;  // channel
+        else { out.innerHTML = '<span class="text-danger">out of C-band range</span>'; return; }
+    }
+    var hit = GRID.find(function(g){ return g.ghz === ghz; });
+    if (hit) {
+        out.innerHTML = '<span class="text-success">' + fmt(hit) + '</span>';
+        var row = document.getElementById('ch' + hit.ch);
+        if (row) { row.classList.add('table-info'); row.scrollIntoView({block:'nearest'}); }
+    } else {
+        var near = GRID.reduce(function(a,b){ return Math.abs(b.ghz-ghz) < Math.abs(a.ghz-ghz) ? b : a; });
+        out.innerHTML = '<span class="text-warning">' + ghz + ' GHz is OFF-GRID — nearest: ' + fmt(near) + '</span>';
+    }
+}
+</script>
+{% endblock %}
