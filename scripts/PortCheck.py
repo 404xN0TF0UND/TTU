@@ -320,6 +320,28 @@ def print_table(results):
         print("  ".join(str(r[c])[:widths[c]].ljust(widths[c]) for c in cols))
 
 
+def run_port_check_web(targets, username, password):
+    """Web interface wrapper: bulk read-only port status check.
+
+    targets: list of (host, port, vendor_or_None). Returns
+    {'results': [...], 'csv': str, 'log_file': str, 'timestamp': str} —
+    same fields per row as the CLI table.
+    """
+    logger, ts = setup_logging()
+    logger.info("[INIT] PortCheck (Web Interface)")
+    results = [check_target(h, p, v, username, password, logger)
+               for h, p, v in targets]
+    import io
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=FIELDS)
+    w.writeheader()
+    w.writerows(results)
+    logger.info("[COMPLETE] PortCheck finished (Web Interface)")
+    return {"results": results, "csv": buf.getvalue(),
+            "log_file": f"portcheck_log_{ts}.txt",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+
 def main():
     if len(sys.argv) < 3 and not (len(sys.argv) == 3 and sys.argv[1] == "-f"):
         if len(sys.argv) < 2 or sys.argv[1] not in ("-f",) and len(sys.argv) < 3:

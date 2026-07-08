@@ -65,6 +65,20 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6 mt-3">
+                                    <div class="d-flex align-items-center p-3 border rounded">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-heartbeat fa-2x text-info"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">Port Check (Bulk Status)</h6>
+                                            <p class="mb-2 text-muted small">Read-only admin/oper state and RX/TX light levels across all four vendors — single port or CSV batch</p>
+                                            <a href="{{ url_for('port_check_script') }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-heartbeat me-1"></i>Open Port Check
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

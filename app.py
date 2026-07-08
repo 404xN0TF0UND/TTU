@@ -898,6 +898,47 @@ def bandwidth_change_script():
     result = session.pop('bandwidth_change_result', None)
     return render_template('bandwidth_change.html', result=result)
 
+# --- Port Check (bulk, read-only) ----------------------------------------
+@app.route('/scripts/port-check', methods=['GET', 'POST'])
+def port_check_script():
+    """Bulk multi-vendor port status check — show commands only."""
+    import sys
+    sys.path.append(SCRIPTS_DIR)
+    result = None
+    targets_text = ''
+    username = ''
+
+    if request.method == 'POST':
+        try:
+            from Port_Disable import parse_targets_text  # shared parser
+            from PortCheck import run_port_check_web
+        except ImportError as e:
+            flash(f'Error importing PortCheck script: {str(e)}', 'error')
+            return render_template('port_check.html', result=None,
+                                   targets_text='', username='')
+
+        targets_text = request.form.get('targets', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        if not targets_text or not username or not password:
+            flash('Targets, username, and password are required!', 'error')
+        else:
+            targets, errors = parse_targets_text(targets_text)
+            for err in errors:
+                flash(f'Target skipped — {err}', 'warning')
+            if not targets:
+                flash('No valid targets found.', 'error')
+            else:
+                result = run_port_check_web(targets, username, password)
+                bad = sum(1 for r in result['results'] if r['error'])
+                if bad:
+                    flash(f"{bad} of {len(result['results'])} target(s) had "
+                          'errors — see table.', 'warning')
+
+    return render_template('port_check.html', result=result,
+                           targets_text=targets_text, username=username)
+
+
 # --- Port Disable (one-way, confirm-gated) -------------------------------
 # Two-phase flow: "preview" does a read-only pre-state capture and shows the
 # planned per-vendor sequence; "execute" requires the preview token plus a

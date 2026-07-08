@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Port Check - TTU Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-heartbeat me-2 text-info"></i>Port Check
+                </h1>
+                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Scripts
+                </a>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="fas fa-eye me-2"></i>
+                <strong>Read-only.</strong> Show commands only — never enters
+                config mode. Checks admin/oper state, description, and RX/TX
+                light levels across Nokia SR OS, Cisco IOS-XR, Juniper, and
+                Ciena SAOS.
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-crosshairs me-2"></i>Targets
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="targets" class="form-label">
+                                <i class="fas fa-list me-1"></i>Targets *
+                            </label>
+                            <textarea class="form-control font-monospace" id="targets" name="targets" rows="5"
+                                      placeholder="host,port[,vendor] — one per line&#10;soag06.cinco.tx.houston.comcast.net,1/1/10,nokia&#10;ssag02.area4.il.chicago.comcast.net,GigabitEthernet0/0/0/5,xr&#10;ag-setcwaej05w.seatac.wa.seattle.comcast.net,ge-0/2/2,juniper&#10;nid-cpe-wpblfljn00w.metroeohfc.fl.comcast.net,3,ciena" required>{{ targets_text }}</textarea>
+                            <div class="form-text">
+                                Vendor optional (nokia / xr / juniper / ciena) — autodetected via SSH if omitted.
+                                Port format: Nokia <code>1/1/10</code>, XR <code>GigabitEthernet0/0/0/5</code>,
+                                Juniper <code>ge-0/2/2</code>, Ciena <code>3</code>.
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Username *
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                       value="{{ username }}" placeholder="SSH username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Password *
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       placeholder="SSH password" required>
+                                <div class="form-text">Never stored — used for this run only.</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-heartbeat me-1"></i>Check Ports
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if result %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2"></i>Results — {{ result.timestamp }}
+                        <span class="text-muted small ms-2">log: {{ result.log_file }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Host</th><th>Port</th><th>Vendor</th><th>Ping</th>
+                                    <th>Admin</th><th>Oper</th><th>RX dBm</th><th>TX dBm</th>
+                                    <th>Optic</th><th>Description</th><th>Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in result.results %}
+                                <tr class="{% if r.error %}table-danger{% elif r.oper and r.oper.lower() != 'up' %}table-warning{% endif %}">
+                                    <td class="font-monospace small">{{ r.host }}</td>
+                                    <td class="font-monospace">{{ r.port }}</td>
+                                    <td>{{ r.vendor }}</td>
+                                    <td>
+                                        {% if r.ping == 'ok' %}
+                                        <span class="badge bg-success">ok</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">{{ r.ping or '?' }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ r.admin or '?' }}</td>
+                                    <td>{{ r.oper or '?' }}</td>
+                                    <td>{{ r.rx_dbm or '—' }}</td>
+                                    <td>{{ r.tx_dbm or '—' }}</td>
+                                    <td class="small">{{ r.optic or '' }}</td>
+                                    <td class="small">{{ r.descr or '' }}</td>
+                                    <td class="small text-danger">{{ r.error or '' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <details>
+                        <summary class="text-muted small">CSV (copy/paste)</summary>
+                        <pre class="bg-dark text-light p-2 rounded small mt-2">{{ result.csv }}</pre>
+                    </details>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
