@@ -14,7 +14,8 @@ from jinja2 import Template
 
 
 app = Flask(__name__)
-app.secret_key = 'change_this_secret_key'
+import secrets as _secrets
+app.secret_key = os.environ.get('TTU_SECRET_KEY') or _secrets.token_hex(32)
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 GENERATED_FORMS_DIR = os.path.join(TEMPLATES_DIR, 'generated_forms')

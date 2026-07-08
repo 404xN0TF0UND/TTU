@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+*.spec.bak
+
+# Runtime / local data
+saved_notes/
+devices.json
+discovered_devices.json
+logs_config.json
+*.log
+ciena_ssh_log_*.txt
+portcheck_log_*.txt
+bandwidth_ssh_log_*.txt
+
+# Secrets / environment
+.env
+
+# Editor
+.vscode/
