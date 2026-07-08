@@ -1,0 +1,40 @@
+GigabitEthernet0/0/0/12 is down, line protocol is down 
+  Interface state transitions: 16
+  Hardware is GigabitEthernet, address is 9ce1.7616.9830 (bia 9ce1.7616.9830)
+  Description: PHY|1G|BIZ-NNI|rhost:CLSPCOWS06W|rport:3|cust-acct:130532819|comments:Save The Storks
+  Internet address is Unknown
+  MTU 9100 bytes, BW 1000000 Kbit (Max: 1000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation ARPA,
+  Full-duplex, 1000Mb/s, DWDM, link type is force-up
+  output flow control is off, input flow control is off
+  Carrier delay (up) is 10 msec
+  loopback not set,
+  Last link flapped 1d18h
+  Last input 1d18h, output 1d18h
+  Last clearing of "show interface" counters never
+  30 second input rate 0 bits/sec, 0 packets/sec
+  30 second output rate 0 bits/sec, 0 packets/sec
+     22885076325 packets input, 22066619398616 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 2227368 broadcast packets, 3015753 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     25221682726 packets output, 17734815818558 bytes, 0 total output drops
+     Output 114597478 broadcast packets, 22057310 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     16 carrier transitions
+
+
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver#
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver#config e
+Wed Dec 31 14:42:35.298 UTC
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver(config)#interface GigabitEthernet0/0/0/12
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver(config-if)#shut
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver(config-if)#commit
+ end
+ exit
+Wed Dec 31 14:42:41.572 UTC
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver(config-if)# end
+RP/0/RP0/CPU0:ssag01.rattlesnake.co.denver# exit

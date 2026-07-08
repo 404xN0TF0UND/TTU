@@ -18,6 +18,7 @@ logs_config.json
 *.log
 ciena_ssh_log_*.txt
 portcheck_log_*.txt
+nokiaretune_log_*.txt
 bandwidth_ssh_log_*.txt
 
 # Secrets / environment

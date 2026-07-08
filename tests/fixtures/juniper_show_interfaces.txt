@@ -1,0 +1,50 @@
+Physical interface: ge-1/0/9, Enabled, Physical link is Down
+  Interface index: 163, SNMP ifIndex: 601
+  Description: PHY|1G|BIZ-NNI|rhost:WVCYUTWW01W|rport:6
+  Link-level type: Ethernet, MTU: 9100, Speed: 1000mbps, Duplex: Full-Duplex, BPDU Error: None, MAC-REWRITE Error: None, Loopback: Disabled, Source filtering: Disabled, Flow control: Disabled, Auto-negotiation: Enabled,
+  Remote fault: Online, Media type: Fiber
+  Device flags   : Present Running Down
+  Interface flags: Hardware-Down SNMP-Traps Internal: 0x0
+  Link flags     : None
+  CoS queues     : 8 supported, 8 maximum usable queues
+  Current address: 3c:94:d5:90:5d:8c, Hardware address: 3c:94:d5:90:5d:8c
+  Last flapped   : 2025-12-01 17:45:53 UTC (4w1d 22:11 ago)
+  Input rate     : 0 bps (0 pps)
+  Output rate    : 0 bps (0 pps)
+  Active alarms  : LINK
+  Active defects : LINK
+  Interface transmit statistics: Disabled
+
+  Logical interface ge-1/0/9.0 (Index 103) (SNMP ifIndex 602)
+    Flags: Device-Down SNMP-Traps 0x0 Encapsulation: ENET2
+    Input packets : 9594892
+    Output packets: 8008916
+    Protocol eth-switch
+      Flags: Trunk-Mode
+
+{master:1}
+rvaugh200@ag-wvcyutuq00w.westvalley.ut.utah> configure exclusive 
+warning: uncommitted changes will be discarded on exit
+Entering configuration mode
+
+{master:1}[edit]
+rvaugh200@ag-wvcyutuq00w.westvalley.ut.utah# set interfaces ge-1/0/9 
+                                                                     ^
+missing argument.
+
+{master:1}[edit]
+rvaugh200@ag-wvcyutuq00w.westvalley.ut.utah# set interfaces ge-1/0/9 disable 
+
+{master:1}[edit]
+rvaugh200@ag-wvcyutuq00w.westvalley.ut.utah# commit and-quit 
+fpc1: 
+configuration check succeeds
+fpc0: 
+commit complete
+fpc1: 
+commit complete
+Exiting configuration mode
+
+{master:1}
+rvaugh200@ag-wvcyutuq00w.westvalley.ut.utah> Warning: session will be closed in 5 minutes if there is no activity
+Warning: session will be closed in 1 minute if there is no activity
