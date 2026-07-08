@@ -898,6 +898,108 @@ def bandwidth_change_script():
     result = session.pop('bandwidth_change_result', None)
     return render_template('bandwidth_change.html', result=result)
 
+# --- Port Disable (one-way, confirm-gated) -------------------------------
+# Two-phase flow: "preview" does a read-only pre-state capture and shows the
+# planned per-vendor sequence; "execute" requires the preview token plus a
+# typed "DISABLE". Credentials for a pending preview live only in this
+# in-memory dict (single-user localhost app), are popped on use, and expire.
+import time as time_module
+
+PENDING_DISABLES = {}
+PENDING_DISABLE_TTL = 600  # seconds
+
+
+def _expire_pending_disables():
+    now = time_module.time()
+    for k in [k for k, v in PENDING_DISABLES.items()
+              if now - v['ts'] > PENDING_DISABLE_TTL]:
+        PENDING_DISABLES.pop(k, None)
+
+
+@app.route('/scripts/port-disable', methods=['GET', 'POST'])
+def port_disable_script():
+    """Vendor-aware one-way port disable with pre/post capture."""
+    import sys
+    import uuid
+    sys.path.append(SCRIPTS_DIR)
+    preview = None
+    result = None
+    token = None
+    targets_text = ''
+    username = ''
+
+    if request.method == 'POST':
+        _expire_pending_disables()
+        action = request.form.get('action', '')
+
+        try:
+            from Port_Disable import (parse_targets_text,
+                                      run_port_disable_preview,
+                                      run_port_disable_execute)
+        except ImportError as e:
+            flash(f'Error importing Port Disable script: {str(e)}', 'error')
+            return render_template('port_disable.html', preview=None,
+                                   result=None, token=None, targets_text='',
+                                   username='')
+
+        if action == 'preview':
+            targets_text = request.form.get('targets', '').strip()
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+            if not targets_text or not username or not password:
+                flash('Targets, username, and password are required!', 'error')
+            else:
+                targets, errors = parse_targets_text(targets_text)
+                for err in errors:
+                    flash(f'Target skipped — {err}', 'warning')
+                if not targets:
+                    flash('No valid targets found.', 'error')
+                else:
+                    preview = run_port_disable_preview(targets, username,
+                                                       password)
+                    token = uuid.uuid4().hex
+                    PENDING_DISABLES[token] = {
+                        'targets': targets,
+                        'username': username,
+                        'password': password,
+                        'previews': preview['targets'],
+                        'ts': time_module.time(),
+                    }
+
+        elif action == 'execute':
+            token_in = request.form.get('token', '')
+            pending = PENDING_DISABLES.pop(token_in, None)
+            if pending is None:
+                flash('Preview expired or already used — run preview again.',
+                      'error')
+            elif request.form.get('confirm', '').strip() != 'DISABLE':
+                # put it back so the user can retry the confirmation
+                PENDING_DISABLES[token_in] = pending
+                token = token_in
+                preview = {'targets': pending['previews']}
+                targets_text = '\n'.join(
+                    f"{h},{p}" for h, p, _ in pending['targets'])
+                username = pending['username']
+                flash('Confirmation text must be exactly DISABLE — '
+                      'nothing was sent.', 'error')
+            else:
+                result = run_port_disable_execute(
+                    pending['targets'], pending['username'],
+                    pending['password'], previews=pending['previews'])
+                ok = sum(1 for r in result['results'] if r['success'])
+                total = len(result['results'])
+                if ok == total:
+                    flash(f'All {total} port(s) confirmed disabled.',
+                          'success')
+                else:
+                    flash(f'{ok}/{total} port(s) disabled — review the '
+                          'failures below.', 'warning')
+
+    return render_template('port_disable.html', preview=preview,
+                           result=result, token=token,
+                           targets_text=targets_text, username=username)
+
+
 @app.route('/quick-notes', methods=['GET', 'POST'])
 def quick_notes():
     if request.method == 'POST':

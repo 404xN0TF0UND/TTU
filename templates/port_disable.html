@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Port Disable - TTU Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-power-off me-2 text-danger"></i>Port Disable
+                </h1>
+                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Scripts
+                </a>
+            </div>
+
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>One-way tool.</strong> This disables ports for circuit
+                turn-downs. There is no enable path. Nothing is sent to any
+                device until you preview the plan and type
+                <code>DISABLE</code> to confirm.
+            </div>
+
+            {% if not result %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-crosshairs me-2"></i>Step 1 — Targets &amp; Pre-Check (read-only)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="preview">
+                        <div class="mb-3">
+                            <label for="targets" class="form-label">
+                                <i class="fas fa-list me-1"></i>Targets *
+                            </label>
+                            <textarea class="form-control font-monospace" id="targets" name="targets" rows="5"
+                                      placeholder="host,port[,vendor] — one per line&#10;soag06.cinco.tx.houston.comcast.net,1/1/10,nokia&#10;ssag02.area4.il.chicago.comcast.net,GigabitEthernet0/0/0/5,xr&#10;ag-setcwaej05w.seatac.wa.seattle.comcast.net,ge-0/2/2,juniper&#10;nid-cpe-wpblfljn00w.metroeohfc.fl.comcast.net,3,ciena" required>{{ targets_text }}</textarea>
+                            <div class="form-text">
+                                Vendor optional (nokia / xr / juniper / ciena) — autodetected via SSH if omitted.
+                                Port format: Nokia <code>1/1/10</code>, XR <code>GigabitEthernet0/0/0/5</code>,
+                                Juniper <code>ge-0/2/2</code>, Ciena <code>3</code>.
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Username *
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                       value="{{ username }}" placeholder="SSH username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>Password *
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       placeholder="SSH password" required>
+                                <div class="form-text">Never stored — held in memory only for this run.</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Run Pre-Check (no changes)
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if preview and not result %}
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-25">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>Step 2 — Review Plan &amp; Confirm
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Host</th><th>Port</th><th>Vendor</th><th>Ping</th>
+                                    <th>Admin</th><th>Oper</th><th>RX dBm</th><th>TX dBm</th>
+                                    <th>Description</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in preview.targets %}
+                                <tr>
+                                    <td class="font-monospace small">{{ t.host }}</td>
+                                    <td class="font-monospace">{{ t.port }}</td>
+                                    <td>{{ t.vendor }}</td>
+                                    <td>{{ t.pre.ping }}</td>
+                                    <td>{{ t.pre.admin or '?' }}</td>
+                                    <td>{{ t.pre.oper or '?' }}</td>
+                                    <td>{{ t.pre.rx_dbm or '—' }}</td>
+                                    <td>{{ t.pre.tx_dbm or '—' }}</td>
+                                    <td class="small">{{ t.pre.descr or '' }}</td>
+                                    <td>
+                                        {% if t.already_down %}
+                                        <span class="badge bg-secondary">already down — will skip</span>
+                                        {% elif t.pre.error %}
+                                        <span class="badge bg-danger">{{ t.pre.error }} — will skip</span>
+                                        {% elif t.ok %}
+                                        <span class="badge bg-warning text-dark">will disable</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">unknown vendor — will skip</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6><i class="fas fa-terminal me-1"></i>Planned commands</h6>
+                    {% for t in preview.targets %}
+                    {% if t.ok %}
+                    <div class="mb-2">
+                        <span class="font-monospace small">{{ t.host }} — port {{ t.port }} [{{ t.vendor }}]</span>
+                        <pre class="bg-dark text-light p-2 rounded small mb-1">{% for cmd in t.planned %}{{ cmd }}
+{% endfor %}</pre>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if token %}
+                    <form method="POST" class="mt-3">
+                        <input type="hidden" name="action" value="execute">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label for="confirm" class="form-label">
+                                    Type <code>DISABLE</code> to confirm *
+                                </label>
+                                <input type="text" class="form-control" id="confirm" name="confirm"
+                                       autocomplete="off" placeholder="DISABLE" required>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-power-off me-1"></i>Disable Ports Now
+                                </button>
+                                <a href="{{ url_for('port_disable_script') }}" class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                                <div class="form-text">Preview expires after 10 minutes.</div>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if result %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-flag-checkered me-2"></i>Results — {{ result.timestamp }}
+                        <span class="text-muted small ms-2">log: {{ result.log_file }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for r in result.results %}
+                    <div class="card mb-3 {% if r.success %}border-success{% else %}border-danger{% endif %}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="font-monospace small">{{ r.host }} — port {{ r.port }} [{{ r.vendor }}]</span>
+                            {% if r.skipped %}
+                            <span class="badge bg-secondary">SKIPPED — {{ r.error }}</span>
+                            {% elif r.success %}
+                            <span class="badge bg-success">DISABLED &amp; VERIFIED</span>
+                            {% else %}
+                            <span class="badge bg-danger">FAILED — {{ r.error }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <div class="row small mb-2">
+                                <div class="col-md-6">
+                                    <strong>Before:</strong>
+                                    admin={{ r.pre.admin or '?' }}, oper={{ r.pre.oper or '?' }},
+                                    rx={{ r.pre.rx_dbm or '?' }} dBm, tx={{ r.pre.tx_dbm or '?' }} dBm
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>After:</strong>
+                                    {% if r.post %}
+                                    admin={{ r.post.admin or '?' }}, oper={{ r.post.oper or '?' }}
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            {% if r.outputs %}
+                            <details>
+                                <summary class="text-muted small">Raw command outputs</summary>
+                                {% for cmd, out in r.outputs.items() %}
+                                <div class="mt-2">
+                                    <span class="font-monospace small text-info">{{ cmd }}</span>
+                                    <pre class="bg-dark text-light p-2 rounded small mb-1">{{ out }}</pre>
+                                </div>
+                                {% endfor %}
+                            </details>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <a href="{{ url_for('port_disable_script') }}" class="btn btn-primary">
+                        <i class="fas fa-redo me-1"></i>New Port Disable
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+2026-07-08 09:50:44,872 - INFO - [INIT] Port disable PREVIEW (web) — read-only pass
+2026-07-08 09:50:44,873 - INFO - [test-unreachable.invalid] ping: FAIL
+2026-07-08 09:50:44,873 - INFO - [COMPLETE] Preview finished
+2026-07-08 09:50:44,874 - INFO - 127.0.0.1 - - [08/Jul/2026 09:50:44] "POST /scripts/port-disable HTTP/1.1" 200 -
+2026-07-08 09:50:44,885 - INFO - 127.0.0.1 - - [08/Jul/2026 09:50:44] "POST /scripts/port-disable HTTP/1.1" 200 -
+2026-07-08 09:50:44,890 - INFO - [INIT] Port disable EXECUTE (web)
+2026-07-08 09:50:44,890 - ERROR - [test-unreachable.invalid] pre-check failed: unreachable — no config commands sent
+2026-07-08 09:50:44,890 - INFO - [COMPLETE] Execute finished
+2026-07-08 09:50:44,891 - INFO - 127.0.0.1 - - [08/Jul/2026 09:50:44] "POST /scripts/port-disable HTTP/1.1" 200 -
+2026-07-08 09:50:44,897 - INFO - 127.0.0.1 - - [08/Jul/2026 09:50:44] "POST /scripts/port-disable HTTP/1.1" 200 -
