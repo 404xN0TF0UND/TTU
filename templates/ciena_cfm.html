@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Ciena CFM Script - TTU Notes{% endblock %}
+{% block title %}Ciena CFM Toolkit - TTU Notes{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 mb-0">
-                    <i class="fas fa-network-wired me-2"></i>Ciena CFM Script
+                    <i class="fas fa-network-wired me-2"></i>Ciena CFM Toolkit
                 </h1>
                 <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i>Back to Scripts
@@ -16,134 +21,138 @@
             </div>
 
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-5">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-cog me-2"></i>Script Configuration
-                            </h5>
+                            <h5 class="card-title mb-0"><i class="fas fa-cog me-2"></i>Run</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST">
                                 <div class="mb-3">
-                                    <label for="device_ip" class="form-label">
-                                        <i class="fas fa-server me-1"></i>Device IP Address *
-                                    </label>
-                                    <input type="text" class="form-control" id="device_ip" name="device_ip" 
-                                           placeholder="192.168.1.1" required>
-                                    <div class="form-text">Enter the IP address of the Ciena device</div>
+                                    <label for="mode" class="form-label"><i class="fas fa-tasks me-1"></i>Mode *</label>
+                                    <select class="form-select" id="mode" name="mode" onchange="modeChanged()">
+                                        <option value="status" {% if mode == 'status' %}selected{% endif %}>CFM / MEP status (read-only)</option>
+                                        <option value="delay" {% if mode == 'delay' %}selected{% endif %}>CFM delay tests (~30s per EVC)</option>
+                                        <option value="bench_status" {% if mode == 'bench_status' %}selected{% endif %}>Benchmark status (bench sh)</option>
+                                        <option value="bench_setup" {% if mode == 'bench_setup' %}selected{% endif %}>Benchmark reflector SETUP</option>
+                                        <option value="bench_teardown" {% if mode == 'bench_teardown' %}selected{% endif %}>Benchmark reflector TEARDOWN</option>
+                                    </select>
                                 </div>
-
                                 <div class="mb-3">
-                                    <label for="username" class="form-label">
-                                        <i class="fas fa-user me-1"></i>Username
-                                    </label>
-                                    <input type="text" class="form-control" id="username" name="username" 
-                                           value="rvaugh200" placeholder="Username">
-                                    <div class="form-text">SSH username (default: rvaugh200)</div>
+                                    <label for="device_ip" class="form-label"><i class="fas fa-server me-1"></i>Device IP / hostname *</label>
+                                    <input type="text" class="form-control font-monospace" id="device_ip" name="device_ip" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label"><i class="fas fa-user me-1"></i>Username *</label>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                               value="{{ default_username }}" placeholder="SSH username" required>
+                                        <div class="form-text">Defaults from TTU_SSH_USER env var</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label"><i class="fas fa-lock me-1"></i>Password *</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <div class="form-text">Never stored</div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-1"></i>Password *
-                                    </label>
-                                    <input type="password" class="form-control" id="password" name="password" 
-                                           placeholder="Enter SSH password" required>
-                                    <div class="form-text">SSH password for the device</div>
+                                <div class="mb-3 mode-field mode-delay">
+                                    <label for="local_mepid" class="form-label"><i class="fas fa-hashtag me-1"></i>Local MEP ID</label>
+                                    <input type="number" class="form-control" id="local_mepid" name="local_mepid" value="9" min="1" max="8191">
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="local_mepid" class="form-label">
-                                        <i class="fas fa-hashtag me-1"></i>Local MEP ID
-                                    </label>
-                                    <input type="number" class="form-control" id="local_mepid" name="local_mepid" 
-                                           value="9" min="1" max="8191">
-                                    <div class="form-text">Local MEP ID for CFM testing (default: 9)</div>
+                                <div class="mb-3 mode-field mode-bench_setup">
+                                    <label for="bench_port" class="form-label"><i class="fas fa-ethernet me-1"></i>Reflector port *</label>
+                                    <input type="text" class="form-control font-monospace" id="bench_port" name="bench_port" placeholder="1">
                                 </div>
-
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>What this script does:</strong>
-                                    <ul class="mb-0 mt-2">
-                                        <li>Connects to Ciena SAOS device via SSH</li>
-                                        <li>Runs port and traffic profiling commands</li>
-                                        <li>Discovers EVC services and remote MEPs</li>
-                                        <li>Executes CFM delay tests for each EVC</li>
-                                        <li>Captures and logs all outputs</li>
-                                    </ul>
+                                <div class="mb-3 mode-field mode-bench_setup mode-bench_teardown">
+                                    <label for="ip_interface" class="form-label"><i class="fas fa-plug me-1"></i>IP interface (optional)</label>
+                                    <input type="text" class="form-control font-monospace" id="ip_interface" name="ip_interface" placeholder="EDIA-3994-ref">
+                                    <div class="form-text">Enabled on setup, disabled on teardown, if given</div>
+                                </div>
+                                <div class="mb-3 form-check mode-field mode-bench_teardown">
+                                    <input class="form-check-input" type="checkbox" id="bench_delete" name="bench_delete">
+                                    <label class="form-check-label" for="bench_delete">Also delete reflector + test instances</label>
+                                </div>
+                                <div class="mb-3 form-check mode-field mode-bench_setup mode-bench_teardown">
+                                    <input class="form-check-input" type="checkbox" id="confirm_bench" name="confirm_bench">
+                                    <label class="form-check-label" for="confirm_bench">
+                                        <strong>I confirm</strong> — this changes reflector/interface state on the device
+                                    </label>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-play me-1"></i>Run Ciena CFM Script
+                                    <i class="fas fa-play me-1"></i>Run
                                 </button>
                             </form>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
+                <div class="col-lg-7">
                     {% if result %}
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-terminal me-2"></i>Script Results
-                                {% if result.success %}
-                                    <span class="badge bg-success ms-2">Success</span>
-                                {% else %}
-                                    <span class="badge bg-warning ms-2">Completed with Errors</span>
-                                {% endif %}
+                                <i class="fas fa-terminal me-2"></i>Results — {{ result.device_ip }}
+                                <span class="text-muted small ms-2">{{ result.timestamp }}</span>
                             </h5>
+                            {% if result.success %}
+                            <span class="badge bg-success">Success</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Completed with errors</span>
+                            {% endif %}
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <strong>Device:</strong> {{ result.device_ip }}<br>
-                                <strong>Timestamp:</strong> {{ result.timestamp }}
+                            {% if result.meps %}
+                            <h6><i class="fas fa-sitemap me-1"></i>Local MEPs</h6>
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-striped align-middle">
+                                    <thead>
+                                        <tr><th>Service</th><th>Port</th><th>VID</th><th>MEP ID</th><th>Type</th>
+                                            <th>Admin</th><th>CCM</th><th>SD Mode</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for m in result.meps %}
+                                        <tr>
+                                            <td class="font-monospace small">{{ m.service }}</td>
+                                            <td>{{ m.port }}</td><td>{{ m.vid }}</td><td>{{ m.mepid }}</td>
+                                            <td>{{ m.type }}</td>
+                                            <td>{% if m.admin == 'en' %}<span class="badge bg-success">en</span>{% else %}<span class="badge bg-secondary">{{ m.admin }}</span>{% endif %}</td>
+                                            <td>{{ m.ccm }}</td><td>{{ m.sd_mode }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
-                            
-                            <div class="mb-3">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" 
-                                        data-bs-toggle="collapse" data-bs-target="#scriptOutput" 
-                                        aria-expanded="false" aria-controls="scriptOutput">
-                                    <i class="fas fa-eye me-1"></i>Toggle Output
-                                </button>
-                            </div>
-
-                            <div class="collapse" id="scriptOutput">
-                                <div class="card card-body bg-dark text-light">
-                                    <pre class="mb-0" style="max-height: 400px; overflow-y: auto;">{{ result.output }}</pre>
-                                </div>
-                            </div>
+                            {% endif %}
+                            {% if result.sequence %}
+                            <h6><i class="fas fa-terminal me-1"></i>Commands sent</h6>
+                            <pre class="bg-dark text-light p-2 rounded small mb-3">{% for cmd in result.sequence %}{{ cmd }}
+{% endfor %}</pre>
+                            {% endif %}
+                            <details {% if not result.meps %}open{% endif %}>
+                                <summary class="text-muted small">Full output</summary>
+                                <pre class="bg-dark text-light p-2 rounded small mt-2" style="max-height: 500px; overflow-y: auto;">{{ result.output }}</pre>
+                            </details>
                         </div>
                     </div>
                     {% else %}
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Instructions
-                            </h5>
+                            <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Modes</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="alert alert-info">
-                                <h6><i class="fas fa-lightbulb me-2"></i>How to use:</h6>
-                                <ol class="mb-0">
-                                    <li>Enter the Ciena device IP address</li>
-                                    <li>Provide SSH credentials (username/password)</li>
-                                    <li>Set the local MEP ID (default: 9)</li>
-                                    <li>Click "Run Ciena CFM Script"</li>
-                                    <li>Wait for the script to complete (may take 1-2 minutes)</li>
-                                    <li>Review the results and captured outputs</li>
-                                </ol>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Notes:</h6>
-                                <ul class="mb-0">
-                                    <li>Script will run CFM delay tests for all discovered EVCs</li>
-                                    <li>Each test takes approximately 30 seconds</li>
-                                    <li>Ensure the device is accessible and credentials are correct</li>
-                                    <li>Results are logged to timestamped files in the scripts directory</li>
-                                </ul>
-                            </div>
+                        <div class="card-body small">
+                            <p><strong>CFM / MEP status</strong> — read-only: port show, cfm mep show,
+                            cfm remote-mep show, traffic-profiling. Parses the local MEP table.</p>
+                            <p><strong>CFM delay tests</strong> — discovers EVCs from remote MEPs and runs
+                            <code>cfm delay send … count 30</code> per remote MEP (~30 s each), then <code>cfm delay show</code>.</p>
+                            <p><strong>Benchmark status</strong> — <code>bench sh</code> only.</p>
+                            <p><strong>Benchmark SETUP</strong> — creates/enables the <code>refDefault</code> reflector
+                            (out-of-service mode) and <code>refTestDefault</code> test on the given port, optional
+                            ip-interface enable. Mirrors your standard turn-up session.</p>
+                            <p class="mb-0"><strong>Benchmark TEARDOWN</strong> — disables test, benchmark, reflector;
+                            optional ip-interface disable and full delete.</p>
                         </div>
                     </div>
                     {% endif %}
@@ -152,4 +161,14 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<script>
+function modeChanged() {
+    var mode = document.getElementById('mode').value;
+    document.querySelectorAll('.mode-field').forEach(function (el) {
+        el.style.display = el.classList.contains('mode-' + mode) ? '' : 'none';
+    });
+}
+document.addEventListener('DOMContentLoaded', modeChanged);
+</script>
+{% endblock %}

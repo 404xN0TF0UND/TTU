@@ -200,6 +200,132 @@ def run_ciena_cfm_web(device_ip, username, password, local_mepid=9):
     logger.info("[COMPLETE] Script execution completed (Web Interface)")
     return result
 
+
+
+# --- Extension (#4 from log mining): MEP status + benchmark reflector ----
+# Benchmark sequences mirror the canonical session mined from the 2026
+# archive (67x setup / 148x teardown): refDefault reflector +
+# refTestDefault test, optional per-circuit ip-interface (EDIA-<n>-ref).
+BENCH_REFLECTOR = "refDefault"
+BENCH_TEST = "refTestDefault"
+
+
+def parse_cfm_mep_table(output):
+    """Parse 'cfm mep show' table rows into dicts. Columns per SAOS:
+    Service | Port | Vid | Mepid | Type | Mac | Admin | CCM | Pri |
+    Accelerated | SD Trigger Mode. Handles wrapped service-name rows."""
+    meps = []
+    for line in output.splitlines():
+        line = line.strip()
+        if not line.startswith("|") or line.startswith("+"):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if len(cells) >= 11 and cells[3].isdigit():
+            meps.append({
+                "service": cells[0].rstrip("."), "port": cells[1],
+                "vid": cells[2], "mepid": cells[3], "type": cells[4],
+                "mac": cells[5], "admin": cells[6], "ccm": cells[7],
+                "pri": cells[8], "accelerated": cells[9], "sd_mode": cells[10],
+            })
+        elif meps and len(cells) >= 11 and cells[0] and cells[0] != "." \
+                and not any(cells[1:4]):
+            # wrapped service-name continuation row
+            meps[-1]["service"] = (meps[-1]["service"]
+                                   + cells[0].rstrip(".")).rstrip(".")
+    return meps
+
+
+def cfm_status_commands():
+    """Read-only status set: ports, local MEPs, remote MEPs, profiles."""
+    return ["port show", "cfm mep show", "cfm remote-mep show",
+            "traffic-profiling standard-profile show"]
+
+
+def run_cfm_status_web(device_ip, username, password):
+    """Read-only CFM/MEP status capture with parsed MEP table."""
+    logger = setup_logging()
+    logger.info("[INIT] Ciena CFM status (Web Interface, read-only)")
+    outputs = ssh_to_ciena(device_ip, username, password,
+                           cfm_status_commands(), logger, cfm_test=False)
+    formatted = []
+    for command, output in outputs.items():
+        formatted += [f"Command: {command}", f"Output:\n{output}", "=" * 50]
+    result = {
+        "success": "connection_error" not in outputs,
+        "output": "\n".join(formatted),
+        "raw_outputs": outputs,
+        "meps": parse_cfm_mep_table(outputs.get("cfm mep show", "")),
+        "device_ip": device_ip,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    logger.info("[COMPLETE] CFM status finished")
+    return result
+
+
+def benchmark_setup_sequence(port, ip_interface=None):
+    seq = [
+        f"benchmark create reflector name {BENCH_REFLECTOR} port {port}",
+        f"benchmark reflector set name {BENCH_REFLECTOR} mode out-of-service",
+        f"benchmark test create name {BENCH_TEST} vtag-stack *",
+        f"benchmark reflector clear name {BENCH_REFLECTOR} statistics",
+        "benchmark enable",
+        "benchmark reflector enable",
+        f"benchmark test enable name {BENCH_TEST}",
+    ]
+    if ip_interface:
+        seq.append(f"interface enable ip-interface {ip_interface}")
+    seq.append("bench sh")
+    return seq
+
+
+def benchmark_teardown_sequence(ip_interface=None, delete=False):
+    seq = [
+        f"benchmark test disable name {BENCH_TEST}",
+        "benchmark disable",
+        "benchmark reflector disable",
+    ]
+    if ip_interface:
+        seq.append(f"interface disable ip-interface {ip_interface}")
+    if delete:
+        seq += [f"benchmark reflector delete name {BENCH_REFLECTOR} "
+                "all-test-instances",
+                f"benchmark delete name {BENCH_REFLECTOR}"]
+    seq.append("bench sh")
+    return seq
+
+
+def run_benchmark_web(device_ip, username, password, action,
+                      port=None, ip_interface=None, delete=False):
+    """Run the benchmark reflector setup / teardown / status cycle."""
+    logger = setup_logging()
+    logger.info(f"[INIT] Ciena benchmark {action} (Web Interface)")
+    if action == "setup":
+        commands = benchmark_setup_sequence(port, ip_interface)
+    elif action == "teardown":
+        commands = benchmark_teardown_sequence(ip_interface, delete)
+    elif action == "status":
+        commands = ["bench sh"]
+    else:
+        return {"success": False, "output": f"unknown action '{action}'",
+                "raw_outputs": {}, "device_ip": device_ip,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    outputs = ssh_to_ciena(device_ip, username, password, commands, logger,
+                           cfm_test=False)
+    formatted = []
+    for command, output in outputs.items():
+        formatted += [f"Command: {command}", f"Output:\n{output}", "=" * 50]
+    result = {
+        "success": "connection_error" not in outputs,
+        "output": "\n".join(formatted),
+        "raw_outputs": outputs,
+        "sequence": commands,
+        "device_ip": device_ip,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    logger.info(f"[COMPLETE] Benchmark {action} finished")
+    return result
+
+
 if __name__ == "__main__":
     try:
         main()

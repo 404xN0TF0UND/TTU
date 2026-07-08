@@ -802,56 +802,85 @@ def scripts():
 
 @app.route('/scripts/ciena-cfm', methods=['GET', 'POST'])
 def ciena_cfm_script():
-    """Handle Ciena CFM script execution with web form inputs."""
+    """Ciena CFM toolkit: delay tests, MEP status, benchmark reflector."""
+    import sys
+    sys.path.append(SCRIPTS_DIR)
+    default_username = os.environ.get('TTU_SSH_USER', '')
+    result = None
+    mode = 'status'
+
     if request.method == 'POST':
+        mode = request.form.get('mode', 'status')
         device_ip = request.form.get('device_ip', '').strip()
-        username = request.form.get('username', 'rvaugh200').strip()
+        username = (request.form.get('username', '').strip()
+                    or default_username)
         password = request.form.get('password', '').strip()
-        local_mepid = request.form.get('local_mepid', '9').strip()
-        
-        # Validation
-        if not device_ip or not password:
-            flash('Device IP and password are required!', 'error')
-            return redirect(url_for('ciena_cfm_script'))
-        
+
+        if not device_ip or not username or not password:
+            flash('Device IP, username, and password are required!', 'error')
+            return render_template('ciena_cfm.html', result=None, mode=mode,
+                                   default_username=default_username)
         try:
-            local_mepid = int(local_mepid)
-        except ValueError:
-            local_mepid = 9
-        
-        # Import and run the script
-        try:
-            import sys
-            sys.path.append(SCRIPTS_DIR)
-            from Ciena_CFM import run_ciena_cfm_web
-            
-            result = run_ciena_cfm_web(device_ip, username, password, local_mepid)
-            
-            if result['success']:
-                flash(f'Ciena CFM script completed successfully for {device_ip}!', 'success')
+            from Ciena_CFM import (run_ciena_cfm_web, run_cfm_status_web,
+                                   run_benchmark_web)
+
+            if mode == 'delay':
+                try:
+                    local_mepid = int(request.form.get('local_mepid', '9'))
+                except ValueError:
+                    local_mepid = 9
+                result = run_ciena_cfm_web(device_ip, username, password,
+                                           local_mepid)
+            elif mode == 'status':
+                result = run_cfm_status_web(device_ip, username, password)
+            elif mode in ('bench_setup', 'bench_teardown', 'bench_status'):
+                action = mode.replace('bench_', '')
+                if action in ('setup', 'teardown') and \
+                        request.form.get('confirm_bench') != 'on':
+                    flash('Benchmark setup/teardown changes device state — '
+                          'tick the confirmation box to proceed. '
+                          'Nothing was sent.', 'error')
+                    return render_template('ciena_cfm.html', result=None,
+                                           mode=mode,
+                                           default_username=default_username)
+                port = request.form.get('bench_port', '').strip()
+                ip_interface = request.form.get('ip_interface', '').strip() \
+                    or None
+                delete = request.form.get('bench_delete') == 'on'
+                if action == 'setup' and not port:
+                    flash('Reflector port is required for benchmark setup!',
+                          'error')
+                    return render_template('ciena_cfm.html', result=None,
+                                           mode=mode,
+                                           default_username=default_username)
+                result = run_benchmark_web(device_ip, username, password,
+                                           action, port=port,
+                                           ip_interface=ip_interface,
+                                           delete=delete)
             else:
-                flash(f'Ciena CFM script completed with errors for {device_ip}. Check output for details.', 'warning')
-            
-            # Store result in session for display
-            session['ciena_cfm_result'] = result
-            
+                flash(f'Unknown mode: {mode}', 'error')
+
+            if result is not None:
+                if result['success']:
+                    flash(f'{mode} completed for {device_ip}.', 'success')
+                else:
+                    flash(f'{mode} completed with errors for {device_ip} — '
+                          'check output.', 'warning')
         except ImportError as e:
             flash(f'Error importing Ciena CFM script: {str(e)}', 'error')
         except Exception as e:
             flash(f'Error running Ciena CFM script: {str(e)}', 'error')
-        
-        return redirect(url_for('ciena_cfm_script'))
-    
-    # Get result from session if available
-    result = session.pop('ciena_cfm_result', None)
-    return render_template('ciena_cfm.html', result=result)
+
+    return render_template('ciena_cfm.html', result=result, mode=mode,
+                           default_username=default_username)
 
 @app.route('/scripts/bandwidth-change', methods=['GET', 'POST'])
 def bandwidth_change_script():
     """Handle Bandwidth Change script execution with web form inputs."""
     if request.method == 'POST':
         device_ip = request.form.get('device_ip', '').strip()
-        username = request.form.get('username', 'rvaugh200').strip()
+        username = (request.form.get('username', '').strip()
+                    or os.environ.get('TTU_SSH_USER', ''))
         password = request.form.get('password', '').strip()
         port = request.form.get('port', '').strip()
         cir_pir_shaper = request.form.get('cir_pir_shaper', '').strip()
@@ -896,7 +925,8 @@ def bandwidth_change_script():
     
     # Get result from session if available
     result = session.pop('bandwidth_change_result', None)
-    return render_template('bandwidth_change.html', result=result)
+    return render_template('bandwidth_change.html', result=result,
+                           default_username=os.environ.get('TTU_SSH_USER', ''))
 
 # --- Nokia DWDM Retune (ITU-grid validated, confirm-gated) ----------------
 PENDING_RETUNES = {}
