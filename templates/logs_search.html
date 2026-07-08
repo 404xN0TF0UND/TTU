@@ -180,7 +180,7 @@
                 <div class="card-body">
                     <p class="text-muted mb-3">Click on any command to search for it:</p>
                     <div class="d-flex flex-wrap gap-2">
-                        {% for command, count in list(index.common_commands.items())[:15] %}
+                        {% for command, count in (index.common_commands.items() | list)[:15] %}
                         <a href="{{ url_for('logs_search', q=command) }}" 
                            class="btn btn-outline-primary btn-sm">
                             <code>{{ command }}</code>

@@ -898,6 +898,87 @@ def bandwidth_change_script():
     result = session.pop('bandwidth_change_result', None)
     return render_template('bandwidth_change.html', result=result)
 
+# --- Nokia DWDM Retune (ITU-grid validated, confirm-gated) ----------------
+PENDING_RETUNES = {}
+
+
+def _expire_pending_retunes():
+    now = time_module.time()
+    for k in [k for k, v in PENDING_RETUNES.items()
+              if now - v['ts'] > PENDING_DISABLE_TTL]:
+        PENDING_RETUNES.pop(k, None)
+
+
+@app.route('/scripts/nokia-retune', methods=['GET', 'POST'])
+def nokia_retune_script():
+    """Nokia SR OS DWDM frequency retune with grid validation."""
+    import sys
+    import uuid
+    sys.path.append(SCRIPTS_DIR)
+    preview = None
+    result = None
+    token = None
+    form = {'host': '', 'port': '', 'frequency': '', 'username': ''}
+
+    if request.method == 'POST':
+        _expire_pending_retunes()
+        action = request.form.get('action', '')
+
+        try:
+            from Nokia_Retune import (run_retune_preview, run_retune_execute)
+        except ImportError as e:
+            flash(f'Error importing Nokia Retune script: {str(e)}', 'error')
+            return render_template('nokia_retune.html', preview=None,
+                                   result=None, token=None, form=form)
+
+        if action == 'preview':
+            form = {k: request.form.get(k, '').strip()
+                    for k in ('host', 'port', 'frequency', 'username')}
+            password = request.form.get('password', '')
+            if not all(form.values()) or not password:
+                flash('All fields are required!', 'error')
+            else:
+                preview = run_retune_preview(form['host'], form['port'],
+                                             form['frequency'],
+                                             form['username'], password)
+                if preview['error']:
+                    flash(f"Pre-check failed: {preview['error']}", 'error')
+                else:
+                    token = uuid.uuid4().hex
+                    PENDING_RETUNES[token] = {
+                        'host': form['host'], 'port': form['port'],
+                        'freq_mhz': preview['freq_mhz'],
+                        'username': form['username'], 'password': password,
+                        'ts': time_module.time(),
+                    }
+
+        elif action == 'execute':
+            token_in = request.form.get('token', '')
+            pending = PENDING_RETUNES.pop(token_in, None)
+            if pending is None:
+                flash('Preview expired or already used — run preview again.',
+                      'error')
+            elif request.form.get('confirm', '').strip() != 'RETUNE':
+                PENDING_RETUNES[token_in] = pending
+                flash('Confirmation text must be exactly RETUNE — '
+                      'nothing was sent. Run preview again to review.',
+                      'error')
+            else:
+                result = run_retune_execute(
+                    pending['host'], pending['port'], pending['freq_mhz'],
+                    pending['username'], pending['password'])
+                if result['success']:
+                    flash(f"Port retuned and verified at "
+                          f"{result['post'].get('wavelength_nm')} nm.",
+                          'success')
+                else:
+                    flash(f"Retune not verified — {result['error']}",
+                          'warning')
+
+    return render_template('nokia_retune.html', preview=preview,
+                           result=result, token=token, form=form)
+
+
 # --- Port Check (bulk, read-only) ----------------------------------------
 @app.route('/scripts/port-check', methods=['GET', 'POST'])
 def port_check_script():

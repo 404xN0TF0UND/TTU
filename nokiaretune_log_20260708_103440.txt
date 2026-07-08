@@ -1,0 +1,3 @@
+2026-07-08 10:34:40,777 - INFO - [INIT] Nokia retune PREVIEW (web) — read-only pass
+2026-07-08 10:34:40,781 - ERROR - [unreachable.invalid] preview failed: ssh timeout
+2026-07-08 10:34:40,781 - INFO - [COMPLETE] Preview finished

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Nokia DWDM Retune - TTU Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-wave-square me-2 text-warning"></i>Nokia DWDM Retune
+                </h1>
+                <a href="{{ url_for('scripts') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Scripts
+                </a>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Live wavelength change.</strong> Frequencies are
+                validated against the ITU C-band 100 GHz grid (ch 1-72,
+                190100-197200 GHz) before anything is sent. Sequence follows
+                Tuning Commands.txt; the <code>compare</code> output is always
+                captured in the run log. Type <code>RETUNE</code> to confirm.
+            </div>
+
+            {% if not result %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-crosshairs me-2"></i>Step 1 — Target &amp; Pre-Check (read-only)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="preview">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="host" class="form-label"><i class="fas fa-server me-1"></i>Host *</label>
+                                <input type="text" class="form-control font-monospace" id="host" name="host"
+                                       value="{{ form.host }}" placeholder="soag06.cinco.tx.houston.comcast.net" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="port" class="form-label"><i class="fas fa-ethernet me-1"></i>Port *</label>
+                                <input type="text" class="form-control font-monospace" id="port" name="port"
+                                       value="{{ form.port }}" placeholder="1/1/17" required>
+                                <div class="form-text">slot/mda/port</div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="frequency" class="form-label"><i class="fas fa-wave-square me-1"></i>Frequency *</label>
+                                <input type="text" class="form-control font-monospace" id="frequency" name="frequency"
+                                       value="{{ form.frequency }}" placeholder="193.3" required>
+                                <div class="form-text">THz (193.3), GHz (193300), MHz (193300000), or ch33</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label"><i class="fas fa-user me-1"></i>Username *</label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                       value="{{ form.username }}" placeholder="SSH username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label"><i class="fas fa-lock me-1"></i>Password *</label>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       placeholder="SSH password" required>
+                                <div class="form-text">Never stored — held in memory only for this run.</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Validate &amp; Pre-Check (no changes)
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if preview and not preview.error and not result %}
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-25">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>Step 2 — Review Plan &amp; Confirm
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Target frequency (grid-validated)</h6>
+                            <table class="table table-sm w-auto">
+                                <tr><th>ITU channel</th><td>{{ preview.grid.channel }}</td></tr>
+                                <tr><th>THz</th><td>{{ preview.grid.freq_thz }}</td></tr>
+                                <tr><th>GHz</th><td>{{ preview.grid.freq_ghz }}</td></tr>
+                                <tr><th>MHz (CLI value)</th><td>{{ preview.grid.freq_mhz }}</td></tr>
+                                <tr><th>Wavelength</th><td>{{ preview.grid.wavelength_nm }} nm</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Current port state</h6>
+                            <table class="table table-sm w-auto">
+                                <tr><th>Admin / Oper</th><td>{{ preview.pre.admin or '?' }} / {{ preview.pre.oper or '?' }}</td></tr>
+                                <tr><th>TX wavelength</th><td>{{ preview.pre.wavelength_nm or '?' }} nm</td></tr>
+                                <tr><th>RX / TX power</th><td>{{ preview.pre.rx_dbm or '?' }} / {{ preview.pre.tx_dbm or '?' }} dBm</td></tr>
+                                <tr><th>Description</th><td class="small">{{ preview.pre.descr or '' }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h6><i class="fas fa-terminal me-1"></i>Planned commands</h6>
+                    <pre class="bg-dark text-light p-2 rounded small mb-3">{% for cmd in preview.planned %}{{ cmd }}
+{% endfor %}</pre>
+
+                    {% if token %}
+                    <form method="POST">
+                        <input type="hidden" name="action" value="execute">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label for="confirm" class="form-label">Type <code>RETUNE</code> to confirm *</label>
+                                <input type="text" class="form-control" id="confirm" name="confirm"
+                                       autocomplete="off" placeholder="RETUNE" required>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-wave-square me-1"></i>Retune Port Now
+                                </button>
+                                <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-outline-secondary">Cancel</a>
+                                <div class="form-text">Preview expires after 10 minutes.</div>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if result %}
+            <div class="card mb-4 {% if result.success %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-flag-checkered me-2"></i>Result — {{ result.timestamp }}
+                        <span class="text-muted small ms-2">log: {{ result.log_file }}</span>
+                    </h5>
+                    {% if result.success %}
+                    <span class="badge bg-success">RETUNED &amp; VERIFIED</span>
+                    {% else %}
+                    <span class="badge bg-danger">NOT VERIFIED</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row small mb-3">
+                        <div class="col-md-6">
+                            <strong>Before:</strong>
+                            {{ result.pre.wavelength_nm or '?' }} nm,
+                            rx={{ result.pre.rx_dbm or '?' }} dBm, tx={{ result.pre.tx_dbm or '?' }} dBm
+                        </div>
+                        <div class="col-md-6">
+                            <strong>After:</strong>
+                            {{ result.post.wavelength_nm or '?' }} nm
+                            (target {{ result.grid.wavelength_nm }} nm, ch {{ result.grid.channel }}),
+                            rx={{ result.post.rx_dbm or '?' }} dBm, tx={{ result.post.tx_dbm or '?' }} dBm
+                        </div>
+                    </div>
+                    {% if not result.success and result.error %}
+                    <div class="alert alert-danger small">{{ result.error }}</div>
+                    {% endif %}
+                    {% if result.compare %}
+                    <h6>compare output</h6>
+                    <pre class="bg-dark text-light p-2 rounded small">{{ result.compare }}</pre>
+                    {% endif %}
+                    {% if result.outputs %}
+                    <details>
+                        <summary class="text-muted small">Raw command outputs</summary>
+                        {% for cmd, out in result.outputs.items() %}
+                        <div class="mt-2">
+                            <span class="font-monospace small text-info">{{ cmd }}</span>
+                            <pre class="bg-dark text-light p-2 rounded small mb-1">{{ out }}</pre>
+                        </div>
+                        {% endfor %}
+                    </details>
+                    {% endif %}
+                    <a href="{{ url_for('nokia_retune_script') }}" class="btn btn-primary mt-2">
+                        <i class="fas fa-redo me-1"></i>New Retune
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
